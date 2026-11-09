@@ -4,7 +4,7 @@ import { verifyToken } from '@/lib/auth';
 const protectedPaths = ['/', '/clients', '/packages', '/activity', '/team', '/settings'];
 const authPaths = ['/login', '/register'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
     const token = request.cookies.get('auth-token')?.value;
@@ -25,20 +25,13 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (err) {
-    console.error('Middleware error caught:', err);
+    console.error('Proxy error caught:', err);
     return NextResponse.next();
   }
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - api routes
-     * - _next/static, _next/image
-     * - favicon.ico and static assets (.svg, .png, .jpg, .webp, etc.)
-     */
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)',
   ],
 };
-
