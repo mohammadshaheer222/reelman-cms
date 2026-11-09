@@ -10,7 +10,7 @@ import { z } from 'zod';
 const createClientSchema = z.object({
   name: z.string().optional(),
   phone: z.string().optional(),
-  noteContent: z.string().min(1, 'Please add at least one note'),
+  noteContent: z.string().optional(),
   statusId: z.string().optional(),
 });
 
@@ -93,18 +93,22 @@ export async function POST(request: NextRequest) {
     }
 
     const clientId = generateId('RC');
+    const initialNotes = noteContent?.trim()
+      ? [
+          {
+            content: noteContent.trim(),
+            createdBy: user!.userId,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ]
+      : [];
+
     const client = await Client.create({
       clientId,
       name: name?.trim() || undefined,
       phone: phone?.trim() || undefined,
-      notes: [
-        {
-          content: noteContent.trim(),
-          createdBy: user!.userId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ],
+      notes: initialNotes,
       status: statusDoc._id,
       statusHistory: [
         {

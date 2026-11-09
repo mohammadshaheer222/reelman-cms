@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { formatDate, formatDateTime, timeAgo } from '@/lib/utils';
+import { openWhatsApp } from '@/lib/whatsapp';
 import { toast } from 'sonner';
 
 export default function ClientProfilePage({
@@ -147,15 +148,11 @@ export default function ClientProfilePage({
   };
 
   const handleWhatsApp = () => {
-    const rawPhone = client?.phone?.replace(/\D/g, '');
-    if (!rawPhone) {
+    if (!client?.phone) {
       toast.error('No phone number saved. Please add a phone number first.');
       return;
     }
-    const msg = encodeURIComponent(
-      `Hi ${client?.name || ''}, following up regarding your inquiry with Reelman Production. Looking forward to connecting with you!`
-    );
-    window.open(`https://wa.me/${rawPhone}?text=${msg}`, '_blank');
+    openWhatsApp(client.phone, client.name);
   };
 
   const handleAddNote = async (e: React.FormEvent) => {

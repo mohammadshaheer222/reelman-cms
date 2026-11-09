@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { LayoutGrid, List, Users, Phone } from 'lucide-react';
+import { LayoutGrid, List, Users, Phone, MessageCircle } from 'lucide-react';
 import { Client } from '@/types';
 import { ClientCard } from './ClientCard';
 import { StatusBadge } from './StatusBadge';
@@ -16,6 +16,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate, timeAgo } from '@/lib/utils';
+import { openWhatsApp } from '@/lib/whatsapp';
+import { toast } from 'sonner';
 
 interface ClientListProps {
   clients: Client[];
@@ -94,6 +96,7 @@ export function ClientList({
               <TableRow className="bg-gray-50/50">
                 <TableHead>Client</TableHead>
                 <TableHead>ID</TableHead>
+                <TableHead>Phone / WhatsApp</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Notes</TableHead>
                 <TableHead>Created</TableHead>
@@ -120,6 +123,23 @@ export function ClientList({
                     </TableCell>
                     <TableCell className="font-mono text-xs text-gray-500">
                       {c.clientId}
+                    </TableCell>
+                    <TableCell>
+                      {c.phone ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-gray-700 font-mono">{c.phone}</span>
+                          <button
+                            type="button"
+                            onClick={() => openWhatsApp(c.phone!, c.name)}
+                            className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded"
+                            title="Open WhatsApp"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">—</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={c.status} />
