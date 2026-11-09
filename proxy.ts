@@ -9,7 +9,7 @@ export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const token = request.cookies.get('auth-token')?.value;
     const user = token ? await verifyToken(token) : null;
-
+ 
     const isProtected = protectedPaths.some(
       (p) => pathname === p || pathname.startsWith(p + '/')
     );
