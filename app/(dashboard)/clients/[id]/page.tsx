@@ -15,6 +15,7 @@ import {
   Sparkles,
   MessageCircle,
   Phone,
+  Calendar,
 } from 'lucide-react';
 import { Client, Status, Activity } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -60,6 +61,10 @@ export default function ClientProfilePage({
   const [editingPhone, setEditingPhone] = useState(false);
   const [phoneInput, setPhoneInput] = useState('');
 
+  // Edit date state
+  const [editingDate, setEditingDate] = useState(false);
+  const [dateInput, setDateInput] = useState('');
+
   // Delete modal
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -83,6 +88,7 @@ export default function ClientProfilePage({
       setClient(clientData.data);
       setNameInput(clientData.data.name || '');
       setPhoneInput(clientData.data.phone || '');
+      setDateInput(clientData.data.date || '');
       setStatuses(statusData.data || []);
 
       if (actRes.ok) {
@@ -144,6 +150,22 @@ export default function ClientProfilePage({
       fetchClientData();
     } catch {
       toast.error('Could not update phone number');
+    }
+  };
+
+  const handleSaveDate = async () => {
+    try {
+      const res = await fetch(`/api/clients/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: dateInput.trim() }),
+      });
+      if (!res.ok) throw new Error('Failed to update date');
+      toast.success('Event date updated');
+      setEditingDate(false);
+      fetchClientData();
+    } catch {
+      toast.error('Could not update event date');
     }
   };
 
@@ -384,6 +406,48 @@ export default function ClientProfilePage({
                   onClick={() => setEditingPhone(true)}
                   className="p-0.5 text-gray-400 hover:text-gray-600 rounded transition-colors"
                   title="Edit Phone Number"
+                >
+                  <Edit2 className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+
+            {/* Event / Shoot Date */}
+            {editingDate ? (
+              <div className="flex items-center gap-2 mt-1.5">
+                <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                <Input
+                  type="date"
+                  value={dateInput}
+                  onChange={(e) => setDateInput(e.target.value)}
+                  className="h-7 text-xs w-44"
+                />
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSaveDate}>
+                  <Check className="w-3.5 h-3.5 text-green-600" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  onClick={() => { setEditingDate(false); setDateInput(client.date || ''); }}
+                >
+                  <X className="w-3.5 h-3.5 text-gray-400" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 mt-1">
+                <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                <span className="text-sm text-gray-600">
+                  {client.date ? (
+                    <span>Event Date: <span className="font-medium text-gray-800">{formatDate(client.date)}</span></span>
+                  ) : (
+                    <span className="text-gray-400 italic text-xs">No event date — click to set</span>
+                  )}
+                </span>
+                <button
+                  onClick={() => setEditingDate(true)}
+                  className="p-0.5 text-gray-400 hover:text-gray-600 rounded transition-colors"
+                  title="Edit Event Date"
                 >
                   <Edit2 className="w-3 h-3" />
                 </button>

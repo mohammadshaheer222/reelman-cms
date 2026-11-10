@@ -10,6 +10,7 @@ import { z } from 'zod';
 const createClientSchema = z.object({
   name: z.string().optional(),
   phone: z.string().optional(),
+  date: z.string().optional(),
   noteContent: z.string().optional(),
   statusId: z.string().optional(),
 });
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid input' }, { status: 400 });
     }
-    const { name, phone, noteContent, statusId } = parsed.data;
+    const { name, phone, date, noteContent, statusId } = parsed.data;
 
     let statusDoc = statusId ? await Status.findById(statusId) : null;
     if (!statusDoc) statusDoc = await Status.findOne({ name: 'New' });
@@ -108,6 +109,7 @@ export async function POST(request: NextRequest) {
       clientId,
       name: name?.trim() || undefined,
       phone: phone?.trim() || undefined,
+      date: date?.trim() || undefined,
       notes: initialNotes,
       status: statusDoc._id,
       statusHistory: [

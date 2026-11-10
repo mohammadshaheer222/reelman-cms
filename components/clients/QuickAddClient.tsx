@@ -42,6 +42,7 @@ export function QuickAddClient({
 }: QuickAddClientProps) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [date, setDate] = useState('');
   const [noteContent, setNoteContent] = useState('');
   const [statusId, setStatusId] = useState('');
   const [statuses, setStatuses] = useState<Status[]>([]);
@@ -118,6 +119,7 @@ export function QuickAddClient({
         body: JSON.stringify({
           name: name.trim() || undefined,
           phone: phone.trim() || undefined,
+          date: date.trim() || undefined,
           noteContent: noteContent.trim() || undefined,
           statusId: statusId || undefined,
         }),
@@ -133,6 +135,7 @@ export function QuickAddClient({
       });
       setName('');
       setPhone('');
+      setDate('');
       setNoteContent('');
       setErrors({});
       onOpenChange(false);
@@ -152,10 +155,10 @@ export function QuickAddClient({
         <form onSubmit={handleSubmit} noValidate>
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">
-              Quick Add Client
+              Add Client
             </DialogTitle>
             <DialogDescription className="text-xs text-gray-500">
-              Create a client inquiry or booking. Enter either a name or phone number.
+              Enter client details and event requirements
             </DialogDescription>
           </DialogHeader>
 
@@ -170,29 +173,26 @@ export function QuickAddClient({
             </div>
           )}
 
-          <div className="space-y-4 py-4">
+          <div className="space-y-3.5 py-4">
             {/* Client Name */}
-            <div className="space-y-1.5">
-              <Label htmlFor="clientName" className="text-xs font-semibold text-gray-700 flex items-center justify-between">
-                <span>Client Name</span>
-                <span className="text-[11px] font-normal text-gray-400">Optional if phone provided</span>
+            <div className="space-y-1">
+              <Label htmlFor="clientName" className="text-xs font-semibold text-gray-700">
+                Client Name
               </Label>
-              <div className="relative">
-                <Input
-                  ref={nameInputRef}
-                  id="clientName"
-                  placeholder="e.g. Rahul Sharma"
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value);
-                    if (errors.name) {
-                      setErrors((prev) => ({ ...prev, name: undefined }));
-                    }
-                  }}
-                  className={errors.name ? 'border-red-400 bg-red-50/20 focus-visible:ring-red-400' : ''}
-                  autoComplete="name"
-                />
-              </div>
+              <Input
+                ref={nameInputRef}
+                id="clientName"
+                placeholder="Rahul Sharma"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (errors.name) {
+                    setErrors((prev) => ({ ...prev, name: undefined }));
+                  }
+                }}
+                className={errors.name ? 'border-red-400 bg-red-50/20 focus-visible:ring-red-400' : ''}
+                autoComplete="name"
+              />
               {errors.name && (
                 <p className="text-xs text-red-600 font-medium flex items-center gap-1 mt-1">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -202,16 +202,15 @@ export function QuickAddClient({
             </div>
 
             {/* Phone Number */}
-            <div className="space-y-1.5">
-              <Label htmlFor="clientPhone" className="text-xs font-semibold text-gray-700 flex items-center justify-between">
-                <span>Phone / WhatsApp Number</span>
-                <span className="text-[11px] font-normal text-gray-400">e.g. 98765 43210</span>
+            <div className="space-y-1">
+              <Label htmlFor="clientPhone" className="text-xs font-semibold text-gray-700">
+                Phone / WhatsApp Number
               </Label>
               <Input
                 ref={phoneInputRef}
                 id="clientPhone"
                 type="tel"
-                placeholder="10-digit number (e.g. 9895943440)"
+                placeholder="9876543210"
                 value={phone}
                 onChange={(e) => {
                   setPhone(e.target.value);
@@ -230,38 +229,54 @@ export function QuickAddClient({
               )}
             </div>
 
-            {/* Initial Status */}
-            <div className="space-y-1.5">
-              <Label htmlFor="status" className="text-xs font-semibold text-gray-700">Initial Status</Label>
-              <Select value={statusId} onValueChange={setStatusId}>
-                <SelectTrigger className="h-10 sm:h-9 text-base sm:text-sm">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {statuses.map((status) => (
-                    <SelectItem key={status._id} value={status._id}>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: status.color }}
-                        />
-                        <span>{status.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Event / Shoot Date & Status Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="clientDate" className="text-xs font-semibold text-gray-700">
+                  Event / Shoot Date
+                </Label>
+                <Input
+                  id="clientDate"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="h-10 sm:h-9"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="status" className="text-xs font-semibold text-gray-700">
+                  Status
+                </Label>
+                <Select value={statusId} onValueChange={setStatusId}>
+                  <SelectTrigger className="h-10 sm:h-9 text-base sm:text-sm">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statuses.map((status) => (
+                      <SelectItem key={status._id} value={status._id}>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: status.color }}
+                          />
+                          <span>{status.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Initial Note / Requirements */}
-            <div className="space-y-1.5">
-              <Label htmlFor="noteContent" className="text-xs font-semibold text-gray-700 flex items-center justify-between">
-                <span>Initial Requirements / Notes</span>
-                <span className="text-[11px] font-normal text-gray-400">Optional</span>
+            {/* Requirements / Notes */}
+            <div className="space-y-1">
+              <Label htmlFor="noteContent" className="text-xs font-semibold text-gray-700">
+                Requirements / Notes
               </Label>
               <Textarea
                 id="noteContent"
-                placeholder="Event dates, location, requested packages, discussion points..."
+                placeholder="Discussion notes, shooting requests, package details..."
                 rows={3}
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}

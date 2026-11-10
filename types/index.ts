@@ -28,6 +28,7 @@ export interface Client {
   clientId: string;
   name?: string;
   phone?: string;
+  date?: string;
   notes: Note[];
   status: Status | string;
   statusHistory: StatusHistory[];

@@ -97,6 +97,7 @@ export function ClientList({
                 <TableHead>Client</TableHead>
                 <TableHead>ID</TableHead>
                 <TableHead>Phone / WhatsApp</TableHead>
+                <TableHead>Event Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Notes</TableHead>
                 <TableHead>Created</TableHead>
@@ -140,6 +141,9 @@ export function ClientList({
                       ) : (
                         <span className="text-xs text-gray-400 italic">—</span>
                       )}
+                    </TableCell>
+                    <TableCell className="text-xs text-gray-700 font-medium whitespace-nowrap">
+                      {c.date ? formatDate(c.date) : <span className="text-gray-400 italic">—</span>}
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={c.status} />

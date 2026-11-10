@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { MessageSquare, Calendar, ChevronRight, Phone, MessageCircle } from 'lucide-react';
 import { Client } from '@/types';
 import { StatusBadge } from './StatusBadge';
-import { timeAgo } from '@/lib/utils';
+import { timeAgo, formatDate } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { openWhatsApp } from '@/lib/whatsapp';
 import { toast } from 'sonner';
@@ -76,9 +76,9 @@ export function ClientCard({ client }: ClientCardProps) {
               <MessageSquare className="w-3.5 h-3.5" />
               {client.notes?.length || 0} notes
             </span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1" title={client.date ? `Event: ${formatDate(client.date)}` : `Created ${formatDate(client.createdAt)}`}>
               <Calendar className="w-3.5 h-3.5" />
-              {timeAgo(client.createdAt)}
+              {client.date ? formatDate(client.date) : timeAgo(client.createdAt)}
             </span>
           </div>
           <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#2C8567] group-hover:translate-x-0.5 transition-all" />

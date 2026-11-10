@@ -19,6 +19,7 @@ export interface IClient extends Document {
   clientId: string;
   name?: string;
   phone?: string;
+  date?: string;
   notes: mongoose.Types.DocumentArray<INote & Document>;
   status: mongoose.Types.ObjectId;
   statusHistory: IStatusHistory[];
@@ -49,6 +50,7 @@ const ClientSchema = new Schema<IClient>(
     clientId: { type: String, required: true, unique: true },
     name: { type: String, trim: true },
     phone: { type: String, trim: true },
+    date: { type: String, trim: true },
     notes: [NoteSchema],
     status: { type: Schema.Types.ObjectId, ref: 'Status', required: true },
     statusHistory: [StatusHistorySchema],
