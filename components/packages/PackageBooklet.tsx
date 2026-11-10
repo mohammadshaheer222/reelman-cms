@@ -1,9 +1,28 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext, createContext } from 'react';
 import { PackageData, TextStyleConfig, BookletPageItem, PageBackgroundConfig } from '@/types';
 import { DEFAULT_BOOKLET_PAGES } from '@/lib/defaultPackage';
-import { Camera, Plus, Trash2, Palette, Image as ImageIcon, Sparkles, X, Upload } from 'lucide-react';
+import {
+  Camera,
+  Plus,
+  Trash2,
+  Palette,
+  Image as ImageIcon,
+  Sparkles,
+  X,
+  Upload,
+  Move,
+  GripVertical,
+  ArrowUpDown,
+} from 'lucide-react';
 import { CanvaFontToolbar } from './CanvaFontToolbar';
+
+interface BookletContextType {
+  onDragMargin: (id: string, newMargin: number) => void;
+  selectedElementId: string | null;
+}
+
+const BookletContext = createContext<BookletContextType | null>(null);
 
 interface PackageBookletProps {
   pkg: PackageData;
@@ -71,10 +90,29 @@ function EditableSpan({
   isSelected = false,
   onSelect,
 }: EditableSpanProps) {
-  // Ensure text-align works: inline elements ignore text-align, so set display:block when needed
+  const bookletCtx = useContext(BookletContext);
+  const [isDragging, setIsDragging] = useState(false);
+  const [liveMargin, setLiveMargin] = useState<number | null>(null);
+
+  // Compute base margin from style
+  const propMargin = typeof style.marginTop === 'number'
+    ? style.marginTop
+    : parseInt(String(style.marginTop || '0'), 10) || 0;
+
+  const currentMargin = liveMargin !== null ? liveMargin : propMargin;
+
+  // Reset live margin when not dragging
+  useEffect(() => {
+    if (!isDragging) {
+      setLiveMargin(null);
+    }
+  }, [isDragging, propMargin]);
+
+  // Ensure vertical margin is respected and text aligns properly
   const effectiveStyle: React.CSSProperties = {
-    ...(style.textAlign ? { display: 'block' } : {}),
     ...style,
+    display: style.textAlign ? 'block' : (style.display || 'inline-block'),
+    marginTop: `${currentMargin}px`,
     userSelect: 'text',
   };
 
@@ -86,17 +124,68 @@ function EditableSpan({
     );
   }
 
+  const handleDragStart = (clientY: number) => {
+    setIsDragging(true);
+    const startY = clientY;
+    const startMargin = currentMargin;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      moveEvent.preventDefault();
+      const deltaY = moveEvent.clientY - startY;
+      const nextMargin = Math.max(-60, Math.min(180, Math.round(startMargin + deltaY)));
+      setLiveMargin(nextMargin);
+      bookletCtx?.onDragMargin(id, nextMargin);
+    };
+
+    const onMouseUp = () => {
+      setIsDragging(false);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    if (!touch) return;
+    setIsDragging(true);
+    const startY = touch.clientY;
+    const startMargin = currentMargin;
+
+    const onTouchMove = (moveEvent: TouchEvent) => {
+      const curTouch = moveEvent.touches[0];
+      if (!curTouch) return;
+      if (moveEvent.cancelable) moveEvent.preventDefault();
+      const deltaY = curTouch.clientY - startY;
+      const nextMargin = Math.max(-60, Math.min(180, Math.round(startMargin + deltaY)));
+      setLiveMargin(nextMargin);
+      bookletCtx?.onDragMargin(id, nextMargin);
+    };
+
+    const onTouchEnd = () => {
+      setIsDragging(false);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
+
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
+  };
+
   return (
     <Tag
       contentEditable
       suppressContentEditableWarning
-      className={`canva-editable relative transition-all duration-150 cursor-text select-text ${
+      className={`canva-editable relative transition-[border-color,background-color] duration-150 cursor-text select-text ${
         isSelected
           ? 'ring-2 ring-[#2C8567] bg-[#2C8567]/10 rounded shadow-xs'
           : 'hover:ring-1 hover:ring-[#2C8567]/40 hover:bg-[#2C8567]/5'
       } ${className}`}
       style={effectiveStyle}
-      title="Click to edit text"
+      title="Click to select & edit text. Drag handle to adjust spacing."
       onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
         onSelect?.();
@@ -116,15 +205,89 @@ function EditableSpan({
       }}
     >
       {value || placeholder}
+
+      {/* Canva Floating Drag Handle & Spacing Readout */}
       {isSelected && !isPrintMode && (
         <span
           contentEditable={false}
-          className="no-print absolute -top-5 left-1/2 -translate-x-1/2 bg-[#2C8567] text-white text-[9px] font-semibold px-1.5 py-0.5 rounded shadow-sm flex items-center gap-1 pointer-events-none select-none z-30 whitespace-nowrap"
+          className={`no-print absolute -top-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 px-1.5 py-0.5 rounded-lg shadow-md select-none transition-transform pointer-events-auto ${
+            isDragging
+              ? 'bg-[#1b5340] text-white scale-105 ring-2 ring-white/60'
+              : 'bg-[#2C8567] text-white hover:bg-[#246d54]'
+          }`}
+          style={{ touchAction: 'none' }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <span>{label}</span>
-          {style.marginTop && (
-            <span className="opacity-90">| Gap: {style.marginTop}</span>
-          )}
+          {/* Draggable grip handle */}
+          <span
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              handleDragStart(e.clientY);
+            }}
+            onTouchStart={handleTouchStart}
+            className="cursor-ns-resize active:cursor-grabbing flex items-center gap-1 px-1 py-0.5 rounded hover:bg-white/20 transition-colors"
+            title="Click & drag up or down to adjust gap/spacing"
+          >
+            <GripVertical className="w-3.5 h-3.5 opacity-90" />
+            <span className="text-[10px] font-semibold tracking-wide whitespace-nowrap">
+              {label}
+            </span>
+            <span className="text-[9px] font-mono bg-black/30 px-1 py-0.5 rounded font-bold ml-0.5 text-white">
+              {currentMargin > 0 ? `+${currentMargin}px` : `${currentMargin}px`}
+            </span>
+          </span>
+
+          {/* Quick fine-tune nudge buttons */}
+          <span className="flex items-center border-l border-white/30 pl-1 ml-0.5 gap-0.5">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const next = Math.max(-60, currentMargin - 2);
+                bookletCtx?.onDragMargin(id, next);
+              }}
+              className="w-4 h-4 flex items-center justify-center rounded hover:bg-white/25 text-[11px] font-bold leading-none cursor-pointer"
+              title="Move up / Reduce spacing (-2px)"
+            >
+              -
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const next = Math.min(180, currentMargin + 2);
+                bookletCtx?.onDragMargin(id, next);
+              }}
+              className="w-4 h-4 flex items-center justify-center rounded hover:bg-white/25 text-[11px] font-bold leading-none cursor-pointer"
+              title="Move down / Increase spacing (+2px)"
+            >
+              +
+            </button>
+            {currentMargin !== 0 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  bookletCtx?.onDragMargin(id, 0);
+                }}
+                className="text-[8px] px-1 py-0.5 rounded hover:bg-white/25 uppercase font-bold text-white/85 cursor-pointer"
+                title="Reset spacing to 0"
+              >
+                0
+              </button>
+            )}
+          </span>
+        </span>
+      )}
+
+      {/* Visual dashed spacing line indicator */}
+      {isSelected && !isPrintMode && currentMargin !== 0 && (
+        <span
+          contentEditable={false}
+          className="no-print absolute -top-1 left-0 right-0 pointer-events-none select-none flex items-center justify-center z-30"
+        >
+          <span className="h-0 border-t border-dashed border-[#2C8567]/60 w-full" />
         </span>
       )}
     </Tag>
@@ -1740,9 +1903,29 @@ export function PackageBooklet({
             <div className="text-center pt-4 sm:pt-6">
               <p
                 className="text-[10px] tracking-widest uppercase opacity-70"
-                style={getStyleFor('customFooter', 'body')}
+                style={getStyleFor(`customFooter-${page.id}`, 'body')}
               >
-                {pkg.coverBrand} {pkg.coverSubtitle}
+                <EditableSpan
+                  id={`customFooter-${page.id}`}
+                  label="Footer"
+                  role="body"
+                  value={`${pkg.coverBrand || 'REELMAN'} ${pkg.coverSubtitle || 'Production'}`}
+                  onChange={(val) => {
+                    const parts = val.split(' ');
+                    updateField('coverBrand', parts[0] || '');
+                    updateField('coverSubtitle', parts.slice(1).join(' ') || '');
+                  }}
+                  style={getStyleFor(`customFooter-${page.id}`, 'body')}
+                  isSelected={selectedElement?.id === `customFooter-${page.id}`}
+                  onSelect={() =>
+                    setSelectedElement({
+                      id: `customFooter-${page.id}`,
+                      label: 'Footer',
+                      role: 'body',
+                    })
+                  }
+                  isPrintMode={isPrintMode}
+                />
               </p>
             </div>
           </>
@@ -1760,55 +1943,74 @@ export function PackageBooklet({
   }
 
   return (
-    <div className="space-y-3 flex flex-col items-center w-full">
-      {/* Canva Floating Format Bar */}
-      {selectedElement && (
-        <div className="sticky top-2 z-40 w-full flex justify-center px-1">
-          <CanvaFontToolbar
-            selectedElementId={selectedElement.id}
-            selectedLabel={selectedElement.label}
-            role={selectedElement.role}
-            currentStyle={activeStyleConfig}
-            onStyleChange={handleToolbarStyleChange}
-            onDeselect={() => setSelectedElement(null)}
-          />
-        </div>
-      )}
+    <BookletContext.Provider
+      value={{
+        onDragMargin: (id, newMargin) => {
+          if (!onUpdatePkg) return;
+          onUpdatePkg((prev) => ({
+            ...prev,
+            textStyles: {
+              ...(prev.textStyles || {}),
+              [id]: {
+                ...(prev.textStyles?.[id] || {}),
+                marginTop: newMargin,
+              },
+            },
+          }));
+        },
+        selectedElementId: selectedElement?.id || null,
+      }}
+    >
+      <div className="space-y-3 flex flex-col items-center w-full">
+        {/* Canva Floating Format Bar */}
+        {selectedElement && (
+          <div className="sticky top-2 z-40 w-full flex justify-center px-1">
+            <CanvaFontToolbar
+              selectedElementId={selectedElement.id}
+              selectedLabel={selectedElement.label}
+              role={selectedElement.role}
+              currentStyle={activeStyleConfig}
+              onStyleChange={handleToolbarStyleChange}
+              onDeselect={() => setSelectedElement(null)}
+            />
+          </div>
+        )}
 
-      {/* Preview mode (single page or all) */}
-      {activePageIndex !== undefined && pagesList[activePageIndex] ? (
-        <div className="w-full flex flex-col items-center gap-3">
-          {renderPageContent(pagesList[activePageIndex], activePageIndex)}
+        {/* Preview mode (single page or all) */}
+        {activePageIndex !== undefined && pagesList[activePageIndex] ? (
+          <div className="w-full flex flex-col items-center gap-3">
+            {renderPageContent(pagesList[activePageIndex], activePageIndex)}
 
-          {/* Quick Add Page Button below current page */}
-          <button
-            type="button"
-            onClick={handleAddPage}
-            className="no-print py-1.5 px-3 bg-white hover:bg-gray-50 border border-dashed border-gray-300 rounded-xl text-xs font-medium text-gray-700 hover:text-[#2C8567] hover:border-[#2C8567]/50 flex items-center gap-1.5 shadow-2xs transition-all"
-          >
-            <Plus className="w-3.5 h-3.5 text-[#2C8567]" />
-            <span>Add New Page</span>
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-5 sm:space-y-6 flex flex-col items-center w-full">
-          {pagesList.map((p, idx) => (
-            <div key={p.id} className="w-full">
-              {renderPageContent(p, idx)}
-            </div>
-          ))}
+            {/* Quick Add Page Button below current page */}
+            <button
+              type="button"
+              onClick={handleAddPage}
+              className="no-print py-1.5 px-3 bg-white hover:bg-gray-50 border border-dashed border-gray-300 rounded-xl text-xs font-medium text-gray-700 hover:text-[#2C8567] hover:border-[#2C8567]/50 flex items-center gap-1.5 shadow-2xs transition-all"
+            >
+              <Plus className="w-3.5 h-3.5 text-[#2C8567]" />
+              <span>Add New Page</span>
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-5 sm:space-y-6 flex flex-col items-center w-full">
+            {pagesList.map((p, idx) => (
+              <div key={p.id} className="w-full">
+                {renderPageContent(p, idx)}
+              </div>
+            ))}
 
-          {/* Add Page Button at the bottom of all pages */}
-          <button
-            type="button"
-            onClick={handleAddPage}
-            className="no-print py-2 px-4 bg-white hover:bg-gray-50 border border-dashed border-gray-300 rounded-xl text-xs font-semibold text-gray-700 hover:text-[#2C8567] hover:border-[#2C8567]/50 flex items-center gap-2 shadow-xs transition-all"
-          >
-            <Plus className="w-4 h-4 text-[#2C8567]" />
-            <span>Add New Page</span>
-          </button>
-        </div>
-      )}
-    </div>
+            {/* Add Page Button at the bottom of all pages */}
+            <button
+              type="button"
+              onClick={handleAddPage}
+              className="no-print py-2 px-4 bg-white hover:bg-gray-50 border border-dashed border-gray-300 rounded-xl text-xs font-semibold text-gray-700 hover:text-[#2C8567] hover:border-[#2C8567]/50 flex items-center gap-2 shadow-xs transition-all"
+            >
+              <Plus className="w-4 h-4 text-[#2C8567]" />
+              <span>Add New Page</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </BookletContext.Provider>
   );
 }

@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/select';
 import { formatDate, formatDateTime, timeAgo } from '@/lib/utils';
 import { openWhatsApp } from '@/lib/whatsapp';
+import { WhatsAppModal } from '@/components/clients/WhatsAppModal';
 import { toast } from 'sonner';
 
 export default function ClientProfilePage({
@@ -68,6 +69,9 @@ export default function ClientProfilePage({
   // Delete modal
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // WhatsApp modal
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 
   // Fetch client details
   const fetchClientData = async () => {
@@ -174,7 +178,7 @@ export default function ClientProfilePage({
       toast.error('No phone number saved. Please add a phone number first.');
       return;
     }
-    openWhatsApp(client.phone, client.name);
+    setWhatsAppModalOpen(true);
   };
 
   const handleAddNote = async (e: React.FormEvent) => {
@@ -584,6 +588,19 @@ export default function ClientProfilePage({
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* WhatsApp Modal */}
+      {client && (
+        <WhatsAppModal
+          open={whatsAppModalOpen}
+          onOpenChange={setWhatsAppModalOpen}
+          client={{
+            name: client.name,
+            phone: client.phone,
+            date: client.date,
+          }}
+        />
+      )}
 
       {/* Confirm Delete Dialog */}
       <ConfirmDialog
