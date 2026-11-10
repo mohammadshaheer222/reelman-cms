@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { Users, ArrowRight } from 'lucide-react';
+import { Users, ArrowRight, Calendar } from 'lucide-react';
 import { Client } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusBadge } from '@/components/clients/StatusBadge';
-import { timeAgo } from '@/lib/utils';
+import { timeAgo, formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 interface RecentClientsProps {
@@ -42,9 +42,17 @@ export function RecentClients({ clients }: RecentClientsProps) {
                   className="py-3 flex items-center justify-between hover:bg-gray-50/80 -mx-3 px-3 rounded-lg transition-colors group"
                 >
                   <div className="min-w-0 flex-1 mr-3">
-                    <p className="text-sm font-medium text-gray-900 group-hover:text-[#2C8567] truncate transition-colors">
-                      {client.name || 'Unnamed Client'}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-gray-900 group-hover:text-[#2C8567] truncate transition-colors">
+                        {client.name || 'Unnamed Client'}
+                      </p>
+                      {client.date && (
+                        <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-medium text-[#2C8567] bg-[#2C8567]/10 px-1.5 py-0.5 rounded border border-[#2C8567]/20 shrink-0">
+                          <Calendar className="w-2.5 h-2.5" />
+                          {formatDate(client.date)}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-400 truncate mt-0.5">
                       {latestNote ? latestNote.content : client.clientId}
                     </p>

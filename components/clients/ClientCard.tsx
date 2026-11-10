@@ -39,26 +39,38 @@ export function ClientCard({ client }: ClientCardProps) {
             <StatusBadge status={client.status} />
           </div>
 
-          {/* Phone & Direct WhatsApp Action */}
-          <div className="mt-2.5 flex items-center justify-between gap-2 py-1.5 px-2 bg-gray-50/80 rounded-lg border border-gray-100">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-              <span className="text-xs font-medium text-gray-700 truncate">
-                {client.phone || <span className="text-gray-400 italic">No phone number</span>}
+          {/* Date & Phone/WhatsApp Row */}
+          <div className="mt-2.5 space-y-1.5">
+            {/* Event Date */}
+            <div className="flex items-center gap-1.5 py-1 px-2 bg-[#2C8567]/5 rounded-lg border border-[#2C8567]/15 text-xs">
+              <Calendar className="w-3.5 h-3.5 text-[#2C8567] shrink-0" />
+              <span className="text-gray-500 font-normal">Date:</span>
+              <span className="font-semibold text-gray-800">
+                {client.date ? formatDate(client.date) : <span className="text-gray-400 font-normal italic">No date set</span>}
               </span>
             </div>
 
-            {client.phone && (
-              <button
-                type="button"
-                onClick={handleWhatsAppClick}
-                className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-green-700 bg-green-100 hover:bg-green-200 px-2 py-0.5 rounded-md transition-colors"
-                title="Send WhatsApp message"
-              >
-                <MessageCircle className="w-3 h-3 text-green-600" />
-                <span>WhatsApp</span>
-              </button>
-            )}
+            {/* Phone & Direct WhatsApp Action */}
+            <div className="flex items-center justify-between gap-2 py-1 px-2 bg-gray-50/80 rounded-lg border border-gray-100">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                <span className="text-xs font-medium text-gray-700 truncate">
+                  {client.phone || <span className="text-gray-400 italic">No phone</span>}
+                </span>
+              </div>
+
+              {client.phone && (
+                <button
+                  type="button"
+                  onClick={handleWhatsAppClick}
+                  className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-green-700 bg-green-100 hover:bg-green-200 px-2 py-0.5 rounded-md transition-colors"
+                  title="Send WhatsApp message"
+                >
+                  <MessageCircle className="w-3 h-3 text-green-600" />
+                  <span>WhatsApp</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {latestNote ? (
@@ -76,9 +88,8 @@ export function ClientCard({ client }: ClientCardProps) {
               <MessageSquare className="w-3.5 h-3.5" />
               {client.notes?.length || 0} notes
             </span>
-            <span className="flex items-center gap-1" title={client.date ? `Event: ${formatDate(client.date)}` : `Created ${formatDate(client.createdAt)}`}>
-              <Calendar className="w-3.5 h-3.5" />
-              {client.date ? formatDate(client.date) : timeAgo(client.createdAt)}
+            <span className="text-gray-400" title={`Added: ${formatDate(client.createdAt)}`}>
+              Added {timeAgo(client.createdAt)}
             </span>
           </div>
           <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#2C8567] group-hover:translate-x-0.5 transition-all" />

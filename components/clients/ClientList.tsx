@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { LayoutGrid, List, Users, Phone, MessageCircle } from 'lucide-react';
+import { LayoutGrid, List, Users, Phone, MessageCircle, Calendar } from 'lucide-react';
 import { Client } from '@/types';
 import { ClientCard } from './ClientCard';
 import { StatusBadge } from './StatusBadge';
@@ -90,14 +90,19 @@ export function ClientList({
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+        <div className="bg-white rounded-xl border border-gray-100 overflow-x-auto shadow-sm">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50/50">
                 <TableHead>Client</TableHead>
                 <TableHead>ID</TableHead>
                 <TableHead>Phone / WhatsApp</TableHead>
-                <TableHead>Event Date</TableHead>
+                <TableHead className="whitespace-nowrap">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-[#2C8567]" />
+                    <span>Event Date</span>
+                  </div>
+                </TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Notes</TableHead>
                 <TableHead>Created</TableHead>
@@ -142,8 +147,15 @@ export function ClientList({
                         <span className="text-xs text-gray-400 italic">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs text-gray-700 font-medium whitespace-nowrap">
-                      {c.date ? formatDate(c.date) : <span className="text-gray-400 italic">—</span>}
+                    <TableCell className="whitespace-nowrap">
+                      {c.date ? (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#2C8567]/10 text-[#2C8567] font-semibold text-xs border border-[#2C8567]/20">
+                          <Calendar className="w-3 h-3 text-[#2C8567] shrink-0" />
+                          {formatDate(c.date)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">No date</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={c.status} />
