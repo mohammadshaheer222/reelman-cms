@@ -22,7 +22,7 @@ export function NoteItem({ note, currentUser, onDelete }: NoteItemProps) {
   return (
     <div className="flex gap-3 p-3.5 rounded-xl bg-gray-50/70 border border-gray-100 hover:bg-gray-50 transition-colors group">
       <Avatar className="h-7 w-7 mt-0.5">
-        <AvatarFallback className="text-[10px] bg-blue-100 text-blue-700 font-medium">
+        <AvatarFallback className="text-[10px] bg-[#2C8567]/15 text-[#2C8567] font-medium">
           {getInitials(authorName)}
         </AvatarFallback>
       </Avatar>

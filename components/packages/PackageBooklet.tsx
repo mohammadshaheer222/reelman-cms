@@ -72,9 +72,11 @@ function EditableSpan({
   onSelect,
 }: EditableSpanProps) {
   // Ensure text-align works: inline elements ignore text-align, so set display:block when needed
-  const effectiveStyle: React.CSSProperties = style.textAlign
-    ? { display: 'block', ...style }
-    : style;
+  const effectiveStyle: React.CSSProperties = {
+    ...(style.textAlign ? { display: 'block' } : {}),
+    ...style,
+    userSelect: 'text',
+  };
 
   if (isPrintMode || !onChange) {
     return (
@@ -88,10 +90,10 @@ function EditableSpan({
     <Tag
       contentEditable
       suppressContentEditableWarning
-      className={`canva-editable relative transition-all duration-150 ${
+      className={`canva-editable relative transition-all duration-150 cursor-text select-text ${
         isSelected
-          ? 'ring-2 ring-blue-500 bg-blue-50/20 rounded shadow-xs'
-          : 'hover:ring-1 hover:ring-blue-300 hover:bg-blue-50/10'
+          ? 'ring-2 ring-[#2C8567] bg-[#2C8567]/10 rounded shadow-xs'
+          : 'hover:ring-1 hover:ring-[#2C8567]/40 hover:bg-[#2C8567]/5'
       } ${className}`}
       style={effectiveStyle}
       title="Click to edit text"
@@ -114,6 +116,17 @@ function EditableSpan({
       }}
     >
       {value || placeholder}
+      {isSelected && !isPrintMode && (
+        <span
+          contentEditable={false}
+          className="no-print absolute -top-5 left-1/2 -translate-x-1/2 bg-[#2C8567] text-white text-[9px] font-semibold px-1.5 py-0.5 rounded shadow-sm flex items-center gap-1 pointer-events-none select-none z-30 whitespace-nowrap"
+        >
+          <span>{label}</span>
+          {style.marginTop && (
+            <span className="opacity-90">| Gap: {style.marginTop}</span>
+          )}
+        </span>
+      )}
     </Tag>
   );
 }
@@ -199,6 +212,8 @@ export function PackageBooklet({
       lineHeight: custom.lineHeight || baseStyle.lineHeight,
       textTransform: custom.textTransform || baseStyle.textTransform,
       textAlign: custom.textAlign || baseStyle.textAlign,
+      marginTop: custom.marginTop !== undefined ? `${custom.marginTop}px` : baseStyle.marginTop,
+      marginBottom: custom.marginBottom !== undefined ? `${custom.marginBottom}px` : baseStyle.marginBottom,
     };
   };
 
@@ -274,6 +289,8 @@ export function PackageBooklet({
         lineHeight: pkg.textStyles?.[selectedElement.id]?.lineHeight,
         textTransform: pkg.textStyles?.[selectedElement.id]?.textTransform,
         textAlign: pkg.textStyles?.[selectedElement.id]?.textAlign,
+        marginTop: pkg.textStyles?.[selectedElement.id]?.marginTop,
+        marginBottom: pkg.textStyles?.[selectedElement.id]?.marginBottom,
       }
     : {};
 
@@ -355,15 +372,10 @@ export function PackageBooklet({
       <div
         key={page.id}
         className={`pdf-sheet ${isLast ? 'pdf-sheet-last' : ''} relative w-full ${
-          isPrintMode ? 'rounded-none shadow-none' : 'aspect-[1/1.4142] rounded-xl shadow-xl'
-        } overflow-hidden flex flex-col justify-between p-5 sm:p-10 md:p-12 select-none transition-all mx-auto ${textColorClass}`}
+          isPrintMode ? 'rounded-none shadow-none p-12' : 'aspect-[1/1.4142] rounded-xl shadow-xl p-5 sm:p-10 md:p-12'
+        } overflow-hidden flex flex-col justify-between select-text transition-all mx-auto ${textColorClass}`}
         style={{
           backgroundColor: effectiveBgColor,
-          backgroundImage: effectiveBgImage
-            ? `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.68) 100%), url(${effectiveBgImage})`
-            : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
           ...(isPrintMode && isLast
             ? { breakAfter: 'avoid', pageBreakAfter: 'avoid' }
             : {}),
@@ -373,6 +385,24 @@ export function PackageBooklet({
           setActiveBgPopoverPageId(null);
         }}
       >
+        {/* Real image background layer: 100% supported by WebKit print engine without black background bug */}
+        {effectiveBgImage && (
+          <img
+            src={effectiveBgImage}
+            alt="Page Background"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
+            style={{ objectPosition: 'center' }}
+            crossOrigin="anonymous"
+          />
+        )}
+        {effectiveBgImage && (
+          <div
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.68) 100%)',
+            }}
+          />
+        )}
         {/* Decorative inner border removed for cleaner look */}
 
         {/* Page Top Control Bar (Canva-Style: Page #, Background, Delete) */}
@@ -877,9 +907,9 @@ export function PackageBooklet({
                       },
                     ]);
                   }}
-                  className="no-print text-[11px] text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 py-0.5 px-2 rounded border border-dashed border-blue-200 hover:bg-blue-50/50"
+                  className="no-print text-[11px] text-[#2C8567] hover:text-[#236d54] font-medium flex items-center gap-1 py-0.5 px-2 rounded border border-dashed border-[#2C8567]/40 hover:bg-[#2C8567]/10"
                 >
-                  <Plus className="w-3 h-3" /> Add Event
+                  <Plus className="w-3 h-3 text-[#2C8567]" /> Add Event
                 </button>
               )}
             </div>
@@ -994,9 +1024,9 @@ export function PackageBooklet({
                       'New Deliverable Item',
                     ]);
                   }}
-                  className="no-print text-[11px] text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 py-0.5 px-2 rounded border border-dashed border-blue-200 hover:bg-blue-50/50"
+                  className="no-print text-[11px] text-[#2C8567] hover:text-[#236d54] font-medium flex items-center gap-1 py-0.5 px-2 rounded border border-dashed border-[#2C8567]/40 hover:bg-[#2C8567]/10"
                 >
-                  <Plus className="w-3 h-3" /> Add Item
+                  <Plus className="w-3 h-3 text-[#2C8567]" /> Add Item
                 </button>
               )}
             </div>
@@ -1069,7 +1099,23 @@ export function PackageBooklet({
                   className="text-[9px] sm:text-[10px] tracking-widest opacity-75"
                   style={getStyleFor('contactWebP4', 'body')}
                 >
-                  {pkg.contactWebsite}
+                  <EditableSpan
+                    id="contactWebP4"
+                    label="Deliverables Footer"
+                    role="body"
+                    value={pkg.contactWebsite}
+                    onChange={(val) => updateField('contactWebsite', val)}
+                    style={getStyleFor('contactWebP4', 'body')}
+                    isSelected={selectedElement?.id === 'contactWebP4'}
+                    onSelect={() =>
+                      setSelectedElement({
+                        id: 'contactWebP4',
+                        label: 'Deliverables Footer',
+                        role: 'body',
+                      })
+                    }
+                    isPrintMode={isPrintMode}
+                  />
                 </p>
               </div>
             </div>
@@ -1189,9 +1235,9 @@ export function PackageBooklet({
                         },
                       ]);
                     }}
-                    className="no-print text-[11px] text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 py-0.5 px-2 rounded border border-dashed border-blue-200 hover:bg-blue-50/50 mx-auto"
+                    className="no-print text-[11px] text-[#2C8567] hover:text-[#236d54] font-medium flex items-center gap-1 py-0.5 px-2 rounded border border-dashed border-[#2C8567]/40 hover:bg-[#2C8567]/10 mx-auto"
                   >
-                    <Plus className="w-3 h-3" /> Add Condition
+                    <Plus className="w-3 h-3 text-[#2C8567]" /> Add Condition
                   </button>
                 )}
               </div>
@@ -1204,7 +1250,29 @@ export function PackageBooklet({
                   fontSize: '1.15rem',
                 })}
               >
-                {pkg.coverBrand} {pkg.coverSubtitle}
+                <EditableSpan
+                  id="p5Script"
+                  label="Terms Footer"
+                  role="script"
+                  value={`${pkg.coverBrand} ${pkg.coverSubtitle}`}
+                  onChange={(val) => {
+                    const parts = val.split(' ');
+                    updateField('coverBrand', parts[0] || '');
+                    updateField('coverSubtitle', parts.slice(1).join(' ') || '');
+                  }}
+                  style={getStyleFor('p5Script', 'script', {
+                    fontSize: '1.15rem',
+                  })}
+                  isSelected={selectedElement?.id === 'p5Script'}
+                  onSelect={() =>
+                    setSelectedElement({
+                      id: 'p5Script',
+                      label: 'Terms Footer',
+                      role: 'script',
+                    })
+                  }
+                  isPrintMode={isPrintMode}
+                />
               </p>
             </div>
           </>
@@ -1322,9 +1390,9 @@ export function PackageBooklet({
                       },
                     ]);
                   }}
-                  className="no-print text-[11px] text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 py-0.5 px-2 rounded border border-dashed border-blue-200 hover:bg-blue-50/50 mx-auto"
+                  className="no-print text-[11px] text-[#2C8567] hover:text-[#236d54] font-medium flex items-center gap-1 py-0.5 px-2 rounded border border-dashed border-[#2C8567]/40 hover:bg-[#2C8567]/10 mx-auto"
                 >
-                  <Plus className="w-3 h-3" /> Add Milestone
+                  <Plus className="w-3 h-3 text-[#2C8567]" /> Add Milestone
                 </button>
               )}
             </div>
@@ -1336,7 +1404,29 @@ export function PackageBooklet({
                   fontSize: '1.15rem',
                 })}
               >
-                {pkg.coverBrand} {pkg.coverSubtitle}
+                <EditableSpan
+                  id="p6Script"
+                  label="Delivery Footer"
+                  role="script"
+                  value={`${pkg.coverBrand} ${pkg.coverSubtitle}`}
+                  onChange={(val) => {
+                    const parts = val.split(' ');
+                    updateField('coverBrand', parts[0] || '');
+                    updateField('coverSubtitle', parts.slice(1).join(' ') || '');
+                  }}
+                  style={getStyleFor('p6Script', 'script', {
+                    fontSize: '1.15rem',
+                  })}
+                  isSelected={selectedElement?.id === 'p6Script'}
+                  onSelect={() =>
+                    setSelectedElement({
+                      id: 'p6Script',
+                      label: 'Delivery Footer',
+                      role: 'script',
+                    })
+                  }
+                  isPrintMode={isPrintMode}
+                />
               </p>
             </div>
           </>
@@ -1427,9 +1517,9 @@ export function PackageBooklet({
                         'New policy or request point.',
                       ]);
                     }}
-                    className="no-print text-[11px] text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 py-0.5 px-2 rounded border border-dashed border-blue-200 hover:bg-blue-50/50 mx-auto"
+                    className="no-print text-[11px] text-[#2C8567] hover:text-[#236d54] font-medium flex items-center gap-1 py-0.5 px-2 rounded border border-dashed border-[#2C8567]/40 hover:bg-[#2C8567]/10 mx-auto"
                   >
-                    <Plus className="w-3 h-3" /> Add Request
+                    <Plus className="w-3 h-3 text-[#2C8567]" /> Add Request
                   </button>
                 )}
               </div>
@@ -1442,7 +1532,29 @@ export function PackageBooklet({
                   fontSize: '1.15rem',
                 })}
               >
-                {pkg.coverBrand} {pkg.coverSubtitle}
+                <EditableSpan
+                  id="p7Script"
+                  label="Policies Footer"
+                  role="script"
+                  value={`${pkg.coverBrand} ${pkg.coverSubtitle}`}
+                  onChange={(val) => {
+                    const parts = val.split(' ');
+                    updateField('coverBrand', parts[0] || '');
+                    updateField('coverSubtitle', parts.slice(1).join(' ') || '');
+                  }}
+                  style={getStyleFor('p7Script', 'script', {
+                    fontSize: '1.15rem',
+                  })}
+                  isSelected={selectedElement?.id === 'p7Script'}
+                  onSelect={() =>
+                    setSelectedElement({
+                      id: 'p7Script',
+                      label: 'Policies Footer',
+                      role: 'script',
+                    })
+                  }
+                  isPrintMode={isPrintMode}
+                />
               </p>
             </div>
           </>
@@ -1672,9 +1784,9 @@ export function PackageBooklet({
           <button
             type="button"
             onClick={handleAddPage}
-            className="no-print py-1.5 px-3 bg-white hover:bg-gray-50 border border-dashed border-gray-300 rounded-xl text-xs font-medium text-gray-700 hover:text-blue-600 hover:border-blue-300 flex items-center gap-1.5 shadow-2xs transition-all"
+            className="no-print py-1.5 px-3 bg-white hover:bg-gray-50 border border-dashed border-gray-300 rounded-xl text-xs font-medium text-gray-700 hover:text-[#2C8567] hover:border-[#2C8567]/50 flex items-center gap-1.5 shadow-2xs transition-all"
           >
-            <Plus className="w-3.5 h-3.5 text-blue-600" />
+            <Plus className="w-3.5 h-3.5 text-[#2C8567]" />
             <span>Add New Page</span>
           </button>
         </div>
@@ -1690,9 +1802,9 @@ export function PackageBooklet({
           <button
             type="button"
             onClick={handleAddPage}
-            className="no-print py-2 px-4 bg-white hover:bg-gray-50 border border-dashed border-gray-300 rounded-xl text-xs font-semibold text-gray-700 hover:text-blue-600 hover:border-blue-300 flex items-center gap-2 shadow-xs transition-all"
+            className="no-print py-2 px-4 bg-white hover:bg-gray-50 border border-dashed border-gray-300 rounded-xl text-xs font-semibold text-gray-700 hover:text-[#2C8567] hover:border-[#2C8567]/50 flex items-center gap-2 shadow-xs transition-all"
           >
-            <Plus className="w-4 h-4 text-blue-600" />
+            <Plus className="w-4 h-4 text-[#2C8567]" />
             <span>Add New Page</span>
           </button>
         </div>

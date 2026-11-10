@@ -32,7 +32,7 @@ export default function MobileNav() {
               href={tab.href}
               className={cn(
                 'flex-1 flex flex-col items-center gap-1 py-3 text-xs transition-colors',
-                active ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                active ? 'text-[#2C8567] font-semibold' : 'text-gray-500 hover:text-gray-700'
               )}
             >
               <Icon className="w-5 h-5" />

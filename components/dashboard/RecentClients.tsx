@@ -20,7 +20,7 @@ export function RecentClients({ clients }: RecentClientsProps) {
             Recent Clients
           </CardTitle>
         </div>
-        <Button asChild variant="ghost" size="sm" className="text-xs text-blue-600">
+        <Button asChild variant="ghost" size="sm" className="text-xs text-[#2C8567]">
           <Link href="/clients" className="flex items-center gap-1">
             View All <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -42,7 +42,7 @@ export function RecentClients({ clients }: RecentClientsProps) {
                   className="py-3 flex items-center justify-between hover:bg-gray-50/80 -mx-3 px-3 rounded-lg transition-colors group"
                 >
                   <div className="min-w-0 flex-1 mr-3">
-                    <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 truncate transition-colors">
+                    <p className="text-sm font-medium text-gray-900 group-hover:text-[#2C8567] truncate transition-colors">
                       {client.name || 'Unnamed Client'}
                     </p>
                     <p className="text-xs text-gray-400 truncate mt-0.5">

@@ -111,7 +111,7 @@ export default function DashboardPage() {
             title="Total Clients"
             value={stats?.totalClients ?? 0}
             icon={Users}
-            color="text-blue-600 bg-blue-50"
+            color="text-[#2C8567] bg-[#2C8567]/10"
             description="All clients registered"
           />
           <StatsCard
@@ -144,7 +144,7 @@ export default function DashboardPage() {
                 Recent Activity
               </CardTitle>
             </div>
-            <Button asChild variant="ghost" size="sm" className="text-xs text-blue-600">
+            <Button asChild variant="ghost" size="sm" className="text-xs text-[#2C8567]">
               <Link href="/activity" className="flex items-center gap-1">
                 View All <ArrowRight className="w-3.5 h-3.5" />
               </Link>

@@ -15,7 +15,7 @@ export function StatsCard({
   value,
   icon: Icon,
   description,
-  color = 'text-blue-600 bg-blue-50',
+  color = 'text-[#2C8567] bg-[#2C8567]/10',
 }: StatsCardProps) {
   return (
     <Card className="p-5 flex items-center justify-between shadow-sm border-gray-100">

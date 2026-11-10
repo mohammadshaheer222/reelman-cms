@@ -172,6 +172,8 @@ export interface TextStyleConfig {
   letterSpacing?: string; // e.g. '-0.05em' | '0em' | '0.1em' | '0.25em' | '0.35em'
   lineHeight?: string;    // e.g. '1' | '1.2' | '1.5' | '1.8' | '2.2'
   textAlign?: 'left' | 'center' | 'right';
+  marginTop?: number;     // vertical gap / position offset in px
+  marginBottom?: number;  // bottom spacing in px
 }
 
 export interface PageBackgroundConfig {

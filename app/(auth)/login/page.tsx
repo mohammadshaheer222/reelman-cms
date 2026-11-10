@@ -47,7 +47,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo header */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 mb-3">
+          <div className="w-12 h-12 bg-[#2C8567] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2C8567]/20 mb-3">
             <Camera className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-xl font-bold text-gray-900">Reelman Production</h1>
@@ -117,7 +117,7 @@ export default function LoginPage() {
                 First time here?{' '}
                 <Link
                   href="/register"
-                  className="font-medium text-blue-600 hover:text-blue-700 underline"
+                  className="font-medium text-[#2C8567] hover:underline"
                 >
                   Create an admin account
                 </Link>

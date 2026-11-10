@@ -1,10 +1,19 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Toaster } from 'sonner';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Reelman Production CMS',
   description: 'Client and Project Management System for Reelman Production',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  interactiveWidget: 'resizes-content',
+  themeColor: '#2C8567',
 };
 
 export default function RootLayout({

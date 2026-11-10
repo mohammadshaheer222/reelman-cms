@@ -238,7 +238,7 @@ export function PackageBuilder({
             size="sm"
             onClick={handleSave}
             disabled={saving}
-            className="text-xs h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
+            className="text-xs h-8 px-3 bg-[#2C8567] hover:bg-[#236d54] text-white shadow-xs"
           >
             <Save className="w-3.5 h-3.5 mr-1.5" />
             {saving ? 'Saving...' : 'Save'}

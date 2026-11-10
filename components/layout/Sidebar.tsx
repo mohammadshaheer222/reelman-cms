@@ -59,7 +59,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Logo */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-[#2C8567] rounded-lg flex items-center justify-center shadow-xs">
               <Camera className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -85,11 +85,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 className={cn(
                   'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                   active
-                    ? 'bg-blue-50 text-blue-700'
+                    ? 'bg-[#2C8567]/10 text-[#2C8567] font-semibold'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 )}
               >
-                <Icon className={cn('w-4 h-4', active ? 'text-blue-600' : 'text-gray-500')} />
+                <Icon className={cn('w-4 h-4', active ? 'text-[#2C8567]' : 'text-gray-500')} />
                 {item.label}
               </Link>
             );

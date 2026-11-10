@@ -27,11 +27,11 @@ export function ClientCard({ client }: ClientCardProps) {
 
   return (
     <Link href={`/clients/${client._id}`}>
-      <Card className="p-4 hover:shadow-md hover:border-blue-100 transition-all cursor-pointer group flex flex-col h-full justify-between">
+      <Card className="p-4 hover:shadow-md hover:border-[#2C8567]/30 transition-all cursor-pointer group flex flex-col h-full justify-between">
         <div>
           <div className="flex items-start justify-between gap-2 mb-2">
             <div>
-              <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+              <h3 className="font-semibold text-gray-900 group-hover:text-[#2C8567] transition-colors">
                 {client.name || 'Unnamed Client'}
               </h3>
               <p className="text-xs text-gray-400 font-mono mt-0.5">{client.clientId}</p>
@@ -81,7 +81,7 @@ export function ClientCard({ client }: ClientCardProps) {
               {timeAgo(client.createdAt)}
             </span>
           </div>
-          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
+          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#2C8567] group-hover:translate-x-0.5 transition-all" />
         </div>
       </Card>
     </Link>

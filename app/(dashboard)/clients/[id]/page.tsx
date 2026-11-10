@@ -484,10 +484,10 @@ export default function ClientProfilePage({
                   .reverse()
                   .map((sh, idx) => (
                     <div key={idx} className="relative">
-                      <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-blue-500 border-2 border-white ring-2 ring-blue-100" />
+                      <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-[#2C8567] border-2 border-white ring-2 ring-[#2C8567]/20" />
                       <p className="text-sm font-medium text-gray-900">
                         Status changed to{' '}
-                        <span className="font-semibold text-blue-600">{sh.statusName}</span>
+                        <span className="font-semibold text-[#2C8567]">{sh.statusName}</span>
                       </p>
                       <p className="text-xs text-gray-400 mt-0.5">
                         {formatDateTime(sh.changedAt)} ({timeAgo(sh.changedAt)})

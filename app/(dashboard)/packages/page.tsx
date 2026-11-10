@@ -132,7 +132,7 @@ export default function PackagesPage() {
             onClick={handleCreateNew}
             className="h-9 px-3 shrink-0 text-xs flex items-center gap-1 bg-white hover:bg-gray-50"
           >
-            <Plus className="w-3.5 h-3.5 text-blue-600" />
+            <Plus className="w-3.5 h-3.5 text-[#2C8567]" />
             New
           </Button>
         </div>

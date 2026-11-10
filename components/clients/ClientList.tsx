@@ -111,7 +111,7 @@ export function ClientList({
                     <TableCell className="font-medium text-gray-900">
                       <Link
                         href={`/clients/${c._id}`}
-                        className="hover:text-blue-600 font-semibold"
+                        className="hover:text-[#2C8567] font-semibold"
                       >
                         {c.name || 'Unnamed Client'}
                       </Link>
