@@ -2,15 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import {
-  LayoutGrid,
-  List,
-  Users,
-  Phone,
-  MessageCircle,
-  Calendar,
-  Pencil,
-} from 'lucide-react';
+import { LayoutGrid, List, Users, MessageCircle, Calendar } from 'lucide-react';
 import { Client, Status } from '@/types';
 import { ClientCard } from './ClientCard';
 import { StatusBadge } from './StatusBadge';
@@ -52,7 +44,6 @@ export function ClientList({
   onClientUpdated,
 }: ClientListProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
-  // Local override map so table updates reflect immediately without full refetch
   const [overrides, setOverrides] = useState<Record<string, Client>>({});
   const [editTarget, setEditTarget] = useState<{ client: Client; field: EditField } | null>(null);
 
@@ -81,29 +72,10 @@ export function ClientList({
     );
   }
 
-  // Inline edit button used in table cells
-  const EditBtn = ({
-    client,
-    field,
-    label,
-  }: {
-    client: Client;
-    field: EditField;
-    label: string;
-  }) => (
-    <button
-      type="button"
-      onClick={(e) => openEdit(e, client, field)}
-      title={`Edit ${label}`}
-      className="ml-1.5 inline-flex p-1 rounded text-gray-400 hover:text-[#2C8567] hover:bg-[#2C8567]/10 transition-colors opacity-0 group-hover/row:opacity-100 focus:opacity-100"
-    >
-      <Pencil className="w-3 h-3" />
-    </button>
-  );
-
   return (
     <>
       <div className="space-y-4">
+        {/* Top bar */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500 font-medium">
             Showing <span className="font-semibold text-gray-900">{clients.length}</span> of{' '}
@@ -113,9 +85,7 @@ export function ClientList({
             <button
               onClick={() => setViewMode('grid')}
               className={`p-1.5 rounded-md text-xs font-medium transition-colors ${
-                viewMode === 'grid'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-900'
+                viewMode === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
               }`}
               title="Grid View"
             >
@@ -124,9 +94,7 @@ export function ClientList({
             <button
               onClick={() => setViewMode('table')}
               className={`p-1.5 rounded-md text-xs font-medium transition-colors ${
-                viewMode === 'table'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-900'
+                viewMode === 'table' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
               }`}
               title="Table View"
             >
@@ -135,6 +103,7 @@ export function ClientList({
           </div>
         </div>
 
+        {/* Grid */}
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {clients.map((client) => (
@@ -147,6 +116,7 @@ export function ClientList({
             ))}
           </div>
         ) : (
+          /* Table */
           <div className="bg-white rounded-xl border border-gray-100 overflow-x-auto shadow-sm">
             <Table>
               <TableHeader>
@@ -157,7 +127,7 @@ export function ClientList({
                   <TableHead>
                     <div className="flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-[#2C8567]" />
-                      <span>Event Date</span>
+                      Event Date
                     </div>
                   </TableHead>
                   <TableHead>Status</TableHead>
@@ -171,22 +141,19 @@ export function ClientList({
                   const latestNote =
                     c.notes && c.notes.length > 0 ? c.notes[c.notes.length - 1] : null;
                   return (
-                    <TableRow key={c._id} className="hover:bg-gray-50/80 group/row">
-                      {/* Name */}
-                      <TableCell className="font-medium text-gray-900 max-w-[180px]">
-                        <div className="flex items-center gap-0.5">
-                          <Link
-                            href={`/clients/${c._id}`}
-                            className="hover:text-[#2C8567] font-semibold truncate"
-                          >
-                            {c.name || (
-                              <span className="text-gray-400 italic font-normal">Unnamed</span>
-                            )}
-                          </Link>
-                          <EditBtn client={c} field="name" label="Name" />
-                        </div>
+                    <TableRow key={c._id} className="hover:bg-gray-50/60">
+                      {/* Name — click whole cell to edit */}
+                      <TableCell className="max-w-[200px]">
+                        <button
+                          type="button"
+                          onClick={(e) => openEdit(e, c, 'name')}
+                          className="text-left w-full font-semibold text-gray-900 hover:text-[#2C8567] transition-colors truncate block"
+                          title="Click to edit name"
+                        >
+                          {c.name || <span className="text-gray-400 italic font-normal">+ Add name</span>}
+                        </button>
                         {latestNote && (
-                          <p className="text-xs text-gray-500 line-clamp-1 mt-0.5 font-normal">
+                          <p className="text-xs text-gray-400 line-clamp-1 mt-0.5 font-normal">
                             {latestNote.content}
                           </p>
                         )}
@@ -197,49 +164,61 @@ export function ClientList({
                         {c.clientId}
                       </TableCell>
 
-                      {/* Phone */}
+                      {/* Phone — click to edit, WhatsApp button inline */}
                       <TableCell>
-                        <div className="flex items-center gap-0.5">
-                          {c.phone ? (
-                            <>
-                              <span className="text-xs text-gray-700 font-mono">{c.phone}</span>
-                              <button
-                                type="button"
-                                onClick={() => openWhatsApp(c.phone!, c.name)}
-                                className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded"
-                                title="Open WhatsApp"
-                              >
-                                <MessageCircle className="w-3.5 h-3.5" />
-                              </button>
-                            </>
-                          ) : (
-                            <span className="text-xs text-gray-400 italic">—</span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={(e) => openEdit(e, c, 'phone')}
+                            className="text-xs text-gray-700 font-mono hover:text-[#2C8567] transition-colors whitespace-nowrap"
+                            title="Click to edit phone"
+                          >
+                            {c.phone || <span className="text-gray-400 italic">+ Add phone</span>}
+                          </button>
+                          {c.phone && (
+                            <button
+                              type="button"
+                              onClick={() => openWhatsApp(c.phone!, c.name)}
+                              className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded shrink-0"
+                              title="Open WhatsApp"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5" />
+                            </button>
                           )}
-                          <EditBtn client={c} field="phone" label="Phone" />
                         </div>
                       </TableCell>
 
-                      {/* Date */}
+                      {/* Date — click to edit */}
                       <TableCell className="whitespace-nowrap">
-                        <div className="flex items-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={(e) => openEdit(e, c, 'date')}
+                          title="Click to set event date"
+                          className="transition-colors"
+                        >
                           {c.date ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#2C8567]/10 text-[#2C8567] font-semibold text-xs border border-[#2C8567]/20 whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#2C8567]/10 text-[#2C8567] font-semibold text-xs border border-[#2C8567]/20 hover:bg-[#2C8567]/20 transition-colors whitespace-nowrap">
                               <Calendar className="w-3 h-3 shrink-0" />
                               {formatDate(c.date)}
                             </span>
                           ) : (
-                            <span className="text-xs text-gray-400 italic">No date</span>
+                            <span className="text-xs text-gray-400 italic hover:text-[#2C8567] transition-colors">
+                              + Set date
+                            </span>
                           )}
-                          <EditBtn client={c} field="date" label="Date" />
-                        </div>
+                        </button>
                       </TableCell>
 
-                      {/* Status */}
+                      {/* Status — click to change */}
                       <TableCell>
-                        <div className="flex items-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={(e) => openEdit(e, c, 'status')}
+                          title="Click to change status"
+                          className="hover:scale-105 hover:opacity-80 active:scale-95 transition-all"
+                        >
                           <StatusBadge status={c.status} />
-                          <EditBtn client={c} field="status" label="Status" />
-                        </div>
+                        </button>
                       </TableCell>
 
                       {/* Notes count */}
@@ -269,25 +248,16 @@ export function ClientList({
           </div>
         )}
 
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between pt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(page - 1)}
-              disabled={page <= 1}
-            >
+            <Button variant="outline" size="sm" onClick={() => onPageChange(page - 1)} disabled={page <= 1}>
               Previous
             </Button>
             <span className="text-sm text-gray-500">
               Page {page} of {totalPages}
             </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(page + 1)}
-              disabled={page >= totalPages}
-            >
+            <Button variant="outline" size="sm" onClick={() => onPageChange(page + 1)} disabled={page >= totalPages}>
               Next
             </Button>
           </div>
