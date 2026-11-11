@@ -9,11 +9,13 @@ export async function GET(request: NextRequest) {
   if (error) return error;
   try {
     await connectDB();
-    const [activeStatus, pendingStatus, newStatus] = await Promise.all([
-      Status.findOne({ name: 'Active' }),
-      Status.findOne({ name: 'Pending' }),
-      Status.findOne({ name: 'New' }),
-    ]);
+    const statuses = await Status.find({ name: { $in: ['Active', 'Pending', 'New'] } })
+      .select('_id name')
+      .lean();
+
+    const activeStatus = statuses.find((s) => s.name === 'Active');
+    const pendingStatus = statuses.find((s) => s.name === 'Pending');
+    const newStatus = statuses.find((s) => s.name === 'New');
 
     const [
       totalClients,

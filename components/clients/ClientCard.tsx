@@ -7,7 +7,7 @@ import { Client, Status } from '@/types';
 import { StatusBadge } from './StatusBadge';
 import { timeAgo, formatDate } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
-import { openWhatsApp } from '@/lib/whatsapp';
+import { openWhatsApp, formatStatusWhatsAppMessage } from '@/lib/whatsapp';
 import { toast } from 'sonner';
 import { ClientQuickEditModal } from './ClientQuickEditModal';
 
@@ -33,7 +33,11 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
       toast.error('No phone number saved for this client.');
       return;
     }
-    openWhatsApp(client.phone, client.name);
+    const statusObj = typeof client.status === 'object' ? client.status : null;
+    const customMessage = statusObj?.whatsappMessage
+      ? formatStatusWhatsAppMessage(statusObj.whatsappMessage, client.name, client.date, statusObj.name)
+      : undefined;
+    openWhatsApp(client.phone, client.name, customMessage);
   };
 
   const openEdit = (e: React.MouseEvent, field: EditField) => {
@@ -66,7 +70,6 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
                   )}
                 </h3>
               </button>
-              <p className="text-xs text-gray-400 font-mono mt-0.5">{client.clientId}</p>
             </div>
 
             {/* Status — click to change */}

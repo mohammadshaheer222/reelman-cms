@@ -1,22 +1,21 @@
 'use client';
 import { useState, useEffect } from 'react';
 import {
-  Settings,
   Plus,
   Sparkles,
   Edit2,
   Trash2,
   Check,
-  Palette,
-  Shield,
   Layers,
   Info,
+  MessageCircle,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Status } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -36,15 +35,16 @@ import {
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { TableLoadingSkeleton } from '@/components/shared/LoadingSkeleton';
 import { toast } from 'sonner';
+import { formatStatusWhatsAppMessage } from '@/lib/whatsapp';
 
 const PRESET_COLORS = [
-  '#6366f1', // Purple
+  '#2C8567', // Primary Emerald
+  '#6366f1', // Indigo
   '#22c55e', // Green
   '#f59e0b', // Amber
   '#8b5cf6', // Violet
   '#06b6d4', // Cyan
   '#3b82f6', // Blue
-  '#10b981', // Emerald
   '#f97316', // Orange
   '#ef4444', // Red
   '#6b7280', // Gray
@@ -61,7 +61,8 @@ export default function SettingsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingStatus, setEditingStatus] = useState<Status | null>(null);
   const [name, setName] = useState('');
-  const [color, setColor] = useState('#6366f1');
+  const [color, setColor] = useState('#2C8567');
+  const [whatsappMessage, setWhatsappMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   // Delete status
@@ -92,7 +93,8 @@ export default function SettingsPage() {
   const handleOpenAdd = () => {
     setEditingStatus(null);
     setName('');
-    setColor('#6366f1');
+    setColor('#2C8567');
+    setWhatsappMessage('');
     setModalOpen(true);
   };
 
@@ -100,7 +102,12 @@ export default function SettingsPage() {
     setEditingStatus(s);
     setName(s.name);
     setColor(s.color);
+    setWhatsappMessage(s.whatsappMessage || '');
     setModalOpen(true);
+  };
+
+  const handleInsertVariable = (variable: string) => {
+    setWhatsappMessage((prev) => (prev ? `${prev} ${variable}` : variable));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,7 +127,11 @@ export default function SettingsPage() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), color }),
+        body: JSON.stringify({
+          name: name.trim(),
+          color,
+          whatsappMessage: whatsappMessage.trim(),
+        }),
       });
 
       const data = await res.json();
@@ -157,13 +168,13 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSeed = async () => {
+  const handleSeed = async (force = false) => {
     setSeeding(true);
     try {
-      const res = await fetch('/api/seed');
+      const res = await fetch(`/api/seed${force ? '?force=true' : ''}`);
       const data = await res.json();
       if (res.ok) {
-        toast.success(data.message || '10 default statuses seeded successfully');
+        toast.success(data.message || 'Statuses seeded successfully');
         fetchStatuses();
       } else {
         toast.error(data.error || 'Seed failed');
@@ -184,7 +195,7 @@ export default function SettingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Settings</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Configure client workflow stages, colors, and system parameters.
+            Configure client workflow stages, colors, and automated WhatsApp prefill templates.
           </p>
         </div>
 
@@ -193,14 +204,19 @@ export default function SettingsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleSeed}
+              onClick={() => handleSeed(true)}
               disabled={seeding}
-              className="text-amber-700 bg-amber-50 border-amber-200 hover:bg-amber-100"
+              className="text-[#2C8567] bg-[#2C8567]/5 border-[#2C8567]/20 hover:bg-[#2C8567]/10"
+              title="Populates default 10 statuses and WhatsApp prefill messages"
             >
               <Sparkles className="w-4 h-4 mr-1.5" />
-              {seeding ? 'Seeding...' : 'Seed Default 10'}
+              {seeding ? 'Syncing...' : 'Sync Default Templates'}
             </Button>
-            <Button size="sm" onClick={handleOpenAdd} className="flex items-center gap-1.5 shadow-sm">
+            <Button
+              size="sm"
+              onClick={handleOpenAdd}
+              className="flex items-center gap-1.5 bg-[#2C8567] hover:bg-[#236d54] text-white shadow-sm"
+            >
               <Plus className="w-4 h-4" />
               New Status
             </Button>
@@ -212,9 +228,9 @@ export default function SettingsPage() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-5 h-5 text-gray-500" />
+            <Layers className="w-5 h-5 text-[#2C8567]" />
             <h2 className="text-base font-semibold text-gray-900">
-              Client Pipeline Statuses ({statuses.length})
+              Pipeline Statuses & WhatsApp Prefills ({statuses.length})
             </h2>
           </div>
           {!isAdmin && (
@@ -225,12 +241,12 @@ export default function SettingsPage() {
         </div>
 
         {loading ? (
-          <TableLoadingSkeleton rows={5} cols={4} />
+          <TableLoadingSkeleton rows={5} cols={5} />
         ) : statuses.length === 0 ? (
           <div className="p-8 text-center space-y-3">
             <p className="text-sm text-gray-500">No statuses found in the system.</p>
             {isAdmin && (
-              <Button size="sm" onClick={handleSeed} disabled={seeding}>
+              <Button size="sm" onClick={() => handleSeed(false)} disabled={seeding} className="bg-[#2C8567] hover:bg-[#236d54] text-white">
                 <Sparkles className="w-4 h-4 mr-1.5" />
                 Initialize Default 10 Statuses
               </Button>
@@ -241,8 +257,8 @@ export default function SettingsPage() {
             <TableHeader>
               <TableRow className="bg-gray-50/50">
                 <TableHead>Stage Name</TableHead>
-                <TableHead>Preview Badge</TableHead>
-                <TableHead>Color Code</TableHead>
+                <TableHead>Badge</TableHead>
+                <TableHead>WhatsApp Prefill Message</TableHead>
                 <TableHead>Order</TableHead>
                 {isAdmin && <TableHead className="text-right">Action</TableHead>}
               </TableRow>
@@ -269,8 +285,17 @@ export default function SettingsPage() {
                       {s.name}
                     </span>
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-gray-500">
-                    {s.color}
+                  <TableCell className="max-w-[320px]">
+                    {s.whatsappMessage ? (
+                      <div className="flex items-start gap-1.5 text-xs text-gray-600">
+                        <MessageCircle className="w-3.5 h-3.5 text-[#2C8567] shrink-0 mt-0.5" />
+                        <span className="line-clamp-2 leading-relaxed font-sans" title={s.whatsappMessage}>
+                          {s.whatsappMessage}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400 italic">Default intro</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-xs text-gray-500">{s.order ?? idx + 1}</TableCell>
                   {isAdmin && (
@@ -280,7 +305,8 @@ export default function SettingsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleOpenEdit(s)}
-                          className="h-8 w-8 text-gray-400 hover:text-gray-700"
+                          className="h-8 w-8 text-gray-400 hover:text-[#2C8567]"
+                          title="Edit status & WhatsApp template"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </Button>
@@ -289,6 +315,7 @@ export default function SettingsPage() {
                           size="icon"
                           onClick={() => setDeletingStatus(s)}
                           className="h-8 w-8 text-gray-400 hover:text-red-600"
+                          title="Delete status"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
@@ -305,97 +332,133 @@ export default function SettingsPage() {
       {/* System info */}
       <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
         <div className="flex items-center gap-2">
-          <Info className="w-4 h-4 text-gray-400" />
-          <h3 className="text-sm font-semibold text-gray-900">System Environment</h3>
+          <Info className="w-4 h-4 text-[#2C8567]" />
+          <h3 className="text-sm font-semibold text-gray-900">System Environment & WhatsApp Settings</h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs text-gray-600">
-          <div className="p-3 bg-gray-50 rounded-xl">
-            <span className="font-semibold text-gray-900 block mb-0.5">Framework</span>
-            Next.js 14 / App Router + TypeScript
-          </div>
-          <div className="p-3 bg-gray-50 rounded-xl">
-            <span className="font-semibold text-gray-900 block mb-0.5">Database</span>
-            MongoDB + Mongoose ODM
-          </div>
-          <div className="p-3 bg-gray-50 rounded-xl">
-            <span className="font-semibold text-gray-900 block mb-0.5">Current User</span>
-            {user?.name} ({user?.role})
-          </div>
-        </div>
+        <p className="text-xs text-gray-500 leading-relaxed">
+          When team members click the WhatsApp button on a client card or table, the message is automatically tailored to the client&apos;s current status using your custom template with dynamic placeholders for client name and shoot date.
+        </p>
       </div>
 
       {/* Add/Edit Status Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-[420px]">
+        <DialogContent className="max-w-md p-6">
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>{editingStatus ? 'Edit Status' : 'New Status'}</DialogTitle>
-              <DialogDescription>
-                Define a client pipeline stage and custom color code.
+              <DialogTitle className="text-base font-bold text-gray-900">
+                {editingStatus ? `Edit Status: ${editingStatus.name}` : 'New Pipeline Status'}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-gray-500">
+                Customize the status name, color badge, and its automatic WhatsApp prefill message.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="statusName">Status Label</Label>
+            <div className="space-y-4 py-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="statusName" className="text-xs font-semibold text-gray-700">Status Name</Label>
                 <Input
                   id="statusName"
-                  placeholder="e.g. In Negotiation"
+                  placeholder="e.g. Contract Sent"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  className="h-9 text-sm"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Choose Color</Label>
-                <div className="flex flex-wrap gap-2 pt-1">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-gray-700">Badge Color</Label>
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
                   {PRESET_COLORS.map((c) => (
                     <button
                       key={c}
                       type="button"
                       onClick={() => setColor(c)}
-                      className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform ${
+                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-transform ${
                         color.toLowerCase() === c.toLowerCase()
-                          ? 'scale-110 ring-2 ring-offset-2 ring-blue-500'
+                          ? 'scale-110 ring-2 ring-offset-2 ring-[#2C8567]'
                           : 'hover:scale-105'
                       }`}
                       style={{ backgroundColor: c }}
                     >
                       {color.toLowerCase() === c.toLowerCase() && (
-                        <Check className="w-3.5 h-3.5 text-white" />
+                        <Check className="w-3 h-3 text-white" />
                       )}
                     </button>
                   ))}
                 </div>
+              </div>
 
-                <div className="flex items-center gap-2 mt-2">
-                  <Input
-                    type="text"
-                    value={color}
-                    onChange={(e) => setColor(e.target.value)}
-                    placeholder="#6366f1"
-                    className="font-mono text-xs h-8"
-                  />
-                  <div
-                    className="w-8 h-8 rounded-lg border border-gray-200 shrink-0"
-                    style={{ backgroundColor: color }}
-                  />
+              {/* WhatsApp Prefill Message */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="whatsappMessage" className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                    <MessageCircle className="w-3.5 h-3.5 text-[#2C8567]" />
+                    Prefill WhatsApp Message
+                  </Label>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-gray-400">Insert:</span>
+                    <button
+                      type="button"
+                      onClick={() => handleInsertVariable('{name}')}
+                      className="px-1.5 py-0.5 text-[10px] rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-mono"
+                      title="Insert Client Name"
+                    >
+                      {'{name}'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInsertVariable('{date}')}
+                      className="px-1.5 py-0.5 text-[10px] rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-mono"
+                      title="Insert Event Date"
+                    >
+                      {'{date}'}
+                    </button>
+                  </div>
                 </div>
+
+                <Textarea
+                  id="whatsappMessage"
+                  rows={4}
+                  value={whatsappMessage}
+                  onChange={(e) => setWhatsappMessage(e.target.value)}
+                  placeholder="e.g. Hello {name}! 👋 Thank you for choosing Reelman Production for {date}..."
+                  className="text-xs sm:text-sm font-sans resize-none leading-relaxed focus-visible:ring-[#2C8567]"
+                />
+                <p className="text-[10px] text-gray-400">
+                  When clicking WhatsApp for a client in this status, this message will open pre-filled.
+                </p>
+
+                {whatsappMessage && (
+                  <div className="mt-2 p-2.5 bg-green-50/60 rounded-xl border border-green-100 text-xs text-gray-700">
+                    <span className="text-[10px] font-semibold text-[#2C8567] block mb-1">
+                      Live Preview (sample client):
+                    </span>
+                    <p className="whitespace-pre-line leading-relaxed text-gray-800 text-[11px]">
+                      {formatStatusWhatsAppMessage(whatsappMessage, 'Rahul Sharma', '15 Dec 2026', name || 'Status')}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
-            <DialogFooter className="gap-2 sm:gap-0">
+            <DialogFooter className="gap-2 pt-2 border-t border-gray-100">
               <Button
                 type="button"
                 variant="outline"
+                size="sm"
                 onClick={() => setModalOpen(false)}
                 disabled={submitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? 'Saving...' : editingStatus ? 'Update' : 'Create Status'}
+              <Button
+                type="submit"
+                size="sm"
+                disabled={submitting}
+                className="bg-[#2C8567] hover:bg-[#236d54] text-white"
+              >
+                {submitting ? 'Saving...' : editingStatus ? 'Update Status' : 'Create Status'}
               </Button>
             </DialogFooter>
           </form>

@@ -15,17 +15,39 @@ export const WHATSAPP_TEMPLATES = {
     `Hi ${name ? name.trim() + ' ' : ''}! 👋 Following up from *Reelman Production* regarding your photography & film inquiry. Looking forward to speaking with you!`,
 };
 
-export type WhatsAppTemplateKey = keyof typeof WHATSAPP_TEMPLATES;
+export type WhatsAppTemplateKey = keyof typeof WHATSAPP_TEMPLATES | 'status';
+
+export function formatStatusWhatsAppMessage(
+  template: string,
+  clientName?: string,
+  eventDate?: string,
+  statusName?: string
+): string {
+  if (!template) return '';
+  let msg = template;
+  msg = msg.replace(/\{name\}/gi, clientName?.trim() || 'there');
+  msg = msg.replace(/\{date\}/gi, eventDate || 'your event date');
+  msg = msg.replace(/\{status\}/gi, statusName || '');
+  return msg;
+}
 
 export function getDefaultWhatsAppMessage(
   clientName?: string,
   templateKey: WhatsAppTemplateKey = 'inquiry',
-  eventDate?: string
+  eventDate?: string,
+  statusTemplate?: string,
+  statusName?: string
 ): string {
+  if (templateKey === 'status' && statusTemplate) {
+    return formatStatusWhatsAppMessage(statusTemplate, clientName, eventDate, statusName);
+  }
   if (templateKey === 'dateCheck') {
     return WHATSAPP_TEMPLATES.dateCheck(clientName, eventDate);
   }
-  return WHATSAPP_TEMPLATES[templateKey](clientName);
+  if (templateKey in WHATSAPP_TEMPLATES) {
+    return (WHATSAPP_TEMPLATES as Record<string, (n?: string) => string>)[templateKey](clientName);
+  }
+  return WHATSAPP_TEMPLATES.inquiry(clientName);
 }
 
 export function openWhatsApp(

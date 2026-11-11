@@ -46,6 +46,7 @@ export interface Status {
   order: number;
   isDefault: boolean;
   isActive: boolean;
+  whatsappMessage?: string;
   clientCount?: number;
   createdAt: string;
 }

@@ -23,16 +23,40 @@ if (!global.mongoose) {
 }
 
 export async function connectDB() {
-  if (cached.conn) return cached.conn;
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, { bufferCommands: false });
+  // Re-use active, healthy connection if available
+  if (cached.conn && mongoose.connection.readyState === 1) {
+    return cached.conn;
   }
+
+  // If connection is in progress, wait for it
+  if (mongoose.connection.readyState === 2 && cached.promise) {
+    cached.conn = await cached.promise;
+    return cached.conn;
+  }
+
+  // Serverless-optimized connection options
+  const opts: mongoose.ConnectOptions = {
+    bufferCommands: false,
+    maxPoolSize: 10,
+    minPoolSize: 1,
+    serverSelectionTimeoutMS: 5000,
+    connectTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
+    autoIndex: process.env.NODE_ENV !== 'production',
+  };
+
+  cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => {
+    cached.conn = m;
+    return m;
+  });
+
   try {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
+    cached.conn = null;
     throw e;
   }
+
   return cached.conn;
 }
-

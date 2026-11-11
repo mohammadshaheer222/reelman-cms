@@ -16,10 +16,11 @@ export async function GET(
   try {
     await connectDB();
     const client = await Client.findById(id)
-      .populate('status', 'name color')
+      .populate('status', 'name color whatsappMessage')
       .populate('createdBy', 'name email')
       .populate('assignedTo', 'name email')
-      .populate('notes.createdBy', 'name');
+      .populate('notes.createdBy', 'name')
+      .lean();
     if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 });
     return NextResponse.json({ data: client });
   } catch {
@@ -68,9 +69,10 @@ export async function PATCH(
 
     await client.save();
     const updated = await Client.findById(id)
-      .populate('status', 'name color')
+      .populate('status', 'name color whatsappMessage')
       .populate('createdBy', 'name')
-      .populate('assignedTo', 'name');
+      .populate('assignedTo', 'name')
+      .lean();
     return NextResponse.json({ data: updated });
   } catch {
     return NextResponse.json({ error: 'Failed to update client' }, { status: 500 });

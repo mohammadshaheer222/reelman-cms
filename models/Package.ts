@@ -130,11 +130,6 @@ const PackageSchema = new Schema<IPackage>(
   { timestamps: true, strict: false }
 );
 
-// Clear cached model to ensure schema updates like pagesList & pageBackgrounds take effect immediately
-if (mongoose.models && mongoose.models.Package) {
-  delete mongoose.models.Package;
-}
-
 const Package: Model<IPackage> =
   mongoose.models.Package || mongoose.model<IPackage>('Package', PackageSchema);
 

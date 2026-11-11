@@ -65,10 +65,8 @@ ClientSchema.index({ clientId: 1 });
 ClientSchema.index({ status: 1 });
 ClientSchema.index({ createdAt: -1 });
 ClientSchema.index({ isArchived: 1 });
-
-if (mongoose.models && mongoose.models.Client) {
-  delete mongoose.models.Client;
-}
+ClientSchema.index({ isArchived: 1, createdAt: -1 });
+ClientSchema.index({ isArchived: 1, status: 1, createdAt: -1 });
 
 const Client: Model<IClient> =
   mongoose.models.Client ||

@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const clients = await Client.find({ isArchived: false })
       .sort({ createdAt: -1 })
       .limit(5)
-      .populate('status', 'name color')
+      .populate('status', 'name color whatsappMessage')
       .lean();
     return NextResponse.json({ data: clients });
   } catch {

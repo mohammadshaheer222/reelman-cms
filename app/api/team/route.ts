@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   if (error) return error;
   try {
     await connectDB();
-    const users = await User.find({}).select('-passwordHash').sort({ createdAt: -1 });
+    const users = await User.find({}).select('-passwordHash').sort({ createdAt: -1 }).lean();
     return NextResponse.json({ data: users });
   } catch {
     return NextResponse.json({ error: 'Failed to fetch team' }, { status: 500 });

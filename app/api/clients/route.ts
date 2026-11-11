@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         .sort(sortObj)
         .skip(skip)
         .limit(limit)
-        .populate('status', 'name color')
+        .populate('status', 'name color whatsappMessage')
         .populate('createdBy', 'name')
         .lean(),
       Client.countDocuments(query),
@@ -131,8 +131,9 @@ export async function POST(request: NextRequest) {
     });
 
     const populated = await Client.findById(client._id)
-      .populate('status', 'name color')
-      .populate('createdBy', 'name');
+      .populate('status', 'name color whatsappMessage')
+      .populate('createdBy', 'name')
+      .lean();
     return NextResponse.json({ data: populated }, { status: 201 });
   } catch (err) {
     console.error(err);

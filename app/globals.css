@@ -95,6 +95,38 @@
 }
 
 /* ─────────────────────────────────────────────
+   Dropdown / Select content animation
+   ───────────────────────────────────────────── */
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes dropdown-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+}
+
+.dropdown-content {
+  transform-origin: top center;
+  animation: dropdown-in 160ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.dropdown-content[data-state="closed"] {
+  animation: dropdown-out 120ms ease-in forwards;
+}
+
+/* ─────────────────────────────────────────────
    Button micro-interactions
    ───────────────────────────────────────────── */
 @keyframes btn-press {

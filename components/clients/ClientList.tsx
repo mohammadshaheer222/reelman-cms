@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { LayoutGrid, List, Users, MessageCircle, Calendar } from 'lucide-react';
+import { LayoutGrid, List, Users, MessageCircle, Calendar, ArrowRight } from 'lucide-react';
 import { Client, Status } from '@/types';
 import { ClientCard } from './ClientCard';
 import { StatusBadge } from './StatusBadge';
@@ -17,7 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate, timeAgo } from '@/lib/utils';
-import { openWhatsApp } from '@/lib/whatsapp';
+import { openWhatsApp, formatStatusWhatsAppMessage } from '@/lib/whatsapp';
 import { ClientQuickEditModal } from './ClientQuickEditModal';
 
 type EditField = 'name' | 'phone' | 'date' | 'status';
@@ -122,7 +122,6 @@ export function ClientList({
               <TableHeader>
                 <TableRow className="bg-gray-50/50">
                   <TableHead>Client</TableHead>
-                  <TableHead>ID</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>
                     <div className="flex items-center gap-1.5">
@@ -133,7 +132,7 @@ export function ClientList({
                   <TableHead>Status</TableHead>
                   <TableHead>Notes</TableHead>
                   <TableHead>Added</TableHead>
-                  <TableHead className="text-right">View</TableHead>
+                  <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -159,11 +158,6 @@ export function ClientList({
                         )}
                       </TableCell>
 
-                      {/* ID */}
-                      <TableCell className="font-mono text-xs text-gray-400 whitespace-nowrap">
-                        {c.clientId}
-                      </TableCell>
-
                       {/* Phone — click to edit, WhatsApp button inline */}
                       <TableCell>
                         <div className="flex items-center gap-1.5">
@@ -178,9 +172,15 @@ export function ClientList({
                           {c.phone && (
                             <button
                               type="button"
-                              onClick={() => openWhatsApp(c.phone!, c.name)}
+                              onClick={() => {
+                                const statusObj = typeof c.status === 'object' ? c.status : null;
+                                const customMessage = statusObj?.whatsappMessage
+                                  ? formatStatusWhatsAppMessage(statusObj.whatsappMessage, c.name, c.date, statusObj.name)
+                                  : undefined;
+                                openWhatsApp(c.phone!, c.name, customMessage);
+                              }}
                               className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded shrink-0"
-                              title="Open WhatsApp"
+                              title="Open WhatsApp with status prefill"
                             >
                               <MessageCircle className="w-3.5 h-3.5" />
                             </button>
@@ -236,9 +236,13 @@ export function ClientList({
 
                       {/* View */}
                       <TableCell className="text-right">
-                        <Button asChild variant="ghost" size="sm">
-                          <Link href={`/clients/${c._id}`}>View</Link>
-                        </Button>
+                        <Link
+                          href={`/clients/${c._id}`}
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-400 hover:text-[#2C8567] hover:bg-[#2C8567]/8 transition-colors"
+                          title="View client"
+                        >
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
                       </TableCell>
                     </TableRow>
                   );

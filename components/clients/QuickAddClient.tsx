@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -21,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Status } from '@/types';
-import { AlertCircle, User, Phone, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface QuickAddClientProps {
   open: boolean;
@@ -61,9 +60,7 @@ export function QuickAddClient({
           const list: Status[] = data.data || [];
           setStatuses(list);
           const defaultStatus = list.find((s) => s.isDefault) || list[0];
-          if (defaultStatus && !statusId) {
-            setStatusId(defaultStatus._id);
-          }
+          if (defaultStatus && !statusId) setStatusId(defaultStatus._id);
         })
         .catch(() => {});
     }
@@ -71,43 +68,27 @@ export function QuickAddClient({
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
-
     const trimmedName = name.trim();
     const trimmedPhone = phone.trim();
 
-    // Must have at least a Name or a Phone
     if (!trimmedName && !trimmedPhone) {
-      newErrors.name = 'Please provide either a Client Name or a Phone number';
-      newErrors.phone = 'Please provide either a Client Name or a Phone number';
+      newErrors.name = 'Name or phone required';
+      newErrors.phone = 'Name or phone required';
     }
-
-    // If phone is provided, validate digits
     if (trimmedPhone) {
       const digits = trimmedPhone.replace(/\D/g, '');
-      if (digits.length < 10) {
-        newErrors.phone = 'Please enter a valid phone number (at least 10 digits)';
-      }
+      if (digits.length < 10) newErrors.phone = 'Enter a valid phone number';
     }
 
     setErrors(newErrors);
-
-    if (newErrors.name && nameInputRef.current) {
-      nameInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      nameInputRef.current.focus();
-    } else if (newErrors.phone && phoneInputRef.current) {
-      phoneInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      phoneInputRef.current.focus();
-    }
-
+    if (newErrors.name && nameInputRef.current) nameInputRef.current.focus();
+    else if (newErrors.phone && phoneInputRef.current) phoneInputRef.current.focus();
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validate()) {
-      return;
-    }
+    if (!validate()) return;
 
     setSubmitting(true);
     setErrors({});
@@ -126,24 +107,17 @@ export function QuickAddClient({
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to create client');
-      }
+      if (!res.ok) throw new Error(data.error || 'Failed to create client');
 
-      toast.success('Client added successfully', {
+      toast.success('Client added', {
         icon: <CheckCircle2 className="w-4 h-4 text-[#2C8567]" />,
       });
-      setName('');
-      setPhone('');
-      setDate('');
-      setNoteContent('');
-      setErrors({});
+      setName(''); setPhone(''); setDate(''); setNoteContent(''); setErrors({});
       onOpenChange(false);
       onSuccess?.();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong';
       setErrors({ general: message });
-      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -151,116 +125,83 @@ export function QuickAddClient({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="max-w-sm">
         <form onSubmit={handleSubmit} noValidate>
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-gray-900">
-              Add Client
-            </DialogTitle>
-            <DialogDescription className="text-xs text-gray-500">
-              Enter client details and event requirements
-            </DialogDescription>
+            <DialogTitle className="text-base font-semibold text-gray-900">Add Client</DialogTitle>
           </DialogHeader>
 
-          {/* General API Error Banner */}
           {errors.general && (
-            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs text-red-700 animate-in fade-in-50">
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Unable to save client</p>
-                <p className="text-red-600 mt-0.5">{errors.general}</p>
-              </div>
+            <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2 text-xs text-red-600">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              <span>{errors.general}</span>
             </div>
           )}
 
-          <div className="space-y-3.5 py-4">
-            {/* Client Name */}
+          <div className="space-y-3 py-4">
+            {/* Name */}
             <div className="space-y-1">
-              <Label htmlFor="clientName" className="text-xs font-semibold text-gray-700">
-                Client Name
-              </Label>
+              <Label htmlFor="clientName" className="text-xs font-medium text-gray-600">Name</Label>
               <Input
                 ref={nameInputRef}
                 id="clientName"
                 placeholder="Rahul Sharma"
                 value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  if (errors.name) {
-                    setErrors((prev) => ({ ...prev, name: undefined }));
-                  }
-                }}
-                className={errors.name ? 'border-red-400 bg-red-50/20 focus-visible:ring-red-400' : ''}
+                onChange={(e) => { setName(e.target.value); if (errors.name) setErrors((p) => ({ ...p, name: undefined })); }}
+                className={errors.name ? 'border-red-400 focus-visible:ring-red-400' : ''}
                 autoComplete="name"
               />
               {errors.name && (
-                <p className="text-xs text-red-600 font-medium flex items-center gap-1 mt-1">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                  {errors.name}
+                <p className="text-[11px] text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3 shrink-0" />{errors.name}
                 </p>
               )}
             </div>
 
-            {/* Phone Number */}
+            {/* Phone */}
             <div className="space-y-1">
-              <Label htmlFor="clientPhone" className="text-xs font-semibold text-gray-700">
-                Phone / WhatsApp Number
-              </Label>
+              <Label htmlFor="clientPhone" className="text-xs font-medium text-gray-600">Phone / WhatsApp</Label>
               <Input
                 ref={phoneInputRef}
                 id="clientPhone"
                 type="tel"
                 placeholder="9876543210"
                 value={phone}
-                onChange={(e) => {
-                  setPhone(e.target.value);
-                  if (errors.phone) {
-                    setErrors((prev) => ({ ...prev, phone: undefined }));
-                  }
-                }}
-                className={errors.phone ? 'border-red-400 bg-red-50/20 focus-visible:ring-red-400' : ''}
+                onChange={(e) => { setPhone(e.target.value); if (errors.phone) setErrors((p) => ({ ...p, phone: undefined })); }}
+                className={errors.phone ? 'border-red-400 focus-visible:ring-red-400' : ''}
                 autoComplete="tel"
               />
               {errors.phone && (
-                <p className="text-xs text-red-600 font-medium flex items-center gap-1 mt-1">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                  {errors.phone}
+                <p className="text-[11px] text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3 shrink-0" />{errors.phone}
                 </p>
               )}
             </div>
 
-            {/* Event / Shoot Date & Status Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Date & Status */}
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label htmlFor="clientDate" className="text-xs font-semibold text-gray-700">
-                  Event / Shoot Date
-                </Label>
+                <Label htmlFor="clientDate" className="text-xs font-medium text-gray-600">Event Date</Label>
                 <Input
                   id="clientDate"
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="h-10 sm:h-9"
+                  className="h-9"
                 />
               </div>
-
               <div className="space-y-1">
-                <Label htmlFor="status" className="text-xs font-semibold text-gray-700">
-                  Status
-                </Label>
+                <Label htmlFor="status" className="text-xs font-medium text-gray-600">Status</Label>
                 <Select value={statusId} onValueChange={setStatusId}>
-                  <SelectTrigger className="h-10 sm:h-9 text-base sm:text-sm">
-                    <SelectValue placeholder="Select status" />
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {statuses.map((status) => (
-                      <SelectItem key={status._id} value={status._id}>
+                    {statuses.map((s) => (
+                      <SelectItem key={s._id} value={s._id}>
                         <div className="flex items-center gap-2">
-                          <span
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: status.color }}
-                          />
-                          <span>{status.name}</span>
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+                          <span>{s.name}</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -269,14 +210,12 @@ export function QuickAddClient({
               </div>
             </div>
 
-            {/* Requirements / Notes */}
+            {/* Notes */}
             <div className="space-y-1">
-              <Label htmlFor="noteContent" className="text-xs font-semibold text-gray-700">
-                Requirements / Notes
-              </Label>
+              <Label htmlFor="noteContent" className="text-xs font-medium text-gray-600">Notes</Label>
               <Textarea
                 id="noteContent"
-                placeholder="Discussion notes, shooting requests, package details..."
+                placeholder="Requirements, package details..."
                 rows={3}
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
@@ -284,22 +223,24 @@ export function QuickAddClient({
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-2 pt-2 border-t border-gray-100">
+          <DialogFooter className="gap-2 pt-2 border-t border-gray-100">
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
-              className="w-full sm:w-auto"
+              className="flex-1 sm:flex-none"
             >
               Cancel
             </Button>
             <Button
               type="submit"
+              size="sm"
               disabled={submitting}
-              className="w-full sm:w-auto bg-[#2C8567] hover:bg-[#236d54] text-white"
+              className="flex-1 sm:flex-none bg-[#2C8567] hover:bg-[#236d54] text-white"
             >
-              {submitting ? 'Creating...' : 'Create Client'}
+              {submitting ? 'Adding…' : 'Add Client'}
             </Button>
           </DialogFooter>
         </form>
@@ -307,4 +248,3 @@ export function QuickAddClient({
     </Dialog>
   );
 }
-

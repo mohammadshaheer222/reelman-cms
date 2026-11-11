@@ -598,6 +598,7 @@ export default function ClientProfilePage({
             name: client.name,
             phone: client.phone,
             date: client.date,
+            status: client.status,
           }}
         />
       )}

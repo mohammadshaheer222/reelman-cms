@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Client, Status } from '@/types';
-import { Check, Loader2, User, Phone, Calendar, Tag } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils';
 
@@ -26,27 +26,11 @@ interface ClientQuickEditModalProps {
   onSuccess: (updated: Client) => void;
 }
 
-const FIELD_META: Record<EditField, { label: string; icon: React.ElementType; description: string }> = {
-  name: {
-    label: 'Client Name',
-    icon: User,
-    description: 'Update the client or lead name.',
-  },
-  phone: {
-    label: 'Phone Number',
-    icon: Phone,
-    description: 'Enter the WhatsApp-enabled phone number.',
-  },
-  date: {
-    label: 'Event / Shoot Date',
-    icon: Calendar,
-    description: 'Set the event or shoot date for this client.',
-  },
-  status: {
-    label: 'Pipeline Status',
-    icon: Tag,
-    description: 'Move this client to a different pipeline stage.',
-  },
+const FIELD_LABEL: Record<EditField, string> = {
+  name: 'Name',
+  phone: 'Phone',
+  date: 'Event Date',
+  status: 'Status',
 };
 
 export function ClientQuickEditModal({
@@ -61,7 +45,6 @@ export function ClientQuickEditModal({
   const [selectedStatusId, setSelectedStatusId] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Populate current value when modal opens
   useEffect(() => {
     if (!client || !field) return;
     if (field === 'name') setValue(client.name || '');
@@ -91,81 +74,57 @@ export function ClientQuickEditModal({
       });
       if (!res.ok) throw new Error('Update failed');
       const { data } = await res.json();
-      toast.success(`${FIELD_META[field].label} updated`);
+      toast.success(`${FIELD_LABEL[field]} updated`);
       onSuccess(data);
       onOpenChange(false);
     } catch {
-      toast.error('Could not save changes. Please try again.');
+      toast.error('Could not save. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   if (!field || !client) return null;
-  const meta = FIELD_META[field];
-  const Icon = meta.icon;
-
-  const currentStatusObj = statuses.find((s) => s._id === selectedStatusId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm p-5">
+      <DialogContent className="max-w-xs p-6">
         <DialogHeader>
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-9 h-9 rounded-xl bg-[#2C8567]/10 flex items-center justify-center shrink-0">
-              <Icon className="w-4.5 h-4.5 text-[#2C8567]" />
-            </div>
-            <div>
-              <DialogTitle className="text-base font-bold text-gray-900">
-                Edit {meta.label}
-              </DialogTitle>
-              <p className="text-xs text-gray-500 mt-0.5">{meta.description}</p>
-            </div>
-          </div>
-          <p className="text-xs text-gray-400 font-mono bg-gray-50 rounded-lg px-2 py-1 w-fit">
-            {client.clientId} · {client.name || 'Unnamed Client'}
-          </p>
+          <DialogTitle className="text-base font-semibold text-gray-900">
+            Edit {FIELD_LABEL[field]}
+          </DialogTitle>
+          <p className="text-xs text-gray-400 mt-0.5">{client.name || 'Unnamed Client'}</p>
         </DialogHeader>
 
-        <div className="space-y-3 py-1">
+        <div className="py-2">
           {/* NAME */}
           {field === 'name' && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Full Name</label>
-              <Input
-                autoFocus
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder="Enter client name"
-                onKeyDown={(e) => e.key === 'Enter' && !loading && handleSave()}
-                className="h-10 text-sm"
-              />
-            </div>
+            <Input
+              autoFocus
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder="Client name"
+              onKeyDown={(e) => e.key === 'Enter' && !loading && handleSave()}
+              className="h-10 text-sm"
+            />
           )}
 
           {/* PHONE */}
           {field === 'phone' && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Phone Number</label>
-              <Input
-                autoFocus
-                type="tel"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder="+91 98765 43210"
-                onKeyDown={(e) => e.key === 'Enter' && !loading && handleSave()}
-                className="h-10 text-sm font-mono"
-              />
-              <p className="text-[11px] text-gray-400">
-                Include country code for WhatsApp (e.g. +91 for India)
-              </p>
-            </div>
+            <Input
+              autoFocus
+              type="tel"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder="+91 98765 43210"
+              onKeyDown={(e) => e.key === 'Enter' && !loading && handleSave()}
+              className="h-10 text-sm font-mono"
+            />
           )}
 
           {/* DATE */}
           {field === 'date' && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Event / Shoot Date</label>
+            <div className="space-y-2">
               <Input
                 autoFocus
                 type="date"
@@ -174,66 +133,47 @@ export function ClientQuickEditModal({
                 className="h-10 text-sm"
               />
               {value && (
-                <p className="text-xs text-[#2C8567] font-medium flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {formatDate(value)}
-                </p>
+                <p className="text-xs text-[#2C8567] font-medium">{formatDate(value)}</p>
               )}
             </div>
           )}
 
           {/* STATUS */}
           {field === 'status' && (
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-gray-700">Select Pipeline Status</label>
-              <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto pr-0.5">
-                {statuses.map((s) => {
-                  const isSelected = selectedStatusId === s._id;
-                  return (
-                    <button
-                      key={s._id}
-                      type="button"
-                      onClick={() => setSelectedStatusId(s._id)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all ${
-                        isSelected
-                          ? 'border-[#2C8567] bg-[#2C8567]/5 ring-1 ring-[#2C8567]'
-                          : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      <span
-                        className="w-3 h-3 rounded-full shrink-0"
-                        style={{ backgroundColor: s.color }}
-                      />
-                      <span className="text-sm font-medium text-gray-800 flex-1">{s.name}</span>
-                      {isSelected && (
-                        <Check className="w-4 h-4 text-[#2C8567] shrink-0" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              {currentStatusObj && (
-                <p className="text-xs text-gray-500">
-                  Currently:{' '}
-                  <span
-                    className="font-semibold"
-                    style={{ color: currentStatusObj.color }}
+            <div className="flex flex-col gap-1.5 max-h-60 overflow-y-auto modal-scroll">
+              {statuses.map((s) => {
+                const isSelected = selectedStatusId === s._id;
+                return (
+                  <button
+                    key={s._id}
+                    type="button"
+                    onClick={() => setSelectedStatusId(s._id)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all ${
+                      isSelected
+                        ? 'border-[#2C8567] bg-[#2C8567]/5 ring-1 ring-[#2C8567]'
+                        : 'border-gray-100 bg-gray-50 hover:bg-gray-100'
+                    }`}
                   >
-                    {currentStatusObj.name}
-                  </span>
-                </p>
-              )}
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: s.color }}
+                    />
+                    <span className="text-sm text-gray-800 flex-1">{s.name}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 text-[#2C8567] shrink-0" />}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
 
-        <DialogFooter className="gap-2 pt-2 flex-row justify-end">
+        <DialogFooter className="gap-2 flex-row justify-end pt-1">
           <Button
             variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
             disabled={loading}
-            className="h-9"
+            className="h-9 text-gray-600"
           >
             Cancel
           </Button>
@@ -241,19 +181,9 @@ export function ClientQuickEditModal({
             size="sm"
             onClick={handleSave}
             disabled={loading || (field === 'status' && !selectedStatusId)}
-            className="h-9 bg-[#2C8567] hover:bg-[#236d54] text-white font-semibold gap-1.5 min-w-[90px]"
+            className="h-9 bg-[#2C8567] hover:bg-[#236d54] text-white min-w-[80px]"
           >
-            {loading ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                Saving…
-              </>
-            ) : (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                Save
-              </>
-            )}
+            {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save'}
           </Button>
         </DialogFooter>
       </DialogContent>
