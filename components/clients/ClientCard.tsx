@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { MessageSquare, Calendar, ChevronRight, Phone, MessageCircle } from 'lucide-react';
 import { Client, Status } from '@/types';
 import { StatusBadge } from './StatusBadge';
@@ -20,11 +20,16 @@ interface ClientCardProps {
 }
 
 export function ClientCard({ client: initialClient, statuses = [], onUpdated }: ClientCardProps) {
+  const router = useRouter();
   const [client, setClient] = useState<Client>(initialClient);
   const [editField, setEditField] = useState<EditField | null>(null);
 
   const latestNote =
     client.notes && client.notes.length > 0 ? client.notes[client.notes.length - 1] : null;
+
+  const handleCardClick = () => {
+    router.push(`/clients/${client._id}`);
+  };
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -40,10 +45,10 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
     openWhatsApp(client.phone, client.name, customMessage);
   };
 
-  const openEdit = (e: React.MouseEvent, field: EditField) => {
+  const handleStatusClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setEditField(field);
+    setEditField('status');
   };
 
   const handleUpdated = (updated: Client) => {
@@ -53,43 +58,34 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
 
   return (
     <>
-      <Card className="p-4 hover:shadow-md hover:border-[#2C8567]/30 transition-all group flex flex-col h-full justify-between">
+      <Card
+        onClick={handleCardClick}
+        className="p-4 hover:shadow-md hover:border-[#2C8567]/40 transition-all group flex flex-col h-full justify-between cursor-pointer select-none"
+      >
         <div>
-          {/* Name — click to edit */}
+          {/* Header: Name & Status */}
           <div className="flex items-start justify-between gap-2 mb-2">
             <div className="min-w-0 flex-1">
-              <button
-                type="button"
-                onClick={(e) => openEdit(e, 'name')}
-                className="text-left w-full hover:text-[#2C8567] transition-colors"
-                title="Click to edit name"
-              >
-                <h3 className="font-semibold text-gray-900 hover:text-[#2C8567] transition-colors truncate">
-                  {client.name || (
-                    <span className="text-gray-400 italic font-normal">+ Add Name</span>
-                  )}
-                </h3>
-              </button>
+              <h3 className="font-semibold text-gray-900 group-hover:text-[#2C8567] transition-colors truncate">
+                {client.name || (
+                  <span className="text-gray-400 italic font-normal">+ Add Name</span>
+                )}
+              </h3>
             </div>
 
-            {/* Status — click to change */}
+            {/* Status — click to change stage directly */}
             <button
               type="button"
-              onClick={(e) => openEdit(e, 'status')}
+              onClick={handleStatusClick}
               title="Click to change status"
-              className="shrink-0 hover:scale-105 hover:opacity-80 transition-all active:scale-95"
+              className="shrink-0 hover:scale-105 hover:opacity-85 transition-all active:scale-95"
             >
               <StatusBadge status={client.status} />
             </button>
           </div>
 
-          {/* Date — click to edit */}
-          <button
-            type="button"
-            onClick={(e) => openEdit(e, 'date')}
-            title="Click to set event date"
-            className="w-full text-left flex items-center gap-1.5 mt-2.5 py-1.5 px-2 bg-[#2C8567]/5 hover:bg-[#2C8567]/10 border border-[#2C8567]/15 hover:border-[#2C8567]/30 rounded-lg text-xs transition-colors group/date"
-          >
+          {/* Date */}
+          <div className="flex items-center gap-1.5 mt-2.5 py-1.5 px-2 bg-[#2C8567]/5 group-hover:bg-[#2C8567]/10 border border-[#2C8567]/15 rounded-lg text-xs transition-colors">
             <Calendar className="w-3.5 h-3.5 text-[#2C8567] shrink-0" />
             <span className="text-gray-500 font-normal shrink-0">Date:</span>
             <span className="font-semibold text-gray-800 truncate">
@@ -99,14 +95,10 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
                 <span className="text-gray-400 font-normal italic">Tap to set date</span>
               )}
             </span>
-          </button>
+          </div>
 
-          {/* Phone — click to edit, WhatsApp button separate */}
-          <div
-            className="flex items-center justify-between gap-2 mt-1.5 py-1.5 px-2 bg-gray-50/80 rounded-lg border border-gray-100 cursor-pointer hover:bg-gray-100/60 hover:border-gray-200 transition-colors"
-            onClick={(e) => openEdit(e, 'phone')}
-            title="Click to edit phone number"
-          >
+          {/* Phone row & WhatsApp action */}
+          <div className="flex items-center justify-between gap-2 mt-1.5 py-1.5 px-2 bg-gray-50/80 rounded-lg border border-gray-100 transition-colors">
             <div className="flex items-center gap-1.5 min-w-0 flex-1">
               <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
               <span className="text-xs font-medium text-gray-700 truncate">
@@ -149,17 +141,13 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
               {timeAgo(client.createdAt)}
             </span>
           </div>
-          <Link
-            href={`/clients/${client._id}`}
-            onClick={(e) => e.stopPropagation()}
-            className="text-gray-300 hover:text-[#2C8567] transition-colors"
-          >
+          <div className="text-gray-400 group-hover:text-[#2C8567] transition-colors">
             <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
+          </div>
         </div>
       </Card>
 
-      {/* Quick Edit Modal */}
+      {/* Quick Edit Modal (for status change) */}
       <ClientQuickEditModal
         client={client}
         field={editField}
