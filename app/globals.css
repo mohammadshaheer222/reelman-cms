@@ -1,6 +1,91 @@
 @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Allura&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Great+Vibes&family=Inter:wght@300;400;500;600&family=Lato:ital,wght@0,300;0,400;0,700;1,300&family=Marcellus&family=Montserrat:wght@200;300;400;500;600&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Prata&family=Raleway:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────
+   Modal / Dialog animation keyframes
+   ───────────────────────────────────────────── */
+
+/* Overlay: simple fade */
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes overlay-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Content: scale + fade + slide up — smooth spring feel */
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@keyframes modal-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+
+/* Mobile sheet: slide up from bottom */
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0%);
+  }
+}
+@keyframes sheet-out {
+  from {
+    opacity: 1;
+    transform: translateY(0%);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+/* Utility classes used by dialog.tsx */
+.modal-overlay {
+  animation: overlay-in 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.modal-overlay[data-state="closed"] {
+  animation: overlay-out 150ms ease-in forwards;
+}
+
+.modal-content {
+  animation: modal-in 220ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.modal-content[data-state="closed"] {
+  animation: modal-out 160ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* ─────────────────────────────────────────────
+   Button micro-interactions
+   ───────────────────────────────────────────── */
+@keyframes btn-press {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.btn-press:active {
+  animation: btn-press 120ms ease-out;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
