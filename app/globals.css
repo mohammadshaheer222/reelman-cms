@@ -15,11 +15,13 @@
   to   { opacity: 0; }
 }
 
-/* Content: scale + fade + slide up — smooth spring feel */
+/* Content: scale + fade + slide up — smooth spring feel
+   NOTE: must include translate(-50%,-50%) in every keyframe so it
+   doesn't conflict with the Tailwind translate utilities. */
 @keyframes modal-in {
   from {
     opacity: 0;
-    transform: translate(-50%, -48%) scale(0.96);
+    transform: translate(-50%, -47%) scale(0.95);
   }
   to {
     opacity: 1;
@@ -33,8 +35,26 @@
   }
   to {
     opacity: 0;
-    transform: translate(-50%, -48%) scale(0.96);
+    transform: translate(-50%, -47%) scale(0.95);
   }
+}
+
+/* ─────────────────────────────────────────────
+   Custom scrollbar — primary green
+   ───────────────────────────────────────────── */
+.modal-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.modal-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 99px;
+}
+.modal-scroll::-webkit-scrollbar-thumb {
+  background: #2C8567;
+  border-radius: 99px;
+}
+.modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #236d54;
 }
 
 /* Mobile sheet: slide up from bottom */
@@ -68,7 +88,7 @@
 }
 
 .modal-content {
-  animation: modal-in 220ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: modal-in 240ms cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
 }
 .modal-content[data-state="closed"] {
   animation: modal-out 160ms cubic-bezier(0.4, 0, 1, 1) forwards;

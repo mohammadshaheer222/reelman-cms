@@ -109,7 +109,7 @@ export function ClientQuickEditModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm w-[calc(100%-2rem)] p-5 rounded-2xl">
+      <DialogContent className="max-w-sm p-5">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-1">
             <div className="w-9 h-9 rounded-xl bg-[#2C8567]/10 flex items-center justify-center shrink-0">

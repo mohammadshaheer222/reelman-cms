@@ -34,15 +34,15 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        // Positioning
-        'fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%]',
-        // Size
-        'w-[calc(100%-2rem)] max-w-lg max-h-[85dvh] overflow-y-auto overscroll-contain',
+        // Positioning — NO translate utilities here; translation lives in the keyframes
+        'fixed left-[50%] top-[50%] z-50',
+        // Size — reduced width
+        'w-[calc(100%-2rem)] max-w-sm max-h-[85dvh] overflow-y-auto overscroll-contain modal-scroll',
         // Visual
         'bg-white rounded-2xl border border-gray-100 shadow-2xl',
         // Layout
         'grid gap-4 p-5 sm:p-6',
-        // Animation
+        // Animation (handles translate internally)
         'modal-content',
         className
       )}

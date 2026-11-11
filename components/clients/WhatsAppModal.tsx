@@ -71,7 +71,7 @@ export function WhatsAppModal({ open, onOpenChange, client }: WhatsAppModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md w-[calc(100%-2rem)] max-h-[90dvh] overflow-y-auto p-4 sm:p-6 rounded-2xl">
+      <DialogContent className="max-w-md p-4 sm:p-6">
         <DialogHeader className="space-y-1.5 pb-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 shrink-0">
