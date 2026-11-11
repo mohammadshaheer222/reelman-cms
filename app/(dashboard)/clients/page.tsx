@@ -78,6 +78,7 @@ export default function ClientsPage() {
           total={total}
           totalPages={totalPages}
           page={page}
+          statuses={statuses}
           onPageChange={setPage}
           onAddClient={() => setAddClientOpen(true)}
         />
