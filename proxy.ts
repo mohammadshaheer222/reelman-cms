@@ -6,7 +6,7 @@ const authPaths = ['/login', '/register'];
 
 export async function proxy(request: NextRequest) {
   try {
-    const { pathname } = request.nextUrl;
+    const { pathname, search } = request.nextUrl;
 
     // Skip _next internals and static assets
     if (
@@ -31,11 +31,28 @@ export async function proxy(request: NextRequest) {
 
     if (isProtected && !user) {
       const loginUrl = new URL('/login', request.url);
-      return NextResponse.redirect(loginUrl);
+      const fullPath = `${pathname}${search || ''}`;
+      if (pathname !== '/') {
+        loginUrl.searchParams.set('redirect', fullPath);
+      }
+      if (token) {
+        loginUrl.searchParams.set('expired', 'true');
+      }
+      const response = NextResponse.redirect(loginUrl);
+      if (token) {
+        response.cookies.delete('auth-token');
+      }
+      return response;
     }
 
     if (isAuthPath && user) {
       return NextResponse.redirect(new URL('/', request.url));
+    }
+
+    if (isAuthPath && !user && token) {
+      const response = NextResponse.next();
+      response.cookies.delete('auth-token');
+      return response;
     }
 
     return NextResponse.next();
@@ -50,3 +67,5 @@ export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
 
+export const middleware = proxy;
+export default proxy;

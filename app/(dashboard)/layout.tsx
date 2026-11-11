@@ -1,15 +1,32 @@
 'use client';
 import { useState } from 'react';
+import { Camera } from 'lucide-react';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import MobileNav from '@/components/layout/MobileNav';
+import { AuthProvider, useAuth } from '@/hooks/useAuth';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function DashboardContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 bg-[#2C8567] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2C8567]/20 animate-pulse">
+            <Camera className="w-6 h-6 text-white" />
+          </div>
+          <p className="text-sm font-medium text-gray-500">Checking session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    // Redirection to login is handled automatically by AuthProvider
+    return null;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
@@ -30,5 +47,17 @@ export default function DashboardLayout({
         <MobileNav />
       </div>
     </div>
+  );
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AuthProvider>
+      <DashboardContent>{children}</DashboardContent>
+    </AuthProvider>
   );
 }

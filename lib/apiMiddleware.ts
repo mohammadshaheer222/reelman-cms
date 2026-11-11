@@ -13,8 +13,10 @@ export async function requireAuth(
   }
   const user = await verifyToken(token);
   if (!user) {
+    const response = NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    response.cookies.delete('auth-token');
     return {
-      error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+      error: response,
       user: null,
     };
   }

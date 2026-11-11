@@ -9,7 +9,11 @@ export async function GET(request: NextRequest) {
   try {
     await connectDB();
     const dbUser = await User.findById(user!.userId).select('-passwordHash');
-    if (!dbUser) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    if (!dbUser || !dbUser.isActive) {
+      const response = NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      response.cookies.delete('auth-token');
+      return response;
+    }
     return NextResponse.json({ user: dbUser });
   } catch {
     return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 });

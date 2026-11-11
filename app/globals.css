@@ -40,10 +40,41 @@
 }
 
 /* ─────────────────────────────────────────────
-   Custom scrollbar — primary green
+   Global custom scrollbar — primary green
    ───────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2C8567 #f1f5f9;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #2C8567;
+  border-radius: 9999px;
+  transition: background-color 0.15s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #236d54;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Modal slim variant */
 .modal-scroll::-webkit-scrollbar {
   width: 4px;
+  height: 4px;
 }
 .modal-scroll::-webkit-scrollbar-track {
   background: #f1f5f9;
@@ -303,5 +334,13 @@ body {
   .canva-editable {
     box-shadow: none !important;
     background-color: transparent !important;
+  }
+
+  /* Hide scrollbars during print */
+  * {
+    scrollbar-width: none !important;
+  }
+  *::-webkit-scrollbar {
+    display: none !important;
   }
 }

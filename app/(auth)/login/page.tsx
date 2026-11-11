@@ -1,16 +1,20 @@
 'use client';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Camera, Lock, Mail, ArrowRight, Loader2 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Camera, Lock, Mail, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isExpired = searchParams.get('expired') === 'true';
+  const redirectParam = searchParams.get('redirect');
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,7 +36,14 @@ export default function LoginPage() {
       }
 
       toast.success('Signed in successfully');
-      router.push('/');
+
+      // Safely validate redirect path to prevent open redirects
+      const destination =
+        redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+          ? redirectParam
+          : '/';
+
+      router.push(destination);
       router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Login failed';
@@ -42,6 +53,89 @@ export default function LoginPage() {
     }
   };
 
+  return (
+    <Card className="shadow-sm border-gray-100">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg">Welcome Back</CardTitle>
+        <CardDescription>
+          Enter your credentials to access the production management system.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isExpired && (
+          <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+            <span>Your session has expired. Please sign in again to continue.</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email Address</Label>
+            <div className="relative">
+              <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="name@reelman.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-9"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+            </div>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-9"
+                required
+              />
+            </div>
+          </div>
+
+          <Button type="submit" className="w-full mt-2" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              <>
+                Sign In
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </>
+            )}
+          </Button>
+        </form>
+
+        <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+          <p className="text-xs text-gray-500">
+            First time here?{' '}
+            <Link
+              href="/register"
+              className="font-medium text-[#2C8567] hover:underline"
+            >
+              Create an admin account
+            </Link>
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
       <div className="w-full max-w-md">
@@ -54,77 +148,17 @@ export default function LoginPage() {
           <p className="text-sm text-gray-500">Sign in to your CRM dashboard</p>
         </div>
 
-        <Card className="shadow-sm border-gray-100">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Welcome Back</CardTitle>
-            <CardDescription>
-              Enter your credentials to access the production management system.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@reelman.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-9"
-                    required
-                  />
-                </div>
+        <Suspense
+          fallback={
+            <Card className="shadow-sm border-gray-100 p-6">
+              <div className="h-48 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 animate-spin text-[#2C8567]" />
               </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-9"
-                    required
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full mt-2" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  <>
-                    Sign In
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-              <p className="text-xs text-gray-500">
-                First time here?{' '}
-                <Link
-                  href="/register"
-                  className="font-medium text-[#2C8567] hover:underline"
-                >
-                  Create an admin account
-                </Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+            </Card>
+          }
+        >
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   );
