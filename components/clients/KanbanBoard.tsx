@@ -13,6 +13,8 @@ import {
   ChevronDown,
   RotateCcw,
   IndianRupee,
+  MapPin,
+  Sparkles,
 } from 'lucide-react';
 import { Client, Status } from '@/types';
 import { formatDate, timeAgo } from '@/lib/utils';
@@ -29,6 +31,14 @@ interface KanbanBoardProps {
   onOpenCallIntake?: (statusId?: string) => void;
 }
 
+const DEFAULT_STATUSES: Status[] = [
+  { _id: 'stat-new', name: 'New', color: '#6366f1', order: 1, isDefault: true, isActive: true, createdAt: '' },
+  { _id: 'stat-active', name: 'Active', color: '#22c55e', order: 2, isDefault: false, isActive: true, createdAt: '' },
+  { _id: 'stat-pending', name: 'Pending', color: '#f59e0b', order: 3, isDefault: false, isActive: true, createdAt: '' },
+  { _id: 'stat-confirmed', name: 'Confirmed', color: '#06b6d4', order: 4, isDefault: false, isActive: true, createdAt: '' },
+  { _id: 'stat-completed', name: 'Completed', color: '#8b5cf6', order: 5, isDefault: false, isActive: true, createdAt: '' },
+];
+
 export function KanbanBoard({
   clients: initialClients,
   statuses,
@@ -37,6 +47,10 @@ export function KanbanBoard({
   onOpenCallIntake,
 }: KanbanBoardProps) {
   const [, startTransition] = useTransition();
+
+  const effectiveStatuses = useMemo(() => {
+    return statuses && statuses.length > 0 ? statuses : DEFAULT_STATUSES;
+  }, [statuses]);
 
   // Local overrides for optimistic updates
   const [overrides, setOverrides] = useState<Record<string, Client>>({});
@@ -54,38 +68,53 @@ export function KanbanBoard({
   // Group clients by status ID
   const columns = useMemo(() => {
     const map: Record<string, Client[]> = {};
-    statuses.forEach((s) => {
-      map[s._id] = [];
+    effectiveStatuses.forEach((s) => {
+      map[String(s._id)] = [];
     });
 
     effectiveClients.forEach((client) => {
-      const statusId =
-        typeof client.status === 'object' && client.status !== null
-          ? client.status._id
-          : (client.status as string);
+      let matchedStatusId: string | null = null;
+      const clientStatusObj =
+        typeof client.status === 'object' && client.status !== null ? client.status : null;
+      const clientStatusRaw = clientStatusObj ? String(clientStatusObj._id) : String(client.status || '');
+      const clientStatusName = clientStatusObj ? clientStatusObj.name : String(client.status || '');
 
-      if (statusId && map[statusId]) {
-        map[statusId].push(client);
-      } else if (statuses.length > 0) {
-        // Fallback to first status if not matched
-        const fallbackId = statuses[0]._id;
-        if (!map[fallbackId]) map[fallbackId] = [];
-        map[fallbackId].push(client);
+      // 1. Match by ID
+      const byId = effectiveStatuses.find((s) => String(s._id) === clientStatusRaw);
+      if (byId) {
+        matchedStatusId = String(byId._id);
+      } else {
+        // 2. Match by Name (case-insensitive)
+        const byName = effectiveStatuses.find(
+          (s) => s.name.toLowerCase() === clientStatusName.toLowerCase()
+        );
+        if (byName) {
+          matchedStatusId = String(byName._id);
+        }
+      }
+
+      // 3. Fallback to first status (e.g. "New")
+      if (!matchedStatusId && effectiveStatuses.length > 0) {
+        matchedStatusId = String(effectiveStatuses[0]._id);
+      }
+
+      if (matchedStatusId && map[matchedStatusId]) {
+        map[matchedStatusId].push(client);
       }
     });
 
     return map;
-  }, [effectiveClients, statuses]);
+  }, [effectiveClients, effectiveStatuses]);
 
   // Total work price value per column
   const columnTotalValues = useMemo(() => {
     const map: Record<string, number> = {};
-    statuses.forEach((s) => {
-      const cls = columns[s._id] || [];
-      map[s._id] = cls.reduce((sum, c) => sum + (c.workPrice || 0), 0);
+    effectiveStatuses.forEach((s) => {
+      const cls = columns[String(s._id)] || [];
+      map[String(s._id)] = cls.reduce((sum, c) => sum + (c.workPrice || 0), 0);
     });
     return map;
-  }, [columns, statuses]);
+  }, [columns, effectiveStatuses]);
 
   // Handle Drag Start
   const handleDragStart = (e: React.DragEvent, client: Client) => {
@@ -267,10 +296,10 @@ export function KanbanBoard({
       <div className="relative w-full">
         {/* Kanban Board Container with smooth horizontal scrolling */}
         <div className="flex gap-4 overflow-x-auto pb-6 pt-1 px-0.5 modal-scroll snap-x">
-          {statuses.map((status) => {
-            const columnClients = columns[status._id] || [];
+          {effectiveStatuses.map((status) => {
+            const columnClients = columns[String(status._id)] || [];
             const isDragOver = dragOverStatusId === status._id;
-            const totalStageValue = columnTotalValues[status._id] || 0;
+            const totalStageValue = columnTotalValues[String(status._id)] || 0;
             const isNewColumn = status.name.toLowerCase() === 'new';
 
             return (
@@ -328,10 +357,10 @@ export function KanbanBoard({
                     </div>
                   </div>
 
-                  {/* Confirmed Work Price / Pipeline total for this column */}
+                  {/* Total for this column */}
                   {totalStageValue > 0 && (
                     <div className="flex items-center justify-between text-[11px] text-gray-500 font-medium pt-1 mt-1 border-t border-gray-100/70">
-                      <span>Confirmed Work:</span>
+                      <span>Total:</span>
                       <span className="font-bold text-gray-900 font-mono">
                         ₹{totalStageValue.toLocaleString('en-IN')}
                       </span>
@@ -411,26 +440,55 @@ export function KanbanBoard({
                             </Link>
                           </div>
 
-                          {/* Event Date badge */}
-                          <div className="mb-2">
+                          {/* Event Date & Location badge */}
+                          <div className="space-y-1 mb-2">
                             <button
                               type="button"
                               onClick={(e) => openEdit(e, client, 'date')}
                               title="Click to set/change event date"
-                              className="w-full text-left inline-flex items-center gap-1.5 py-1 px-2 rounded-md bg-[#2C8567]/6 hover:bg-[#2C8567]/12 border border-[#2C8567]/15 text-[11px] font-medium text-gray-800 transition-colors"
+                              className="w-full text-left inline-flex items-center justify-between gap-1 py-1 px-2 rounded-md bg-[#2C8567]/6 hover:bg-[#2C8567]/12 border border-[#2C8567]/15 text-[11px] font-medium text-gray-800 transition-colors"
                             >
-                              <Calendar className="w-3 h-3 text-[#2C8567] shrink-0" />
-                              <span className="text-gray-500 font-normal">Date:</span>
-                              <span className="font-semibold truncate">
-                                {client.date ? (
-                                  formatDate(client.date)
-                                ) : (
-                                  <span className="text-gray-400 font-normal italic">
-                                    + Set date
+                              <div className="flex items-center gap-1.5 truncate">
+                                <Calendar className="w-3 h-3 text-[#2C8567] shrink-0" />
+                                <span className="font-semibold truncate">
+                                  {client.date ? (
+                                    formatDate(client.date)
+                                  ) : (
+                                    <span className="text-gray-400 font-normal italic">+ Set date</span>
+                                  )}
+                                </span>
+                              </div>
+                              {client.dates && client.dates.length > 1 && (
+                                <span className="text-[10px] font-bold text-[#2C8567] bg-[#2C8567]/10 px-1 py-0.2 rounded shrink-0">
+                                  +{client.dates.length - 1} days
+                                </span>
+                              )}
+                            </button>
+
+                            {client.location && (
+                              <div className="flex items-center gap-1 px-1.5 text-[10px] text-gray-500 truncate">
+                                <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
+                                <span className="truncate">{client.location}</span>
+                              </div>
+                            )}
+
+                            {client.requirements && client.requirements.length > 0 && (
+                              <div className="flex flex-wrap gap-1 pt-0.5">
+                                {client.requirements.slice(0, 3).map((req, rIdx) => (
+                                  <span
+                                    key={rIdx}
+                                    className="text-[9px] font-medium text-[#2C8567] bg-[#2C8567]/8 border border-[#2C8567]/20 px-1.5 py-0.5 rounded truncate max-w-[130px]"
+                                  >
+                                    {req}
+                                  </span>
+                                ))}
+                                {client.requirements.length > 3 && (
+                                  <span className="text-[9px] text-gray-400 font-medium self-center">
+                                    +{client.requirements.length - 3}
                                   </span>
                                 )}
-                              </span>
-                            </button>
+                              </div>
+                            )}
                           </div>
 
                           {/* Confirmed Work Price & Payment details */}
@@ -446,7 +504,7 @@ export function KanbanBoard({
                                 <span className="font-bold text-emerald-900 truncate font-mono">
                                   {hasWorkPrice
                                     ? `₹${client.workPrice!.toLocaleString('en-IN')}`
-                                    : '+ Work Price'}
+                                    : '+ Add Price'}
                                 </span>
                               </div>
 

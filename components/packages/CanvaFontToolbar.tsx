@@ -344,7 +344,7 @@ export function CanvaFontToolbar({
                   </button>
                   <button
                     type="button"
-                    onClick={() => onStyleChange({ ...currentStyle, marginTop: 0 })}
+                    onClick={() => onStyleChange({ ...currentStyle, marginTop: 0, offsetX: 0, offsetY: 0 })}
                     className="h-6 px-2 text-[10px] rounded border border-gray-200 hover:bg-gray-50 text-gray-500"
                   >
                     Reset

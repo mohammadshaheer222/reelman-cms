@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -18,6 +18,10 @@ import {
   Calendar,
   IndianRupee,
   RotateCcw,
+  MapPin,
+  Upload,
+  Loader2,
+  Package,
 } from 'lucide-react';
 import { Client, Status, Activity } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -73,6 +77,13 @@ export default function ClientProfilePage({
   const [priceInput, setPriceInput] = useState('');
   const [advanceInput, setAdvanceInput] = useState('');
 
+  // Package details state
+  const [editingPackage, setEditingPackage] = useState(false);
+  const [packageInput, setPackageInput] = useState('');
+  const [savingPackage, setSavingPackage] = useState(false);
+  const [extractingPdfClient, setExtractingPdfClient] = useState(false);
+  const clientPdfInputRef = useRef<HTMLInputElement>(null);
+
   // Delete modal
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -102,6 +113,7 @@ export default function ClientProfilePage({
       setDateInput(clientData.data.date || '');
       setPriceInput(String(clientData.data.workPrice || 0));
       setAdvanceInput(String(clientData.data.advancePaid || 0));
+      setPackageInput(clientData.data.packageDetails || '');
       setStatuses(statusData.data || []);
 
       if (actRes.ok) {
@@ -200,6 +212,61 @@ export default function ClientProfilePage({
       fetchClientData();
     } catch {
       toast.error('Could not update price');
+    }
+  };
+
+  const handleSavePackage = async () => {
+    setSavingPackage(true);
+    try {
+      const res = await fetch(`/api/clients/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ packageDetails: packageInput.trim() }),
+      });
+      if (!res.ok) throw new Error('Failed to update package details');
+      toast.success('Package details updated');
+      setEditingPackage(false);
+      fetchClientData();
+    } catch {
+      toast.error('Could not update package details');
+    } finally {
+      setSavingPackage(false);
+    }
+  };
+
+  const handleClientPdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      toast.error('Please upload a valid PDF file');
+      return;
+    }
+
+    setExtractingPdfClient(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/pdf-extract', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to extract text from PDF');
+      }
+
+      const extracted = data.text;
+      setPackageInput((prev) => (prev ? `${prev}\n\n${extracted}` : extracted));
+      setEditingPackage(true);
+      toast.success(`Converted ${file.name} to package text`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error extracting PDF';
+      toast.error(msg);
+    } finally {
+      setExtractingPdfClient(false);
+      if (clientPdfInputRef.current) clientPdfInputRef.current.value = '';
     }
   };
 
@@ -498,6 +565,11 @@ export default function ClientProfilePage({
                     <span className="text-gray-400 italic text-xs">No event date — click to set</span>
                   )}
                 </span>
+                {client.dates && client.dates.length > 1 && (
+                  <span className="text-xs font-semibold text-[#2C8567] bg-[#2C8567]/10 px-2 py-0.5 rounded">
+                    {client.dates.length} Days Shoot
+                  </span>
+                )}
                 <button
                   onClick={() => setEditingDate(true)}
                   className="p-0.5 text-gray-400 hover:text-gray-600 rounded transition-colors"
@@ -505,6 +577,29 @@ export default function ClientProfilePage({
                 >
                   <Edit2 className="w-3 h-3" />
                 </button>
+              </div>
+            )}
+
+            {/* Location */}
+            {client.location && (
+              <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                <span>Shoot Location: <span className="font-medium text-gray-800">{client.location}</span></span>
+              </div>
+            )}
+
+            {/* Requirements */}
+            {client.requirements && client.requirements.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                <span className="text-xs font-medium text-gray-500 mr-1">Requirements:</span>
+                {client.requirements.map((req, i) => (
+                  <span
+                    key={i}
+                    className="text-xs font-medium text-[#2C8567] bg-[#2C8567]/8 border border-[#2C8567]/20 px-2 py-0.5 rounded-md"
+                  >
+                    {req}
+                  </span>
+                ))}
               </div>
             )}
 
@@ -619,6 +714,10 @@ export default function ClientProfilePage({
             <MessageSquare className="w-4 h-4" />
             Notes & Requirements ({client.notes?.length || 0})
           </TabsTrigger>
+          <TabsTrigger value="package" className="flex items-center gap-2">
+            <Package className="w-4 h-4" />
+            Package Deliverables {client.packageDetails ? '✓' : ''}
+          </TabsTrigger>
           <TabsTrigger value="activity" className="flex items-center gap-2">
             <History className="w-4 h-4" />
             Status History & Logs
@@ -667,7 +766,124 @@ export default function ClientProfilePage({
           </div>
         </TabsContent>
 
-        {/* Tab 2: Activity & Status History */}
+        {/* Tab 2: Package Deliverables & PDF Conversion */}
+        <TabsContent value="package" className="space-y-4">
+          <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <Package className="w-4 h-4 text-[#2C8567]" />
+                  <span>Package Deliverables & Inclusions</span>
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Package scope, hours of coverage, deliverables (converted from PDF or edited).
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  ref={clientPdfInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleClientPdfUpload}
+                  className="hidden"
+                  id="clientPdfInput"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={extractingPdfClient}
+                  onClick={() => clientPdfInputRef.current?.click()}
+                  className="text-blue-700 bg-blue-50/70 border-blue-200 hover:bg-blue-100 h-8 text-xs gap-1.5"
+                >
+                  {extractingPdfClient ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+                      <span>Extracting…</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Upload Package PDF</span>
+                    </>
+                  )}
+                </Button>
+
+                {!editingPackage && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setPackageInput(client.packageDetails || '');
+                      setEditingPackage(true);
+                    }}
+                    className="h-8 text-xs gap-1.5"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Edit Details</span>
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {editingPackage ? (
+              <div className="space-y-3">
+                <Textarea
+                  rows={8}
+                  value={packageInput}
+                  onChange={(e) => setPackageInput(e.target.value)}
+                  placeholder="Package deliverables, album size, shoot hours, deliverable timeline..."
+                  className="text-xs sm:text-sm font-sans"
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={savingPackage}
+                    onClick={() => {
+                      setEditingPackage(false);
+                      setPackageInput(client.packageDetails || '');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={savingPackage}
+                    onClick={handleSavePackage}
+                    className="bg-[#2C8567] hover:bg-[#236d54] text-white"
+                  >
+                    {savingPackage ? 'Saving…' : 'Save Deliverables'}
+                  </Button>
+                </div>
+              </div>
+            ) : client.packageDetails ? (
+              <div className="bg-gray-50/70 rounded-xl p-4 border border-gray-100 text-xs sm:text-sm text-gray-800 whitespace-pre-wrap font-sans leading-relaxed">
+                {client.packageDetails}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-gray-400 space-y-2">
+                <Package className="w-8 h-8 mx-auto text-gray-300" />
+                <p className="text-xs">No package details recorded yet.</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditingPackage(true)}
+                  className="text-xs"
+                >
+                  + Add Package Details
+                </Button>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Tab 3: Activity & Status History */}
         <TabsContent value="activity" className="space-y-4">
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
             <h3 className="text-sm font-semibold text-gray-900">Status History</h3>

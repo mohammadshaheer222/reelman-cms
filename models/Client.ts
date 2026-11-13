@@ -20,6 +20,10 @@ export interface IClient extends Document {
   name?: string;
   phone?: string;
   date?: string;
+  dates?: string[];
+  location?: string;
+  requirements?: string[];
+  packageDetails?: string;
   workPrice?: number;
   advancePaid?: number;
   paymentStatus?: 'unpaid' | 'advance-received' | 'partially-paid' | 'fully-paid';
@@ -54,6 +58,10 @@ const ClientSchema = new Schema<IClient>(
     name: { type: String, trim: true },
     phone: { type: String, trim: true },
     date: { type: String, trim: true },
+    dates: [{ type: String, trim: true }],
+    location: { type: String, trim: true },
+    requirements: [{ type: String, trim: true }],
+    packageDetails: { type: String, trim: true },
     workPrice: { type: Number, default: 0 },
     advancePaid: { type: Number, default: 0 },
     paymentStatus: {

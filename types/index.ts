@@ -4,6 +4,7 @@ export interface User {
   email: string;
   role: 'admin' | 'staff';
   isActive: boolean;
+  allowedNavItems?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -29,6 +30,10 @@ export interface Client {
   name?: string;
   phone?: string;
   date?: string;
+  dates?: string[];
+  location?: string;
+  requirements?: string[];
+  packageDetails?: string;
   workPrice?: number;
   advancePaid?: number;
   paymentStatus?: 'unpaid' | 'advance-received' | 'partially-paid' | 'fully-paid';
@@ -40,6 +45,14 @@ export interface Client {
   isArchived: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Requirement {
+  _id: string;
+  name: string;
+  order: number;
+  isDefault: boolean;
+  createdAt?: string;
 }
 
 export interface Status {
@@ -108,6 +121,7 @@ export interface DashboardStats {
   cancelledProjects: number;
   upcomingEvents: number;
   totalRevenue: number;
+  totalAdvance?: number;
   pendingPayments: number;
 }
 
@@ -179,6 +193,8 @@ export interface TextStyleConfig {
   textAlign?: 'left' | 'center' | 'right';
   marginTop?: number;     // vertical gap / position offset in px
   marginBottom?: number;  // bottom spacing in px
+  offsetX?: number;       // horizontal drag-and-drop offset in px
+  offsetY?: number;       // vertical drag-and-drop offset in px
 }
 
 export interface PageBackgroundConfig {

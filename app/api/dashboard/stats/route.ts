@@ -23,13 +23,28 @@ export async function GET(request: NextRequest) {
       pendingClients,
       newClients,
       archivedClients,
+      revenueAgg,
     ] = await Promise.all([
       Client.countDocuments({ isArchived: false }),
       activeStatus ? Client.countDocuments({ status: activeStatus._id, isArchived: false }) : 0,
       pendingStatus ? Client.countDocuments({ status: pendingStatus._id, isArchived: false }) : 0,
       newStatus ? Client.countDocuments({ status: newStatus._id, isArchived: false }) : 0,
       Client.countDocuments({ isArchived: true }),
+      Client.aggregate([
+        { $match: { isArchived: false } },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: '$workPrice' },
+            totalAdvance: { $sum: '$advancePaid' },
+          },
+        },
+      ]),
     ]);
+
+    const totalRevenue = revenueAgg[0]?.totalRevenue || 0;
+    const totalAdvance = revenueAgg[0]?.totalAdvance || 0;
+    const pendingPayments = Math.max(0, totalRevenue - totalAdvance);
 
     return NextResponse.json({
       totalClients,
@@ -40,8 +55,9 @@ export async function GET(request: NextRequest) {
       completedProjects: 0,
       cancelledProjects: 0,
       upcomingEvents: 0,
-      totalRevenue: 0,
-      pendingPayments: 0,
+      totalRevenue,
+      totalAdvance,
+      pendingPayments,
     });
   } catch (err) {
     console.error(err);

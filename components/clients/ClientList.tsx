@@ -131,8 +131,7 @@ export function ClientList({
         {/* Top bar with count & view switcher */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <p className="text-sm text-gray-500 font-medium">
-            Showing <span className="font-semibold text-gray-900">{clients.length}</span> of{' '}
-            <span className="font-semibold text-gray-900">{total}</span> clients in pipeline
+            Showing <span className="font-semibold text-gray-900">{total > 0 ? total : clients.length}</span> clients
           </p>
 
           {/* View mode switcher */}
@@ -145,10 +144,10 @@ export function ClientList({
                   ? 'bg-white text-gray-900 shadow-xs'
                   : 'text-gray-500 hover:text-gray-900'
               }`}
-              title="Kanban Pipeline (Zoho CRM Drag & Drop)"
+              title="Board View"
             >
               <Kanban className="w-3.5 h-3.5 text-[#2C8567]" />
-              <span>Pipeline (Kanban)</span>
+              <span>Board</span>
             </button>
 
             <button
@@ -159,7 +158,7 @@ export function ClientList({
                   ? 'bg-white text-gray-900 shadow-xs'
                   : 'text-gray-500 hover:text-gray-900'
               }`}
-              title="Card Grid View"
+              title="Cards View"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
               <span>Cards</span>
@@ -173,10 +172,10 @@ export function ClientList({
                   ? 'bg-white text-gray-900 shadow-xs'
                   : 'text-gray-500 hover:text-gray-900'
               }`}
-              title="Table List View"
+              title="List View"
             >
               <List className="w-3.5 h-3.5" />
-              <span>Table</span>
+              <span>List</span>
             </button>
           </div>
         </div>
@@ -217,7 +216,8 @@ export function ClientList({
                       Event Date
                     </div>
                   </TableHead>
-                  <TableHead>Work Price & Payment</TableHead>
+                  <TableHead>Requirements</TableHead>
+                  <TableHead>Price & Payment</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Notes</TableHead>
                   <TableHead>Added</TableHead>
@@ -294,19 +294,50 @@ export function ClientList({
                           type="button"
                           onClick={(e) => openEdit(e, c, 'date')}
                           title="Click to set event date"
-                          className="transition-colors"
+                          className="transition-colors text-left"
                         >
                           {c.date ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#2C8567]/10 text-[#2C8567] font-semibold text-xs border border-[#2C8567]/20 hover:bg-[#2C8567]/20 transition-colors whitespace-nowrap">
-                              <Calendar className="w-3 h-3 shrink-0" />
-                              {formatDate(c.date)}
-                            </span>
+                            <div>
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#2C8567]/10 text-[#2C8567] font-semibold text-xs border border-[#2C8567]/20 hover:bg-[#2C8567]/20 transition-colors whitespace-nowrap">
+                                <Calendar className="w-3 h-3 shrink-0" />
+                                {formatDate(c.date)}
+                              </span>
+                              {c.dates && c.dates.length > 1 && (
+                                <span className="block text-[10px] text-gray-500 font-medium mt-0.5">
+                                  +{c.dates.length - 1} more days
+                                </span>
+                              )}
+                              {c.location && (
+                                <span className="block text-[10px] text-gray-400 mt-0.5 truncate max-w-[140px]">
+                                  📍 {c.location}
+                                </span>
+                              )}
+                            </div>
                           ) : (
                             <span className="text-xs text-gray-400 italic hover:text-[#2C8567] transition-colors">
                               + Set date
                             </span>
                           )}
                         </button>
+                      </TableCell>
+
+                      {/* Requirements */}
+                      <TableCell className="max-w-[200px]">
+                        {c.requirements && c.requirements.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {c.requirements.map((req, i) => (
+                              <span
+                                key={i}
+                                className="inline-block text-[10px] font-medium text-[#2C8567] bg-[#2C8567]/10 border border-[#2C8567]/20 px-1.5 py-0.5 rounded truncate max-w-[130px]"
+                                title={req}
+                              >
+                                {req}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">—</span>
+                        )}
                       </TableCell>
 
                       {/* Work Price & Payment */}

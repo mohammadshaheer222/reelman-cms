@@ -11,6 +11,9 @@ import {
   User as UserIcon,
   CheckCircle2,
   XCircle,
+  SlidersHorizontal,
+  RotateCcw,
+  Check,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { User } from '@/types';
@@ -19,6 +22,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { navItems } from '@/components/layout/Sidebar';
 import {
   Dialog,
   DialogContent,
@@ -62,6 +67,57 @@ export default function TeamPage() {
   // Delete modal
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Sidebar access permissions modal
+  const [accessUser, setAccessUser] = useState<User | null>(null);
+  const [userNavItems, setUserNavItems] = useState<string[]>([]);
+  const [savingAccess, setSavingAccess] = useState(false);
+
+  const handleOpenAccess = (member: User) => {
+    setAccessUser(member);
+    if (member.allowedNavItems && Array.isArray(member.allowedNavItems) && member.allowedNavItems.length > 0) {
+      setUserNavItems(member.allowedNavItems);
+    } else {
+      // Default: all nav items enabled
+      setUserNavItems(navItems.map((item) => item.href));
+    }
+  };
+
+  const handleToggleNavItem = (href: string, checked: boolean) => {
+    setUserNavItems((prev) => {
+      if (checked) {
+        return prev.includes(href) ? prev : [...prev, href];
+      } else {
+        return prev.filter((itemHref) => itemHref !== href);
+      }
+    });
+  };
+
+  const handleSelectAllNavItems = () => {
+    setUserNavItems(navItems.map((item) => item.href));
+  };
+
+  const handleSaveAccess = async () => {
+    if (!accessUser) return;
+    setSavingAccess(true);
+    try {
+      const res = await fetch(`/api/team/${accessUser._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ allowedNavItems: userNavItems }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update access');
+      toast.success(`Sidebar access updated for ${accessUser.name}`);
+      setAccessUser(null);
+      fetchTeam();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error updating access';
+      toast.error(msg);
+    } finally {
+      setSavingAccess(false);
+    }
+  };
 
   const fetchTeam = async () => {
     setLoading(true);
@@ -191,6 +247,7 @@ export default function TeamPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Sidebar Access</TableHead>
                 <TableHead>Joined</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
@@ -239,6 +296,21 @@ export default function TeamPage() {
                           <XCircle className="w-3 h-3" /> Inactive
                         </>
                       )}
+                    </button>
+                  </TableCell>
+                  <TableCell>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAccess(member)}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/60 text-gray-700 hover:text-[#2C8567] transition-all shadow-2xs"
+                      title="Configure sidebar menu items visible to this user"
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#2C8567]" />
+                      <span>
+                        {!member.allowedNavItems || member.allowedNavItems.length === 0 || member.allowedNavItems.length === navItems.length
+                          ? 'All 7 Tabs'
+                          : `${member.allowedNavItems.length} of ${navItems.length} Tabs`}
+                      </span>
                     </button>
                   </TableCell>
                   <TableCell className="text-xs text-gray-500">
@@ -369,6 +441,119 @@ export default function TeamPage() {
         loading={deleteLoading}
         onConfirm={handleDelete}
       />
+
+      {/* Sidebar Access Permissions Dialog */}
+      <Dialog open={!!accessUser} onOpenChange={(open) => !open && setAccessUser(null)}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-[#2C8567] flex items-center justify-center shrink-0">
+                <SlidersHorizontal className="w-4 h-4" />
+              </div>
+              <div>
+                <DialogTitle className="text-base font-bold text-gray-900">
+                  Sidebar Access: {accessUser?.name}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-gray-500">
+                  Toggle what pages appear on {accessUser?.name}&apos;s sidebar menu.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="py-2 space-y-3">
+            {/* Quick Actions */}
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100 text-xs">
+              <span className="font-semibold text-gray-700">
+                {userNavItems.length} of {navItems.length} sidebar items active
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSelectAllNavItems}
+                  className="text-xs font-semibold text-[#2C8567] hover:underline"
+                >
+                  Enable All
+                </button>
+                <span className="text-gray-300">|</span>
+                <button
+                  type="button"
+                  onClick={() => setUserNavItems(['/'])}
+                  className="text-xs font-medium text-gray-500 hover:text-gray-800"
+                >
+                  Only Home
+                </button>
+              </div>
+            </div>
+
+            {/* List of sidebar items */}
+            <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isChecked = userNavItems.includes(item.href);
+                return (
+                  <div
+                    key={item.href}
+                    onClick={() => handleToggleNavItem(item.href, !isChecked)}
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
+                      isChecked
+                        ? 'bg-emerald-50/50 border-emerald-200'
+                        : 'bg-gray-50/40 border-gray-200/60 opacity-60 hover:opacity-80'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
+                          isChecked
+                            ? 'bg-[#2C8567] text-white shadow-2xs'
+                            : 'bg-gray-100 text-gray-400'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-gray-900">{item.label}</p>
+                          <span className="text-[11px] font-mono text-gray-400">{item.href}</span>
+                        </div>
+                        <p className="text-xs text-gray-500">{item.description}</p>
+                      </div>
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <Switch
+                        checked={isChecked}
+                        onCheckedChange={(val) => handleToggleNavItem(item.href, val)}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t border-gray-100">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setAccessUser(null)}
+              disabled={savingAccess}
+              className="text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSaveAccess}
+              disabled={savingAccess}
+              className="bg-[#2C8567] hover:bg-[#236d54] text-white text-xs font-semibold px-4"
+            >
+              {savingAccess ? 'Saving...' : 'Save Permissions'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

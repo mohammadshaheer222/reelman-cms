@@ -11,6 +11,10 @@ const createClientSchema = z.object({
   name: z.string().optional(),
   phone: z.string().optional(),
   date: z.string().optional(),
+  dates: z.array(z.string()).optional(),
+  location: z.string().optional(),
+  requirements: z.array(z.string()).optional(),
+  packageDetails: z.string().optional(),
   noteContent: z.string().optional(),
   statusId: z.string().optional(),
   workPrice: z.union([z.number(), z.string().transform((v) => parseFloat(v) || 0)]).optional(),
@@ -34,12 +38,21 @@ export async function GET(request: NextRequest) {
     const archived = searchParams.get('archived') === 'true';
 
     const query: Record<string, unknown> = { isArchived: archived };
-    if (statusId) query.status = statusId;
+    if (statusId) {
+      if (statusId.includes(',')) {
+        const ids = statusId.split(',').map((s) => s.trim()).filter(Boolean);
+        if (ids.length > 0) query.status = { $in: ids };
+      } else {
+        query.status = statusId;
+      }
+    }
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { phone: { $regex: search, $options: 'i' } },
         { clientId: { $regex: search, $options: 'i' } },
+        { location: { $regex: search, $options: 'i' } },
+        { requirements: { $in: [new RegExp(search, 'i')] } },
         { 'notes.content': { $regex: search, $options: 'i' } },
       ];
     }
@@ -86,7 +99,20 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid input' }, { status: 400 });
     }
-    const { name, phone, date, noteContent, statusId, workPrice, advancePaid, paymentStatus } = parsed.data;
+    const {
+      name,
+      phone,
+      date,
+      dates,
+      location,
+      requirements,
+      packageDetails,
+      noteContent,
+      statusId,
+      workPrice,
+      advancePaid,
+      paymentStatus,
+    } = parsed.data;
 
     let statusDoc = statusId ? await Status.findById(statusId) : null;
     if (!statusDoc) statusDoc = await Status.findOne({ name: 'New' });
@@ -110,11 +136,21 @@ export async function POST(request: NextRequest) {
         ]
       : [];
 
+    const effectiveDates = Array.isArray(dates) && dates.length > 0
+      ? dates
+      : date?.trim()
+      ? [date.trim()]
+      : [];
+
     const client = await Client.create({
       clientId,
       name: name?.trim() || undefined,
       phone: phone?.trim() || undefined,
-      date: date?.trim() || undefined,
+      date: effectiveDates[0] || date?.trim() || undefined,
+      dates: effectiveDates,
+      location: location?.trim() || undefined,
+      requirements: Array.isArray(requirements) ? requirements : [],
+      packageDetails: packageDetails?.trim() || undefined,
       workPrice: typeof workPrice === 'number' ? workPrice : 0,
       advancePaid: typeof advancePaid === 'number' ? advancePaid : 0,
       paymentStatus: paymentStatus || (advancePaid && advancePaid > 0 ? 'advance-received' : 'unpaid'),

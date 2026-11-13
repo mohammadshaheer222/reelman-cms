@@ -251,9 +251,9 @@ body {
 
   html,
   body {
-    width: 210mm !important;
-    height: 100% !important;
-    min-height: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
     background: #ffffff !important;
     color: #171717 !important;
@@ -281,9 +281,10 @@ body {
     position: static !important;
     top: auto !important;
     left: auto !important;
-    width: 210mm !important;
+    width: 100% !important;
+    max-width: 210mm !important;
     height: auto !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     padding: 0 !important;
     background: transparent !important;
     overflow: visible !important;
@@ -297,8 +298,9 @@ body {
   .print-only-container {
     display: block !important;
     position: static !important;
-    width: 210mm !important;
-    margin: 0 !important;
+    width: 100% !important;
+    max-width: 210mm !important;
+    margin: 0 auto !important;
     padding: 0 !important;
     background: transparent !important;
     overflow: visible !important;
@@ -313,15 +315,18 @@ body {
     break-after: page !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    width: 210mm !important;
-    height: 296mm !important;
-    min-height: 296mm !important;
-    max-height: 296mm !important;
+    break-inside: avoid-page !important;
+    width: 100% !important;
+    max-width: 210mm !important;
+    /* Safe printable height (248mm) calibrated for iPhone iOS Safari & WebKit AirPrint/PDF generator so bottom content never spills to an orphan page */
+    height: 248mm !important;
+    max-height: 248mm !important;
+    min-height: 0 !important;
     box-sizing: border-box !important;
     box-shadow: none !important;
     border-radius: 0 !important;
     border: none !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     overflow: hidden !important;
     position: relative !important;
     -webkit-print-color-adjust: exact !important;

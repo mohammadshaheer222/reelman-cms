@@ -546,7 +546,7 @@ export function LiveCallIntake({
                 className="flex-1 sm:flex-none text-xs bg-[#2C8567] hover:bg-[#236d54] text-white gap-1.5 h-9 shadow-sm"
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>{submitting ? 'Saving Lead…' : 'Save Client to Pipeline'}</span>
+                <span>{submitting ? 'Saving Lead…' : 'Save Client'}</span>
               </Button>
             </div>
           </div>

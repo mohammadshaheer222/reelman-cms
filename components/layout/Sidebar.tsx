@@ -2,13 +2,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard,
+  Home,
   Users,
-  Sparkles,
-  Activity,
+  Package,
+  History,
   UserCheck,
   Settings,
-  Camera,
+  StickyNote,
   LogOut,
   X,
 } from 'lucide-react';
@@ -16,13 +16,14 @@ import { cn, getInitials } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
-const navItems = [
-  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { label: 'Clients', href: '/clients', icon: Users },
-  { label: 'Proposals', href: '/packages', icon: Sparkles },
-  { label: 'Activity', href: '/activity', icon: Activity },
-  { label: 'Team', href: '/team', icon: UserCheck },
-  { label: 'Settings', href: '/settings', icon: Settings },
+export const navItems = [
+  { label: 'Home', href: '/', icon: Home, description: 'Overview and revenue metrics' },
+  { label: 'Clients', href: '/clients', icon: Users, description: 'Client bookings and status tracking' },
+  { label: 'Notepad', href: '/notepad', icon: StickyNote, description: 'Rough scratchpad for quick phone notes' },
+  { label: 'Packages', href: '/packages', icon: Package, description: 'Package builder and PDF proposals' },
+  { label: 'History', href: '/activity', icon: History, description: 'Recent audit activity and team logs' },
+  { label: 'Team', href: '/team', icon: UserCheck, description: 'Crew members and user accounts' },
+  { label: 'Settings', href: '/settings', icon: Settings, description: 'Business settings and lead statuses' },
 ];
 
 interface SidebarProps {
@@ -38,6 +39,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
   };
+
+  const visibleNavItems = navItems.filter((item) => {
+    if (!user) return true;
+    if (user.allowedNavItems && Array.isArray(user.allowedNavItems)) {
+      return user.allowedNavItems.includes(item.href);
+    }
+    return true;
+  });
 
   return (
     <>
@@ -59,12 +68,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Logo */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#2C8567] rounded-lg flex items-center justify-center shadow-xs">
-              <Camera className="w-4 h-4 text-white" />
-            </div>
+            <img
+              src="/logo.png"
+              alt="Reelman Flow Logo"
+              className="w-8 h-8 rounded-lg object-cover shadow-xs border border-gray-100"
+            />
             <div>
               <p className="text-sm font-bold text-gray-900 leading-none">Reelman</p>
-              <p className="text-xs text-gray-500 leading-none mt-0.5">Production</p>
+              <p className="text-xs text-[#2C8567] font-semibold leading-none mt-1">Flow</p>
             </div>
           </div>
           <button onClick={onClose} className="lg:hidden p-1 rounded hover:bg-gray-100">
@@ -73,10 +84,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) => {
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
+
             return (
               <Link
                 key={item.href}

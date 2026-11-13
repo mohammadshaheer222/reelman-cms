@@ -11,7 +11,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { Status } from '@/types';
+import { Status, Requirement } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -70,6 +70,9 @@ export default function SettingsPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [seeding, setSeeding] = useState(false);
+  const [requirements, setRequirements] = useState<Requirement[]>([]);
+  const [newReqInput, setNewReqInput] = useState('');
+  const [reqSubmitting, setReqSubmitting] = useState(false);
 
   const fetchStatuses = async () => {
     setLoading(true);
@@ -86,9 +89,56 @@ export default function SettingsPage() {
     }
   };
 
+  const fetchRequirements = async () => {
+    try {
+      const res = await fetch('/api/requirements');
+      if (res.ok) {
+        const data = await res.json();
+        setRequirements(data.data || []);
+      }
+    } catch {}
+  };
+
   useEffect(() => {
     fetchStatuses();
+    fetchRequirements();
   }, []);
+
+  const handleAddRequirement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = newReqInput.trim();
+    if (!trimmed) return;
+
+    setReqSubmitting(true);
+    try {
+      const res = await fetch('/api/requirements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: trimmed }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to add');
+      toast.success('Requirement option added');
+      setNewReqInput('');
+      fetchRequirements();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error adding requirement';
+      toast.error(msg);
+    } finally {
+      setReqSubmitting(false);
+    }
+  };
+
+  const handleDeleteRequirement = async (id: string) => {
+    try {
+      const res = await fetch(`/api/requirements/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      toast.success('Requirement removed');
+      fetchRequirements();
+    } catch {
+      toast.error('Could not delete requirement');
+    }
+  };
 
   const handleOpenAdd = () => {
     setEditingStatus(null);
@@ -327,6 +377,62 @@ export default function SettingsPage() {
             </TableBody>
           </Table>
         )}
+      </div>
+
+      {/* Requirements & Services Management */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#2C8567]" />
+              <span>Client Requirements & Services ({requirements.length})</span>
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Options shown in the Add Client requirements dropdown and client profile.
+            </p>
+          </div>
+
+          {/* Add Requirement Form */}
+          <form onSubmit={handleAddRequirement} className="flex items-center gap-2">
+            <Input
+              placeholder="e.g. Pre-Wedding Shoot"
+              value={newReqInput}
+              onChange={(e) => setNewReqInput(e.target.value)}
+              className="h-8 text-xs w-48 sm:w-56"
+            />
+            <Button
+              type="submit"
+              size="sm"
+              disabled={reqSubmitting || !newReqInput.trim()}
+              className="h-8 text-xs bg-[#2C8567] hover:bg-[#236d54] text-white gap-1"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add</span>
+            </Button>
+          </form>
+        </div>
+
+        {/* Requirements Chips */}
+        <div className="flex flex-wrap gap-2 pt-1">
+          {requirements.map((req) => (
+            <div
+              key={req._id}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 border border-gray-200/80 text-xs font-medium text-gray-800 shadow-2xs group"
+            >
+              <span>{req.name}</span>
+              {!req.isDefault && (
+                <button
+                  type="button"
+                  onClick={() => handleDeleteRequirement(req._id)}
+                  className="opacity-40 group-hover:opacity-100 hover:text-red-600 transition-opacity p-0.5"
+                  title="Remove requirement option"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* System info */}

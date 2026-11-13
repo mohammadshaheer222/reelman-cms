@@ -12,14 +12,14 @@ import {
   X,
   Upload,
   Move,
-  GripVertical,
   ArrowUpDown,
 } from 'lucide-react';
 import { CanvaFontToolbar } from './CanvaFontToolbar';
 
 interface BookletContextType {
-  onDragMargin: (id: string, newMargin: number) => void;
+  onDragPosition: (id: string, offsetX: number, offsetY: number) => void;
   selectedElementId: string | null;
+  textStyles?: Record<string, TextStyleConfig>;
 }
 
 const BookletContext = createContext<BookletContextType | null>(null);
@@ -92,28 +92,24 @@ function EditableSpan({
 }: EditableSpanProps) {
   const bookletCtx = useContext(BookletContext);
   const [isDragging, setIsDragging] = useState(false);
-  const [liveMargin, setLiveMargin] = useState<number | null>(null);
+  const [liveOffset, setLiveOffset] = useState<{ x: number; y: number } | null>(null);
 
-  // Compute base margin from style
-  const propMargin = typeof style.marginTop === 'number'
-    ? style.marginTop
-    : parseInt(String(style.marginTop || '0'), 10) || 0;
+  const custom = bookletCtx?.textStyles?.[id];
+  const baseOffsetX = custom?.offsetX || 0;
+  const baseOffsetY = custom?.offsetY || 0;
 
-  const currentMargin = liveMargin !== null ? liveMargin : propMargin;
+  const currentX = liveOffset !== null ? liveOffset.x : baseOffsetX;
+  const currentY = liveOffset !== null ? liveOffset.y : baseOffsetY;
 
-  // Reset live margin when not dragging
-  useEffect(() => {
-    if (!isDragging) {
-      setLiveMargin(null);
-    }
-  }, [isDragging, propMargin]);
-
-  // Ensure vertical margin is respected and text aligns properly
   const effectiveStyle: React.CSSProperties = {
     ...style,
     display: style.textAlign ? 'block' : (style.display || 'inline-block'),
-    marginTop: `${currentMargin}px`,
-    userSelect: 'text',
+    transform:
+      currentX !== 0 || currentY !== 0
+        ? `translate(${currentX}px, ${currentY}px)`
+        : style.transform,
+    userSelect: isDragging ? 'none' : 'text',
+    touchAction: isDragging ? 'none' : 'auto',
   };
 
   if (isPrintMode || !onChange) {
@@ -124,21 +120,38 @@ function EditableSpan({
     );
   }
 
-  const handleDragStart = (clientY: number) => {
+  const handleDragStart = (clientX: number, clientY: number) => {
     setIsDragging(true);
+    const startX = clientX;
     const startY = clientY;
-    const startMargin = currentMargin;
+    const startOffsetX = currentX;
+    const startOffsetY = currentY;
+
+    if (typeof document !== 'undefined') {
+      document.body.style.cursor = 'grabbing';
+      document.body.style.userSelect = 'none';
+    }
+
+    let latestX = startOffsetX;
+    let latestY = startOffsetY;
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       moveEvent.preventDefault();
+      const deltaX = moveEvent.clientX - startX;
       const deltaY = moveEvent.clientY - startY;
-      const nextMargin = Math.max(-60, Math.min(180, Math.round(startMargin + deltaY)));
-      setLiveMargin(nextMargin);
-      bookletCtx?.onDragMargin(id, nextMargin);
+      latestX = Math.round(startOffsetX + deltaX);
+      latestY = Math.round(startOffsetY + deltaY);
+      setLiveOffset({ x: latestX, y: latestY });
     };
 
     const onMouseUp = () => {
       setIsDragging(false);
+      setLiveOffset(null);
+      bookletCtx?.onDragPosition(id, latestX, latestY);
+      if (typeof document !== 'undefined') {
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
     };
@@ -152,21 +165,29 @@ function EditableSpan({
     const touch = e.touches[0];
     if (!touch) return;
     setIsDragging(true);
+    const startX = touch.clientX;
     const startY = touch.clientY;
-    const startMargin = currentMargin;
+    const startOffsetX = currentX;
+    const startOffsetY = currentY;
+
+    let latestX = startOffsetX;
+    let latestY = startOffsetY;
 
     const onTouchMove = (moveEvent: TouchEvent) => {
       const curTouch = moveEvent.touches[0];
       if (!curTouch) return;
       if (moveEvent.cancelable) moveEvent.preventDefault();
+      const deltaX = curTouch.clientX - startX;
       const deltaY = curTouch.clientY - startY;
-      const nextMargin = Math.max(-60, Math.min(180, Math.round(startMargin + deltaY)));
-      setLiveMargin(nextMargin);
-      bookletCtx?.onDragMargin(id, nextMargin);
+      latestX = Math.round(startOffsetX + deltaX);
+      latestY = Math.round(startOffsetY + deltaY);
+      setLiveOffset({ x: latestX, y: latestY });
     };
 
     const onTouchEnd = () => {
       setIsDragging(false);
+      setLiveOffset(null);
+      bookletCtx?.onDragPosition(id, latestX, latestY);
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
     };
@@ -180,12 +201,14 @@ function EditableSpan({
       contentEditable
       suppressContentEditableWarning
       className={`canva-editable relative transition-[border-color,background-color] duration-150 cursor-text select-text ${
-        isSelected
+        isDragging
+          ? 'ring-2 ring-[#2C8567] bg-[#2C8567]/15 rounded shadow-lg'
+          : isSelected
           ? 'ring-2 ring-[#2C8567] bg-[#2C8567]/10 rounded shadow-xs'
           : 'hover:ring-1 hover:ring-[#2C8567]/40 hover:bg-[#2C8567]/5'
       } ${className}`}
       style={effectiveStyle}
-      title="Click to select & edit text. Drag handle to adjust spacing."
+      title="Click to edit. Drag the move handle to reposition anywhere."
       onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
         onSelect?.();
@@ -205,89 +228,22 @@ function EditableSpan({
       }}
     >
       {value || placeholder}
-
-      {/* Canva Floating Drag Handle & Spacing Readout */}
       {isSelected && !isPrintMode && (
         <span
           contentEditable={false}
-          className={`no-print absolute -top-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 px-1.5 py-0.5 rounded-lg shadow-md select-none transition-transform pointer-events-auto ${
-            isDragging
-              ? 'bg-[#1b5340] text-white scale-105 ring-2 ring-white/60'
-              : 'bg-[#2C8567] text-white hover:bg-[#246d54]'
-          }`}
-          style={{ touchAction: 'none' }}
-          onClick={(e) => e.stopPropagation()}
+          role="button"
+          tabIndex={-1}
+          aria-label="Drag and drop to reposition text"
+          title="Drag and drop to reposition anywhere"
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            handleDragStart(e.clientX, e.clientY);
+          }}
+          onTouchStart={handleTouchStart}
+          className="no-print absolute -bottom-7 left-1/2 -translate-x-1/2 z-30 w-6 h-6 rounded-full bg-white border border-gray-300 shadow-md flex items-center justify-center cursor-move text-gray-700 hover:text-[#2C8567] hover:border-[#2C8567] transition-all active:scale-95 hover:shadow-lg"
         >
-          {/* Draggable grip handle */}
-          <span
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              handleDragStart(e.clientY);
-            }}
-            onTouchStart={handleTouchStart}
-            className="cursor-ns-resize active:cursor-grabbing flex items-center gap-1 px-1 py-0.5 rounded hover:bg-white/20 transition-colors"
-            title="Click & drag up or down to adjust gap/spacing"
-          >
-            <GripVertical className="w-3.5 h-3.5 opacity-90" />
-            <span className="text-[10px] font-semibold tracking-wide whitespace-nowrap">
-              {label}
-            </span>
-            <span className="text-[9px] font-mono bg-black/30 px-1 py-0.5 rounded font-bold ml-0.5 text-white">
-              {currentMargin > 0 ? `+${currentMargin}px` : `${currentMargin}px`}
-            </span>
-          </span>
-
-          {/* Quick fine-tune nudge buttons */}
-          <span className="flex items-center border-l border-white/30 pl-1 ml-0.5 gap-0.5">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                const next = Math.max(-60, currentMargin - 2);
-                bookletCtx?.onDragMargin(id, next);
-              }}
-              className="w-4 h-4 flex items-center justify-center rounded hover:bg-white/25 text-[11px] font-bold leading-none cursor-pointer"
-              title="Move up / Reduce spacing (-2px)"
-            >
-              -
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                const next = Math.min(180, currentMargin + 2);
-                bookletCtx?.onDragMargin(id, next);
-              }}
-              className="w-4 h-4 flex items-center justify-center rounded hover:bg-white/25 text-[11px] font-bold leading-none cursor-pointer"
-              title="Move down / Increase spacing (+2px)"
-            >
-              +
-            </button>
-            {currentMargin !== 0 && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  bookletCtx?.onDragMargin(id, 0);
-                }}
-                className="text-[8px] px-1 py-0.5 rounded hover:bg-white/25 uppercase font-bold text-white/85 cursor-pointer"
-                title="Reset spacing to 0"
-              >
-                0
-              </button>
-            )}
-          </span>
-        </span>
-      )}
-
-      {/* Visual dashed spacing line indicator */}
-      {isSelected && !isPrintMode && currentMargin !== 0 && (
-        <span
-          contentEditable={false}
-          className="no-print absolute -top-1 left-0 right-0 pointer-events-none select-none flex items-center justify-center z-30"
-        >
-          <span className="h-0 border-t border-dashed border-[#2C8567]/60 w-full" />
+          <Move className="w-3.5 h-3.5 pointer-events-none" />
         </span>
       )}
     </Tag>
@@ -377,6 +333,10 @@ export function PackageBooklet({
       textAlign: custom.textAlign || baseStyle.textAlign,
       marginTop: custom.marginTop !== undefined ? `${custom.marginTop}px` : baseStyle.marginTop,
       marginBottom: custom.marginBottom !== undefined ? `${custom.marginBottom}px` : baseStyle.marginBottom,
+      transform:
+        custom.offsetX !== undefined || custom.offsetY !== undefined
+          ? `translate(${custom.offsetX || 0}px, ${custom.offsetY || 0}px)`
+          : baseStyle.transform,
     };
   };
 
@@ -539,7 +499,7 @@ export function PackageBooklet({
       <div
         key={page.id}
         className={`pdf-sheet ${isLast ? 'pdf-sheet-last' : ''} relative w-full ${
-          isPrintMode ? 'rounded-none shadow-none p-12' : 'aspect-[1/1.4142] rounded-xl shadow-xl p-5 sm:p-10 md:p-12'
+          isPrintMode ? 'rounded-none shadow-none p-6' : 'aspect-[1/1.4142] rounded-xl shadow-xl p-5 sm:p-10 md:p-12'
         } overflow-hidden flex flex-col justify-between select-text transition-all mx-auto ${textColorClass}`}
         style={{
           backgroundColor: effectiveBgImage ? 'transparent' : effectiveBgColor,
@@ -2135,7 +2095,7 @@ export function PackageBooklet({
   return (
     <BookletContext.Provider
       value={{
-        onDragMargin: (id, newMargin) => {
+        onDragPosition: (id, offsetX, offsetY) => {
           if (!onUpdatePkg) return;
           onUpdatePkg((prev) => ({
             ...prev,
@@ -2143,12 +2103,14 @@ export function PackageBooklet({
               ...(prev.textStyles || {}),
               [id]: {
                 ...(prev.textStyles?.[id] || {}),
-                marginTop: newMargin,
+                offsetX,
+                offsetY,
               },
             },
           }));
         },
         selectedElementId: selectedElement?.id || null,
+        textStyles: pkg.textStyles || {},
       }}
     >
       <div className="space-y-3 flex flex-col items-center w-full">

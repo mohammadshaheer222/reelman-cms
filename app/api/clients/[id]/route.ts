@@ -38,13 +38,31 @@ export async function PATCH(
   try {
     await connectDB();
     const body = await request.json();
-    const { name, phone, date, statusId, assignedTo, isArchived, workPrice, advancePaid, paymentStatus } = body;
+    const {
+      name,
+      phone,
+      date,
+      dates,
+      location,
+      requirements,
+      packageDetails,
+      statusId,
+      assignedTo,
+      isArchived,
+      workPrice,
+      advancePaid,
+      paymentStatus,
+    } = body;
     const client = await Client.findById(id);
     if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 });
 
     if (name !== undefined) client.name = name;
     if (phone !== undefined) client.phone = phone;
     if (date !== undefined) client.date = date;
+    if (dates !== undefined) client.dates = dates;
+    if (location !== undefined) client.location = location;
+    if (requirements !== undefined) client.requirements = requirements;
+    if (packageDetails !== undefined) client.packageDetails = packageDetails;
     if (assignedTo !== undefined) client.assignedTo = assignedTo;
     if (isArchived !== undefined) client.isArchived = isArchived;
     if (workPrice !== undefined) client.workPrice = Number(workPrice) || 0;

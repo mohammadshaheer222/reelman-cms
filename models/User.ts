@@ -7,6 +7,7 @@ export interface IUser extends Document {
   passwordHash: string;
   role: 'admin' | 'staff';
   isActive: boolean;
+  allowedNavItems?: string[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword(password: string): Promise<boolean>;
@@ -25,6 +26,7 @@ const UserSchema = new Schema<IUser>(
     passwordHash: { type: String, required: true },
     role: { type: String, enum: ['admin', 'staff'], default: 'staff' },
     isActive: { type: Boolean, default: true },
+    allowedNavItems: { type: [String], default: undefined },
   },
   { timestamps: true }
 );

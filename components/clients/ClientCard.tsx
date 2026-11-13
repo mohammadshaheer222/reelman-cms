@@ -10,6 +10,8 @@ import {
   MessageCircle,
   IndianRupee,
   RotateCcw,
+  MapPin,
+  Sparkles,
 } from 'lucide-react';
 import { Client, Status } from '@/types';
 import { StatusBadge } from './StatusBadge';
@@ -128,18 +130,46 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
             type="button"
             onClick={(e) => openEdit(e, 'date')}
             title="Click to set event date"
-            className="w-full text-left flex items-center gap-1.5 mt-2 py-1.5 px-2 bg-[#2C8567]/5 hover:bg-[#2C8567]/10 border border-[#2C8567]/15 hover:border-[#2C8567]/30 rounded-lg text-xs transition-colors group/date"
+            className="w-full text-left flex items-center justify-between gap-1.5 mt-2 py-1.5 px-2 bg-[#2C8567]/5 hover:bg-[#2C8567]/10 border border-[#2C8567]/15 hover:border-[#2C8567]/30 rounded-lg text-xs transition-colors group/date"
           >
-            <Calendar className="w-3.5 h-3.5 text-[#2C8567] shrink-0" />
-            <span className="text-gray-500 font-normal shrink-0">Date:</span>
-            <span className="font-semibold text-gray-800 truncate">
-              {client.date ? (
-                formatDate(client.date)
-              ) : (
-                <span className="text-gray-400 font-normal italic">Tap to set date</span>
-              )}
-            </span>
+            <div className="flex items-center gap-1.5 truncate">
+              <Calendar className="w-3.5 h-3.5 text-[#2C8567] shrink-0" />
+              <span className="font-semibold text-gray-800 truncate">
+                {client.date ? (
+                  formatDate(client.date)
+                ) : (
+                  <span className="text-gray-400 font-normal italic">Tap to set date</span>
+                )}
+              </span>
+            </div>
+            {client.dates && client.dates.length > 1 && (
+              <span className="text-[10px] font-bold text-[#2C8567] bg-[#2C8567]/10 px-1.5 py-0.2 rounded shrink-0">
+                +{client.dates.length - 1} days
+              </span>
+            )}
           </button>
+
+          {/* Location */}
+          {client.location && (
+            <div className="flex items-center gap-1 mt-1 text-[11px] text-gray-500 truncate px-1">
+              <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
+              <span className="truncate">{client.location}</span>
+            </div>
+          )}
+
+          {/* Requirements */}
+          {client.requirements && client.requirements.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {client.requirements.map((req, i) => (
+                <span
+                  key={i}
+                  className="text-[9px] font-medium text-[#2C8567] bg-[#2C8567]/8 border border-[#2C8567]/20 px-1.5 py-0.5 rounded truncate max-w-[130px]"
+                >
+                  {req}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Confirmed Work Price & Payment — click to edit */}
           <div
