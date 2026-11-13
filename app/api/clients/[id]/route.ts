@@ -52,6 +52,8 @@ export async function PATCH(
       workPrice,
       advancePaid,
       paymentStatus,
+      deliverables,
+      installments,
     } = body;
     const client = await Client.findById(id);
     if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 });
@@ -68,6 +70,22 @@ export async function PATCH(
     if (workPrice !== undefined) client.workPrice = Number(workPrice) || 0;
     if (advancePaid !== undefined) client.advancePaid = Number(advancePaid) || 0;
     if (paymentStatus !== undefined) client.paymentStatus = paymentStatus;
+    if (deliverables !== undefined) client.deliverables = deliverables;
+    if (installments !== undefined) {
+      client.installments = installments;
+      const totalPaid = installments.reduce((sum: number, inst: { status?: string; paidAmount?: number; amount?: number }) => {
+        return sum + (inst.status === 'paid' ? (Number(inst.paidAmount) || Number(inst.amount) || 0) : (Number(inst.paidAmount) || 0));
+      }, 0);
+      if (totalPaid > 0 && advancePaid === undefined) {
+        client.advancePaid = totalPaid;
+      }
+      const price = client.workPrice || 0;
+      if (price > 0 && totalPaid >= price) {
+        client.paymentStatus = 'fully-paid';
+      } else if (totalPaid > 0) {
+        client.paymentStatus = 'partially-paid';
+      }
+    }
 
     if (statusId && statusId !== client.status.toString()) {
       const newStatus = await Status.findById(statusId);

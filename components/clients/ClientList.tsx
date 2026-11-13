@@ -30,9 +30,10 @@ import { formatDate, timeAgo } from '@/lib/utils';
 import { openWhatsApp, formatStatusWhatsAppMessage } from '@/lib/whatsapp';
 import { ClientQuickEditModal, EditField } from './ClientQuickEditModal';
 import { KanbanBoard } from './KanbanBoard';
+import { ShootCalendar } from '@/components/calendar/ShootCalendar';
 import { toast } from 'sonner';
 
-export type ViewMode = 'kanban' | 'grid' | 'table';
+export type ViewMode = 'kanban' | 'calendar' | 'grid' | 'table';
 
 interface ClientListProps {
   clients: Client[];
@@ -135,7 +136,7 @@ export function ClientList({
           </p>
 
           {/* View mode switcher */}
-          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 self-start sm:self-auto">
+          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 self-start sm:self-auto overflow-x-auto max-w-full modal-scroll">
             <button
               type="button"
               onClick={() => setViewMode('kanban')}
@@ -148,6 +149,20 @@ export function ClientList({
             >
               <Kanban className="w-3.5 h-3.5 text-[#2C8567]" />
               <span>Board</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setViewMode('calendar')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                viewMode === 'calendar'
+                  ? 'bg-white text-gray-900 shadow-xs'
+                  : 'text-gray-500 hover:text-gray-900'
+              }`}
+              title="Shoot Calendar & Conflict Detector"
+            >
+              <Calendar className="w-3.5 h-3.5 text-blue-600" />
+              <span>Calendar</span>
             </button>
 
             <button
@@ -181,7 +196,9 @@ export function ClientList({
         </div>
 
         {/* View Content */}
-        {viewMode === 'kanban' ? (
+        {viewMode === 'calendar' ? (
+          <ShootCalendar />
+        ) : viewMode === 'kanban' ? (
           /* Kanban Drag & Drop Pipeline View */
           <KanbanBoard
             clients={clients}
@@ -422,8 +439,8 @@ export function ClientList({
           </div>
         )}
 
-        {/* Pagination (only in grid and table view, kanban shows full pipeline) */}
-        {viewMode !== 'kanban' && totalPages > 1 && (
+        {/* Pagination (only in grid and table view, kanban and calendar show full dataset) */}
+        {viewMode !== 'kanban' && viewMode !== 'calendar' && totalPages > 1 && (
           <div className="flex items-center justify-between pt-4">
             <Button
               variant="outline"

@@ -19,9 +19,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Status, Requirement } from '@/types';
+import { Status, Requirement, CalendarShootEvent } from '@/types';
 import {
   AlertCircle,
+  AlertTriangle,
   CheckCircle2,
   Calendar,
   Plus,
@@ -128,6 +129,14 @@ export function QuickAddClient({
   const phoneInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Availability conflict detector state
+  const [existingShootsMap, setExistingShootsMap] = useState<Record<string, CalendarShootEvent[]>>({});
+
+  const getConflictsForDate = (dateStr: string) => {
+    if (!dateStr || !dateStr.trim()) return [];
+    return existingShootsMap[dateStr.trim()] || [];
+  };
+
   // Fetch statuses and saved requirements when modal opens
   useEffect(() => {
     if (open) {
@@ -150,6 +159,15 @@ export function QuickAddClient({
         .then((res) => res.json())
         .then((data) => {
           setSavedRequirements(data.data || []);
+        })
+        .catch(() => {});
+
+      fetch('/api/calendar')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.dateMap) {
+            setExistingShootsMap(data.dateMap);
+          }
         })
         .catch(() => {});
     }
@@ -363,38 +381,48 @@ export function QuickAddClient({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!w-[calc(100%-1.25rem)] sm:!w-full !max-w-xl !max-h-[92vh] sm:!max-h-[88vh] !p-0 !flex !flex-col !overflow-hidden rounded-2xl shadow-2xl border border-gray-100 bg-white">
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col h-full min-h-0 flex-1">
+      <DialogContent className="!w-[calc(100%-1.5rem)] sm:!w-full !max-w-lg !max-h-[85dvh] !p-0 !flex !flex-col !overflow-hidden rounded-2xl shadow-2xl border border-gray-100 bg-white">
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col h-full max-h-[85dvh] min-h-0 flex-1 overflow-x-hidden">
           {/* Header */}
-          <DialogHeader className="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-5 py-4 border-b border-gray-100 flex flex-row items-center justify-between shrink-0">
-            <div>
-              <DialogTitle className="text-base sm:text-lg font-bold text-gray-900 tracking-tight">
+          <DialogHeader className="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-4 sm:px-6 py-3.5 border-b border-gray-100 flex flex-row items-center justify-between shrink-0">
+            <div className="min-w-0 pr-2">
+              <DialogTitle className="text-base sm:text-lg font-bold text-gray-900 tracking-tight truncate">
                 Add New Client
               </DialogTitle>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-gray-500 mt-0.5 truncate">
                 Record inquiry details and client booking info
               </p>
             </div>
-            {activeStatus && (
-              <span
-                className="text-xs px-2.5 py-1 rounded-full font-semibold border flex items-center gap-1.5"
-                style={{
-                  backgroundColor: `${activeStatus.color}15`,
-                  color: activeStatus.color,
-                  borderColor: `${activeStatus.color}35`,
-                }}
-              >
+            <div className="flex items-center gap-2 shrink-0">
+              {activeStatus && (
                 <span
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: activeStatus.color }}
-                />
-                {activeStatus.name}
-              </span>
-            )}
+                  className="text-xs px-2.5 py-0.5 rounded-full font-semibold border flex items-center gap-1.5"
+                  style={{
+                    backgroundColor: `${activeStatus.color}15`,
+                    color: activeStatus.color,
+                    borderColor: `${activeStatus.color}35`,
+                  }}
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: activeStatus.color }}
+                  />
+                  {activeStatus.name}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </DialogHeader>
 
-          {/* Clean, Spacious Form Body */}
-          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 modal-scroll">
+          {/* Clean, Spacious Form Body (Strictly no horizontal scroll, perfectly bounded) */}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-4 modal-scroll">
             {errors.general && (
               <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2 text-xs text-red-600">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
@@ -531,47 +559,103 @@ export function QuickAddClient({
                 </div>
 
                 {dates.length === 1 ? (
-                  <div className="relative">
-                    <Input
-                      type="date"
-                      value={dates[0]}
-                      onChange={(e) => handleDateChange(0, e.target.value)}
-                      className="h-9.5 text-xs sm:text-sm bg-white"
-                    />
-                    {dates[0] && formatFriendlyDate(dates[0]) && (
-                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded pointer-events-none border border-emerald-200/60 hidden sm:inline">
-                        {formatFriendlyDate(dates[0])}
-                      </span>
+                  <div className="space-y-1.5">
+                    <div className="relative">
+                      <Input
+                        type="date"
+                        value={dates[0]}
+                        onChange={(e) => handleDateChange(0, e.target.value)}
+                        className={`h-9.5 text-xs sm:text-sm bg-white ${
+                          dates[0] && getConflictsForDate(dates[0]).length > 0
+                            ? 'border-amber-400 focus-visible:ring-amber-400'
+                            : ''
+                        }`}
+                      />
+                      {dates[0] && formatFriendlyDate(dates[0]) && (
+                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded pointer-events-none border border-emerald-200/60 hidden sm:inline">
+                          {formatFriendlyDate(dates[0])}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Real-time Availability Conflict Alert */}
+                    {dates[0] && getConflictsForDate(dates[0]).length > 0 && (
+                      <div className="p-2 rounded-xl bg-amber-50/90 border border-amber-200/90 text-amber-950 text-xs animate-in fade-in slide-in-from-top-1 shadow-2xs">
+                        <div className="flex items-center gap-1.5 font-semibold text-amber-900">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                          <span>
+                            Availability Conflict: {getConflictsForDate(dates[0]).length} shoot{getConflictsForDate(dates[0]).length > 1 ? 's' : ''} already scheduled
+                          </span>
+                        </div>
+                        <div className="mt-1 space-y-1">
+                          {getConflictsForDate(dates[0]).map((c) => (
+                            <div
+                              key={c._id}
+                              className="flex items-center justify-between text-[11px] bg-white/80 px-2 py-0.5 rounded-md border border-amber-200/60"
+                            >
+                              <span className="font-medium text-gray-900 truncate">
+                                {c.name || 'Unnamed Client'}{c.location ? ` • ${c.location}` : ''}
+                              </span>
+                              {c.status && (
+                                <span
+                                  className="text-[10px] px-1.5 py-0.2 rounded font-semibold shrink-0"
+                                  style={{
+                                    backgroundColor: `${c.status.color}20`,
+                                    color: c.status.color,
+                                  }}
+                                >
+                                  {c.status.name}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {dates.map((d, index) => {
                       const friendly = formatFriendlyDate(d);
+                      const dayConflicts = getConflictsForDate(d);
                       return (
-                        <div key={index} className="flex items-center gap-1.5">
-                          <span className="text-[11px] font-mono font-bold text-gray-400 w-11 shrink-0">
-                            Day {index + 1}:
-                          </span>
-                          <Input
-                            type="date"
-                            value={d}
-                            onChange={(e) => handleDateChange(index, e.target.value)}
-                            className="h-9 text-xs sm:text-sm flex-1 bg-white"
-                          />
-                          {friendly && (
-                            <span className="text-[11px] font-medium text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0 hidden sm:inline">
-                              {friendly}
+                        <div key={index} className="space-y-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-mono font-bold text-gray-400 w-11 shrink-0">
+                              Day {index + 1}:
                             </span>
+                            <Input
+                              type="date"
+                              value={d}
+                              onChange={(e) => handleDateChange(index, e.target.value)}
+                              className={`h-9 text-xs sm:text-sm flex-1 bg-white ${
+                                d && dayConflicts.length > 0
+                                  ? 'border-amber-400 focus-visible:ring-amber-400'
+                                  : ''
+                              }`}
+                            />
+                            {friendly && (
+                              <span className="text-[11px] font-medium text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0 hidden sm:inline">
+                                {friendly}
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveDate(index)}
+                              className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
+                              title="Remove day"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          {d && dayConflicts.length > 0 && (
+                            <div className="ml-12 p-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px]">
+                              <span className="font-semibold text-amber-800">
+                                ⚠️ Overlap: {dayConflicts.length} shoot{dayConflicts.length > 1 ? 's' : ''} on this day ({dayConflicts.map((c) => c.name).join(', ')})
+                              </span>
+                            </div>
                           )}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveDate(index)}
-                            className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
-                            title="Remove day"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
                         </div>
                       );
                     })}
@@ -810,114 +894,88 @@ export function QuickAddClient({
               </div>
             )}
 
-            {/* Row 5: Discussion Notes & Package Details (Clean Segmented Tab) */}
-            <div className="pt-3 border-t border-gray-100 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="inline-flex p-0.5 rounded-lg bg-gray-100 text-xs font-medium">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('notes')}
-                    className={`px-3 py-1 rounded-md transition-all flex items-center gap-1.5 ${
-                      activeTab === 'notes'
-                        ? 'bg-white text-gray-900 shadow-xs font-semibold'
-                        : 'text-gray-500 hover:text-gray-800'
-                    }`}
-                  >
-                    <MessageSquare className="w-3.5 h-3.5 text-gray-500" />
-                    <span>Notes</span>
-                    {noteContent.trim() && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#2C8567]" />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('package')}
-                    className={`px-3 py-1 rounded-md transition-all flex items-center gap-1.5 ${
-                      activeTab === 'package'
-                        ? 'bg-white text-gray-900 shadow-xs font-semibold'
-                        : 'text-gray-500 hover:text-gray-800'
-                    }`}
-                  >
-                    <Package className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Package / PDF</span>
-                    {packageDetails.trim() && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-                    )}
-                  </button>
-                </div>
+            {/* Separate Field 1: Discussion Notes */}
+            <div className="pt-3 border-t border-gray-100 space-y-1.5">
+              <Label htmlFor="clientNotes" className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-gray-500" />
+                <span>Notes & Discussion Points</span>
+              </Label>
+              <Textarea
+                id="clientNotes"
+                placeholder="Discussion points, client preferences, special requests..."
+                rows={2}
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
+                className="text-xs sm:text-sm font-sans bg-white resize-none"
+              />
+            </div>
 
-                {activeTab === 'package' && (
-                  <div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="application/pdf"
-                      onChange={handlePdfUpload}
-                      className="hidden"
-                      id="packagePdfInput"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={extractingPdf}
-                      onClick={() => fileInputRef.current?.click()}
-                      className="h-7 text-xs font-medium text-blue-700 bg-blue-50/60 border-blue-200 hover:bg-blue-100 flex items-center gap-1"
-                    >
-                      {extractingPdf ? (
-                        <>
-                          <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
-                          <span>Extracting…</span>
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-3 h-3 text-blue-600" />
-                          <span>Upload Package PDF</span>
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
+            {/* Separate Field 2: Package Scope & Inclusions (with PDF Upload) */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="clientPackageDetails" className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                  <Package className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Package Scope & Deliverables</span>
+                </Label>
+
+                <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handlePdfUpload}
+                    className="hidden"
+                    id="packagePdfInput"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={extractingPdf}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-7 text-xs font-medium text-blue-700 bg-blue-50/60 border-blue-200 hover:bg-blue-100 flex items-center gap-1"
+                  >
+                    {extractingPdf ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
+                        <span>Extracting…</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3 h-3 text-blue-600" />
+                        <span>Upload Package PDF</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
 
-              {activeTab === 'notes' && (
-                <Textarea
-                  placeholder="Discussion points, client preferences, special requests..."
-                  rows={2}
-                  value={noteContent}
-                  onChange={(e) => setNoteContent(e.target.value)}
-                  className="text-xs sm:text-sm font-sans bg-white resize-none"
-                />
-              )}
-
-              {activeTab === 'package' && (
-                <div className="space-y-1.5">
-                  {pdfSource && (
-                    <div className="flex items-center justify-between px-2.5 py-1 rounded bg-blue-50 text-blue-800 text-[11px] border border-blue-200">
-                      <span>Converted from <strong>{pdfSource}</strong></span>
-                      <button
-                        type="button"
-                        onClick={() => setPdfSource(null)}
-                        className="text-blue-500 hover:text-blue-800 p-0.5"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  )}
-                  <Textarea
-                    placeholder="Deliverables, number of photographers, album size, teaser timeline (or upload PDF)..."
-                    rows={2}
-                    value={packageDetails}
-                    onChange={(e) => setPackageDetails(e.target.value)}
-                    className="text-xs sm:text-sm font-sans bg-white border-blue-200 resize-none"
-                  />
+              {pdfSource && (
+                <div className="flex items-center justify-between px-2.5 py-1 rounded bg-blue-50 text-blue-800 text-[11px] border border-blue-200">
+                  <span>Converted from: <strong>{pdfSource}</strong></span>
+                  <button
+                    type="button"
+                    onClick={() => setPdfSource(null)}
+                    className="text-blue-500 hover:text-blue-800 p-0.5"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
               )}
+
+              <Textarea
+                id="clientPackageDetails"
+                placeholder="Deliverables, number of photographers, album size, teaser timeline (or upload PDF above)..."
+                rows={2}
+                value={packageDetails}
+                onChange={(e) => setPackageDetails(e.target.value)}
+                className="text-xs sm:text-sm font-sans bg-white border-blue-200 resize-none"
+              />
             </div>
           </div>
 
           {/* Sticky Footer */}
-          <div className="sticky bottom-0 z-20 bg-white/95 backdrop-blur-md px-5 py-3 border-t border-gray-100 flex items-center justify-end gap-2 shrink-0">
+          <div className="sticky bottom-0 z-20 bg-white/95 backdrop-blur-md px-4 sm:px-6 py-3 border-t border-gray-100 flex items-center justify-end gap-2 shrink-0">
             <Button
               type="button"
               variant="outline"

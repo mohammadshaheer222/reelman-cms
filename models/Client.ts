@@ -15,6 +15,30 @@ export interface IStatusHistory {
   changedAt: Date;
 }
 
+export interface IDeliverableMilestone {
+  id: string;
+  title: string;
+  description?: string;
+  targetDays?: number;
+  status: 'pending' | 'in-progress' | 'completed';
+  completedAt?: Date;
+  notes?: string;
+  link?: string;
+}
+
+export interface IPaymentInstallment {
+  id: string;
+  name: string;
+  percentage?: number;
+  amount: number;
+  dueDate?: string;
+  status: 'paid' | 'pending' | 'overdue';
+  paidAt?: Date;
+  paidAmount?: number;
+  paymentMethod?: string;
+  notes?: string;
+}
+
 export interface IClient extends Document {
   clientId: string;
   name?: string;
@@ -27,6 +51,8 @@ export interface IClient extends Document {
   workPrice?: number;
   advancePaid?: number;
   paymentStatus?: 'unpaid' | 'advance-received' | 'partially-paid' | 'fully-paid';
+  deliverables?: IDeliverableMilestone[];
+  installments?: IPaymentInstallment[];
   notes: mongoose.Types.DocumentArray<INote & Document>;
   status: mongoose.Types.ObjectId;
   statusHistory: IStatusHistory[];
@@ -69,6 +95,40 @@ const ClientSchema = new Schema<IClient>(
       enum: ['unpaid', 'advance-received', 'partially-paid', 'fully-paid'],
       default: 'unpaid',
     },
+    deliverables: [
+      {
+        id: { type: String, required: true },
+        title: { type: String, required: true },
+        description: { type: String },
+        targetDays: { type: Number, default: 0 },
+        status: {
+          type: String,
+          enum: ['pending', 'in-progress', 'completed'],
+          default: 'pending',
+        },
+        completedAt: { type: Date },
+        notes: { type: String },
+        link: { type: String },
+      },
+    ],
+    installments: [
+      {
+        id: { type: String, required: true },
+        name: { type: String, required: true },
+        percentage: { type: Number, default: 0 },
+        amount: { type: Number, default: 0 },
+        dueDate: { type: String },
+        status: {
+          type: String,
+          enum: ['paid', 'pending', 'overdue'],
+          default: 'pending',
+        },
+        paidAt: { type: Date },
+        paidAmount: { type: Number, default: 0 },
+        paymentMethod: { type: String, default: 'upi' },
+        notes: { type: String },
+      },
+    ],
     notes: [NoteSchema],
     status: { type: Schema.Types.ObjectId, ref: 'Status', required: true },
     statusHistory: [StatusHistorySchema],

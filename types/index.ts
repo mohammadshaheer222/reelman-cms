@@ -24,6 +24,30 @@ export interface StatusHistory {
   changedAt: string;
 }
 
+export interface DeliverableMilestone {
+  id: string;
+  title: string;
+  description?: string;
+  targetDays: number; // Promised turnaround in days from event date
+  status: 'pending' | 'in-progress' | 'completed';
+  completedAt?: string;
+  notes?: string;
+  link?: string;
+}
+
+export interface PaymentInstallment {
+  id: string; // 'advance' | 'event-day' | 'final-balance' | string
+  name: string; // 'Booking Advance' | 'On Event / Shoot Day' | 'Album / Final Handover'
+  percentage: number; // 30, 50, 20
+  amount: number;
+  dueDate?: string;
+  status: 'paid' | 'pending' | 'overdue';
+  paidAt?: string;
+  paidAmount?: number;
+  paymentMethod?: 'upi' | 'cash' | 'bank-transfer' | 'cheque' | 'other';
+  notes?: string;
+}
+
 export interface Client {
   _id: string;
   clientId: string;
@@ -37,6 +61,8 @@ export interface Client {
   workPrice?: number;
   advancePaid?: number;
   paymentStatus?: 'unpaid' | 'advance-received' | 'partially-paid' | 'fully-paid';
+  deliverables?: DeliverableMilestone[];
+  installments?: PaymentInstallment[];
   notes: Note[];
   status: Status | string;
   statusHistory: StatusHistory[];
@@ -53,6 +79,26 @@ export interface Requirement {
   order: number;
   isDefault: boolean;
   createdAt?: string;
+}
+
+export interface CalendarShootEvent {
+  _id: string;
+  clientId: string;
+  name: string;
+  phone?: string;
+  date: string;
+  dates: string[];
+  location?: string;
+  requirements?: string[];
+  workPrice?: number;
+  advancePaid?: number;
+  paymentStatus?: string;
+  packageDetails?: string;
+  status?: {
+    _id: string;
+    name: string;
+    color: string;
+  };
 }
 
 export interface Status {
@@ -267,6 +313,96 @@ export interface PackageData {
   pageBackgrounds?: Record<string, PageBackgroundConfig>;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export const DEFAULT_DELIVERABLE_MILESTONES: DeliverableMilestone[] = [
+  {
+    id: 'raw-backup',
+    title: 'Raw Footage Backup & Archive',
+    description: 'Offload dual-SD cards to editing RAID storage and secure cloud backup',
+    targetDays: 1,
+    status: 'pending',
+  },
+  {
+    id: 'teaser-reel',
+    title: 'Instagram 60-sec Teaser Reel',
+    description: 'Cinematic teaser reel delivered within 72 hours of shoot completion',
+    targetDays: 3,
+    status: 'pending',
+  },
+  {
+    id: 'photo-gallery',
+    title: 'Photo Selection Gallery Link Sent',
+    description: 'Curated online proofing gallery for couple to shortlist favorite shots',
+    targetDays: 10,
+    status: 'pending',
+  },
+  {
+    id: 'photo-selections',
+    title: 'Client Photo Selections Received',
+    description: 'Couple finalizes album photo selections and retouching requests',
+    targetDays: 20,
+    status: 'pending',
+  },
+  {
+    id: 'wedding-film',
+    title: 'Wedding Film Final Cut & Color Grade',
+    description: 'Full ceremony & cinematic story edit with audio mastering and color grading',
+    targetDays: 35,
+    status: 'pending',
+  },
+  {
+    id: 'album-shipped',
+    title: 'Photo Album Printed & Shipped',
+    description: 'Flush-mount handcrafted photobook dispatched to client doorstep',
+    targetDays: 50,
+    status: 'pending',
+  },
+];
+
+export function createDefaultInstallments(
+  workPrice: number = 0,
+  advancePaid: number = 0
+): PaymentInstallment[] {
+  const advanceAmount = Math.round(workPrice * 0.3);
+  const eventDayAmount = Math.round(workPrice * 0.5);
+  const finalAmount = Math.max(0, workPrice - (advanceAmount + eventDayAmount));
+
+  const isAdvanceCovered = (advancePaid >= advanceAmount && advanceAmount > 0) || advancePaid > 0;
+
+  return [
+    {
+      id: 'advance',
+      name: 'Booking Advance (30%)',
+      percentage: 30,
+      amount: advanceAmount,
+      dueDate: 'Upon Booking Confirmation',
+      status: isAdvanceCovered ? 'paid' : 'pending',
+      paidAmount: advancePaid > 0 ? (advancePaid >= advanceAmount ? advanceAmount : advancePaid) : 0,
+      paidAt: isAdvanceCovered ? new Date().toISOString() : undefined,
+      paymentMethod: 'upi',
+    },
+    {
+      id: 'event-day',
+      name: 'On Event / Shoot Day (50%)',
+      percentage: 50,
+      amount: eventDayAmount,
+      dueDate: 'On Shoot / Wedding Day',
+      status: 'pending',
+      paidAmount: 0,
+      paymentMethod: 'upi',
+    },
+    {
+      id: 'final-balance',
+      name: 'Album / Final Handover (20%)',
+      percentage: 20,
+      amount: finalAmount,
+      dueDate: 'Upon Album & Film Delivery',
+      status: 'pending',
+      paidAmount: 0,
+      paymentMethod: 'upi',
+    },
+  ];
 }
 
 

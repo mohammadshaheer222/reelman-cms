@@ -76,3 +76,95 @@ export function openWhatsApp(
   }
   return true;
 }
+
+export function formatBookingSummaryWhatsAppMessage({
+  name,
+  date,
+  workPrice = 0,
+  advancePaid = 0,
+  portalUrl,
+}: {
+  name?: string;
+  date?: string;
+  workPrice?: number;
+  advancePaid?: number;
+  portalUrl?: string;
+}): string {
+  const formattedDate = date
+    ? new Date(date).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : 'your event date';
+  const balanceDue = Math.max(0, workPrice - advancePaid);
+  const formattedTotal = `₹${workPrice.toLocaleString('en-IN')}`;
+  const formattedAdvance = `₹${advancePaid.toLocaleString('en-IN')}`;
+  const formattedBalance = `₹${balanceDue.toLocaleString('en-IN')}`;
+
+  let msg = `Hi ${name ? name.trim() : 'there'}! 📸 Your booking with *Reelman Production* for *${formattedDate}* is confirmed.\n\n`;
+  msg += `*Booking Summary:*\n`;
+  msg += `• Total Confirmed: ${formattedTotal}\n`;
+  msg += `• Advance Received: ${formattedAdvance} ✅\n`;
+  if (balanceDue > 0) {
+    msg += `• Balance Due on Event Day: ${formattedBalance} ⏳\n`;
+  } else {
+    msg += `• Payment Status: Fully Paid ✅\n`;
+  }
+  if (portalUrl) {
+    msg += `\nView your package details & track your deliverables here:\n${portalUrl}`;
+  } else {
+    msg += `\nWe are thrilled to capture your special day!`;
+  }
+  return msg;
+}
+
+export function formatPaymentReceiptWhatsAppMessage({
+  name,
+  amountPaid,
+  paymentMethod = 'UPI',
+  remainingBalance = 0,
+  stageName = 'Payment',
+  portalUrl,
+}: {
+  name?: string;
+  amountPaid: number;
+  paymentMethod?: string;
+  remainingBalance?: number;
+  stageName?: string;
+  portalUrl?: string;
+}): string {
+  let msg = `Hi ${name ? name.trim() : 'there'}! 🧾 *Payment Receipt from Reelman Production*\n\n`;
+  msg += `We have received your payment of *₹${amountPaid.toLocaleString('en-IN')}* via ${paymentMethod.toUpperCase()} for *${stageName}*.\n`;
+  if (remainingBalance > 0) {
+    msg += `• Remaining Balance: *₹${remainingBalance.toLocaleString('en-IN')}*\n`;
+  } else {
+    msg += `• Balance: *₹0 (All Dues Cleared)* ✅\n`;
+  }
+  if (portalUrl) {
+    msg += `\nTrack your updated receipt and deliverables here:\n${portalUrl}`;
+  }
+  return msg;
+}
+
+export function formatMilestoneUpdateWhatsAppMessage({
+  name,
+  milestoneTitle,
+  link,
+  portalUrl,
+}: {
+  name?: string;
+  milestoneTitle: string;
+  link?: string;
+  portalUrl?: string;
+}): string {
+  let msg = `Hi ${name ? name.trim() : 'there'}! 🎉 Great news from *Reelman Production*!\n\n`;
+  msg += `Your milestone *"${milestoneTitle}"* is now ready! 🎬✨\n`;
+  if (link) {
+    msg += `\nAccess link: ${link}\n`;
+  }
+  if (portalUrl) {
+    msg += `\nView your live project pipeline & status here:\n${portalUrl}`;
+  }
+  return msg;
+}

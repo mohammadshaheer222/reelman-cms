@@ -14,11 +14,13 @@ import {
   Package,
   Layers,
   Sparkles,
+  Calendar as CalendarIcon,
 } from 'lucide-react';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { RecentClients } from '@/components/dashboard/RecentClients';
+import { PaymentsDueWidget } from '@/components/dashboard/PaymentsDueWidget';
 import { QuickAddClient } from '@/components/clients/QuickAddClient';
 import { Button } from '@/components/ui/button';
 import { CardLoadingSkeleton } from '@/components/shared/LoadingSkeleton';
@@ -147,7 +149,7 @@ export default function DashboardPage() {
       )}
 
       {/* Studio Quick Shortcuts (Smooth, intuitive 1-click navigation) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Link
           href="/clients"
           className="p-4 rounded-xl bg-white border border-gray-100 shadow-2xs hover:shadow-sm hover:border-[#2C8567]/30 transition-all flex items-center justify-between group"
@@ -164,6 +166,24 @@ export default function DashboardPage() {
             </div>
           </div>
           <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#2C8567] group-hover:translate-x-0.5 transition-all" />
+        </Link>
+
+        <Link
+          href="/calendar"
+          className="p-4 rounded-xl bg-white border border-gray-100 shadow-2xs hover:shadow-sm hover:border-blue-400/30 transition-all flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+              <CalendarIcon className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                Shoot Calendar
+              </p>
+              <p className="text-xs text-gray-400">Schedule & conflict detector</p>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
         </Link>
 
         <Link
@@ -202,6 +222,9 @@ export default function DashboardPage() {
           <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#2C8567] group-hover:translate-x-0.5 transition-all" />
         </Link>
       </div>
+
+      {/* Payments Due This Month (Pending Collections & 1-Click Reminders) */}
+      <PaymentsDueWidget />
 
       {/* Recent Clients & Recent Activity Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

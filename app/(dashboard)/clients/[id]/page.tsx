@@ -22,10 +22,16 @@ import {
   Upload,
   Loader2,
   Package,
+  Share2,
+  ExternalLink,
+  Receipt,
+  Clock,
 } from 'lucide-react';
-import { Client, Status, Activity } from '@/types';
+import { Client, Status, Activity, DeliverableMilestone, PaymentInstallment } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { NoteItem } from '@/components/clients/NoteItem';
+import { DeliverableTracker } from '@/components/clients/DeliverableTracker';
+import { PaymentInstallmentsCard } from '@/components/clients/PaymentInstallmentsCard';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +45,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { formatDate, formatDateTime, timeAgo } from '@/lib/utils';
-import { openWhatsApp } from '@/lib/whatsapp';
+import { openWhatsApp, formatBookingSummaryWhatsAppMessage } from '@/lib/whatsapp';
 import { WhatsAppModal } from '@/components/clients/WhatsAppModal';
 import { toast } from 'sonner';
 
@@ -372,6 +378,39 @@ export default function ClientProfilePage({
     );
   }
 
+  // Handle 1-Click WhatsApp Booking Summary
+  const handleSendBookingSummary = () => {
+    if (!client?.phone) {
+      toast.error('No phone number saved for this client.');
+      return;
+    }
+    const portalUrl =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/portal/${client._id}`
+        : undefined;
+
+    const message = formatBookingSummaryWhatsAppMessage({
+      name: client.name,
+      date: client.date,
+      workPrice: client.workPrice,
+      advancePaid: client.advancePaid,
+      portalUrl,
+    });
+
+    openWhatsApp(client.phone, client.name, message);
+  };
+
+  // Copy Client Portal Link to clipboard
+  const handleCopyPortalLink = () => {
+    if (typeof window !== 'undefined' && client) {
+      const url = `${window.location.origin}/portal/${client._id}`;
+      navigator.clipboard.writeText(url);
+      toast.success('Client Portal link copied to clipboard!', {
+        icon: <Check className="w-4 h-4 text-[#2C8567]" />,
+      });
+    }
+  };
+
   if (!client) {
     return (
       <div className="py-20 text-center">
@@ -387,92 +426,161 @@ export default function ClientProfilePage({
     typeof client.status === 'object' ? client.status._id : client.status;
 
   return (
-    <div className="space-y-6">
-      {/* Back button & top bar */}
-      <div className="flex items-center justify-between">
-        <Button asChild variant="ghost" size="sm" className="-ml-2 text-gray-600">
-          <Link href="/clients" className="flex items-center gap-1.5">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Clients
-          </Link>
-        </Button>
-
-        <div className="flex items-center gap-2">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Back button & top bar (Mobile-First Responsive Layout) */}
+      <div className="flex flex-col gap-2.5">
+        <div className="flex items-center justify-between gap-2">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
-            onClick={handleWhatsApp}
-            className="text-green-700 bg-green-50 border-green-200 hover:bg-green-100"
+            onClick={() => {
+              if (typeof window !== 'undefined' && window.history.length > 1) {
+                router.back();
+              } else {
+                router.push('/clients');
+              }
+            }}
+            className="-ml-2 text-gray-600 h-8 px-2 text-xs flex items-center gap-1 cursor-pointer"
           >
-            <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
-            WhatsApp
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back</span>
           </Button>
 
+          <div className="flex items-center gap-1.5 flex-wrap justify-end">
+            {/* WhatsApp Quick Chat */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleWhatsApp}
+              className="text-emerald-800 bg-emerald-50/80 border-emerald-200 hover:bg-emerald-100 text-xs h-8 px-2.5 gap-1 shadow-2xs"
+              title="Open WhatsApp chat with client"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-[#2C8567]" />
+              <span className="hidden sm:inline">WhatsApp</span>
+              <span className="sm:hidden">Chat</span>
+            </Button>
+
+            {/* Portal Link with direct view */}
+            <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden text-xs bg-white shadow-2xs">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyPortalLink}
+                className="h-8 px-2 text-xs text-gray-700 hover:bg-gray-50 border-r border-gray-200 gap-1 rounded-none"
+                title="Copy Client Portal Link to clipboard"
+              >
+                <Share2 className="w-3 h-3 text-blue-600" />
+                <span className="hidden sm:inline">Portal</span>
+              </Button>
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-xs text-gray-600 hover:bg-gray-50 rounded-none"
+                title="Open Client Portal in new tab"
+              >
+                <a href={`/portal/${client._id}`} target="_blank" rel="noreferrer">
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </Button>
+            </div>
+
+            {/* Proposal PDF */}
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="text-purple-700 bg-purple-50/70 border-purple-200 hover:bg-purple-100 text-xs h-8 px-2 hidden sm:inline-flex"
+            >
+              <Link href="/packages">
+                <Sparkles className="w-3.5 h-3.5 mr-1" />
+                <span>Proposal</span>
+              </Link>
+            </Button>
+
+            {/* Archive */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleToggleArchive}
+              className="text-gray-600 text-xs h-8 px-2 hidden sm:inline-flex"
+              title={client.isArchived ? 'Restore' : 'Archive'}
+            >
+              <Archive className="w-3.5 h-3.5" />
+            </Button>
+
+            {/* Delete */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteConfirmOpen(true)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 text-xs h-8 px-2"
+              title="Delete client"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Full-width on mobile: Prominent WhatsApp Booking Summary Trigger */}
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleSendBookingSummary}
+            className="w-full sm:w-auto text-white bg-[#2C8567] hover:bg-[#236d54] font-semibold text-xs h-9 gap-1.5 shadow-xs"
+            title="Send WhatsApp booking confirmation with deliverables and payment link"
+          >
+            <Send className="w-3.5 h-3.5" />
+            <span>Send WhatsApp Booking Summary</span>
+          </Button>
+
+          {/* Proposal shortcut visible on mobile */}
           <Button
             asChild
             variant="outline"
             size="sm"
-            className="text-purple-700 bg-purple-50 border-purple-200 hover:bg-purple-100"
+            className="sm:hidden text-purple-700 bg-purple-50/70 border-purple-200 text-xs h-9 px-3 shrink-0"
+            title="Proposal PDF"
           >
             <Link href="/packages">
-              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              Package / Proposal PDF
+              <Sparkles className="w-3.5 h-3.5 mr-1" />
+              <span>PDF</span>
             </Link>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleToggleArchive}
-            className="text-gray-600"
-          >
-            <Archive className="w-3.5 h-3.5 mr-1.5" />
-            {client.isArchived ? 'Restore' : 'Archive'}
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setDeleteConfirmOpen(true)}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-          >
-            <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-            Delete
           </Button>
         </div>
       </div>
 
-      {/* Client Header Card */}
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Client Header Card (Clean, Spacious, Uncluttered Studio Overview) */}
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+        {/* Top: Client Name, ID, and Pipeline Status */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100/80 pb-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 flex-wrap">
               {editingName ? (
                 <div className="flex items-center gap-2">
                   <Input
                     value={nameInput}
                     onChange={(e) => setNameInput(e.target.value)}
-                    className="h-8 text-lg font-bold"
+                    className="h-8 text-base sm:text-lg font-bold"
                     placeholder="Client Name"
                   />
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleSaveName}>
-                    <Check className="w-4 h-4 text-green-600" />
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600" onClick={handleSaveName}>
+                    <Check className="w-4 h-4" />
                   </Button>
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8"
+                    className="h-8 w-8 text-gray-400"
                     onClick={() => {
                       setEditingName(false);
                       setNameInput(client.name || '');
                     }}
                   >
-                    <X className="w-4 h-4 text-gray-400" />
+                    <X className="w-4 h-4" />
                   </Button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                  <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
                     {client.name || 'Unnamed Client'}
                   </h1>
                   <button
@@ -484,208 +592,55 @@ export default function ClientProfilePage({
                   </button>
                 </div>
               )}
+
+              {typeof client.status === 'object' && client.status && (
+                <span
+                  className="text-xs px-2.5 py-0.5 rounded-full font-semibold border flex items-center gap-1.5 shadow-2xs"
+                  style={{
+                    backgroundColor: `${client.status.color}15`,
+                    color: client.status.color,
+                    borderColor: `${client.status.color}35`,
+                  }}
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: client.status.color }}
+                  />
+                  {client.status.name}
+                </span>
+              )}
+
               {client.isArchived && (
-                <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full font-medium">
+                <span className="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-medium">
                   Archived
                 </span>
               )}
             </div>
+
             <p className="text-xs text-gray-400 font-mono">
-              ID: {client.clientId} • Created {formatDate(client.createdAt)}
+              ID: {client.clientId} • Added {formatDate(client.createdAt)}
             </p>
-
-            {/* Phone / WhatsApp */}
-            {editingPhone ? (
-              <div className="flex items-center gap-2 mt-1">
-                <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                <Input
-                  value={phoneInput}
-                  onChange={(e) => setPhoneInput(e.target.value)}
-                  className="h-7 text-sm w-44"
-                  placeholder="+91 98765 43210"
-                  type="tel"
-                />
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSavePhone}>
-                  <Check className="w-3.5 h-3.5 text-green-600" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7"
-                  onClick={() => { setEditingPhone(false); setPhoneInput(client.phone || ''); }}
-                >
-                  <X className="w-3.5 h-3.5 text-gray-400" />
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 mt-1">
-                <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                <span className="text-sm text-gray-600">
-                  {client.phone || <span className="text-gray-400 italic text-xs">No phone number — click to add</span>}
-                </span>
-                <button
-                  onClick={() => setEditingPhone(true)}
-                  className="p-0.5 text-gray-400 hover:text-gray-600 rounded transition-colors"
-                  title="Edit Phone Number"
-                >
-                  <Edit2 className="w-3 h-3" />
-                </button>
-              </div>
-            )}
-
-            {/* Event / Shoot Date */}
-            {editingDate ? (
-              <div className="flex items-center gap-2 mt-1.5">
-                <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                <Input
-                  type="date"
-                  value={dateInput}
-                  onChange={(e) => setDateInput(e.target.value)}
-                  className="h-7 text-xs w-44"
-                />
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSaveDate}>
-                  <Check className="w-3.5 h-3.5 text-green-600" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7"
-                  onClick={() => { setEditingDate(false); setDateInput(client.date || ''); }}
-                >
-                  <X className="w-3.5 h-3.5 text-gray-400" />
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 mt-1">
-                <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                <span className="text-sm text-gray-600">
-                  {client.date ? (
-                    <span>Event Date: <span className="font-medium text-gray-800">{formatDate(client.date)}</span></span>
-                  ) : (
-                    <span className="text-gray-400 italic text-xs">No event date — click to set</span>
-                  )}
-                </span>
-                {client.dates && client.dates.length > 1 && (
-                  <span className="text-xs font-semibold text-[#2C8567] bg-[#2C8567]/10 px-2 py-0.5 rounded">
-                    {client.dates.length} Days Shoot
-                  </span>
-                )}
-                <button
-                  onClick={() => setEditingDate(true)}
-                  className="p-0.5 text-gray-400 hover:text-gray-600 rounded transition-colors"
-                  title="Edit Event Date"
-                >
-                  <Edit2 className="w-3 h-3" />
-                </button>
-              </div>
-            )}
-
-            {/* Location */}
-            {client.location && (
-              <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
-                <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                <span>Shoot Location: <span className="font-medium text-gray-800">{client.location}</span></span>
-              </div>
-            )}
-
-            {/* Requirements */}
-            {client.requirements && client.requirements.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                <span className="text-xs font-medium text-gray-500 mr-1">Requirements:</span>
-                {client.requirements.map((req, i) => (
-                  <span
-                    key={i}
-                    className="text-xs font-medium text-[#2C8567] bg-[#2C8567]/8 border border-[#2C8567]/20 px-2 py-0.5 rounded-md"
-                  >
-                    {req}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Confirmed Work Price & Payment */}
-            {editingPrice ? (
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                <IndianRupee className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-                <Input
-                  type="number"
-                  placeholder="Work Price (₹)"
-                  value={priceInput}
-                  onChange={(e) => setPriceInput(e.target.value)}
-                  className="h-7 text-xs w-32 font-semibold"
-                />
-                <Input
-                  type="number"
-                  placeholder="Advance Paid (₹)"
-                  value={advanceInput}
-                  onChange={(e) => setAdvanceInput(e.target.value)}
-                  className="h-7 text-xs w-32 font-semibold"
-                />
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSavePrice}>
-                  <Check className="w-3.5 h-3.5 text-green-600" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7"
-                  onClick={() => {
-                    setEditingPrice(false);
-                    setPriceInput(String(client.workPrice || 0));
-                    setAdvanceInput(String(client.advancePaid || 0));
-                  }}
-                >
-                  <X className="w-3.5 h-3.5 text-gray-400" />
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 mt-1">
-                <IndianRupee className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-                <span className="text-sm text-gray-700">
-                  Confirmed Work Price:{' '}
-                  <span className="font-bold text-gray-900 font-mono">
-                    {client.workPrice ? `₹${client.workPrice.toLocaleString('en-IN')}` : '₹0'}
-                  </span>
-                  {client.advancePaid ? (
-                    <span className="ml-2 text-xs text-blue-700 font-semibold font-mono">
-                      (Adv Paid: ₹{client.advancePaid.toLocaleString('en-IN')})
-                    </span>
-                  ) : null}
-                  {client.paymentStatus === 'fully-paid' && (
-                    <span className="ml-2 text-xs font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                      Paid in Full ✅
-                    </span>
-                  )}
-                </span>
-                <button
-                  onClick={() => setEditingPrice(true)}
-                  className="p-0.5 text-gray-400 hover:text-gray-600 rounded transition-colors"
-                  title="Edit Work Price & Payment"
-                >
-                  <Edit2 className="w-3 h-3" />
-                </button>
-              </div>
-            )}
           </div>
 
-          {/* Status selector & Move to New button */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+          {/* Stage Dropdown & Move to New */}
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
             {typeof client.status === 'object' && client.status.name.toLowerCase() !== 'new' && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleMoveToNew}
-                className="text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-300 gap-1 h-9 text-xs font-semibold"
+                className="text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-300 gap-1 h-8 text-xs font-semibold"
                 title="Move client back to New column"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-3 h-3" />
                 <span>Move to New</span>
               </Button>
             )}
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 font-medium">Status:</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-gray-500 font-medium">Stage:</span>
               <Select value={currentStatusId} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-[170px] h-9 bg-gray-50 font-medium">
+                <SelectTrigger className="w-[140px] sm:w-[160px] h-8 bg-gray-50 font-medium text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -705,28 +660,282 @@ export default function ClientProfilePage({
             </div>
           </div>
         </div>
+
+        {/* 4 Clean Metric Cards (2x2 on Mobile, 4-col on Desktop) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Card 1: Event Date & Location */}
+          <div className="p-3 rounded-xl bg-gray-50/80 border border-gray-100/90 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
+                <Calendar className="w-3 h-3 text-[#2C8567]" />
+                <span>Shoot Date</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setEditingDate(true)}
+                className="text-gray-400 hover:text-gray-700 p-0.5"
+                title="Edit date"
+              >
+                <Edit2 className="w-3 h-3" />
+              </button>
+            </div>
+
+            {editingDate ? (
+              <div className="flex items-center gap-1 pt-1">
+                <Input
+                  type="date"
+                  value={dateInput}
+                  onChange={(e) => setDateInput(e.target.value)}
+                  className="h-7 text-xs flex-1 bg-white"
+                />
+                <Button size="icon" variant="ghost" className="h-7 w-7 text-green-600" onClick={handleSaveDate}>
+                  <Check className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 text-gray-400"
+                  onClick={() => { setEditingDate(false); setDateInput(client.date || ''); }}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm font-bold text-gray-900">
+                  {client.date ? formatDate(client.date) : <span className="text-gray-400 italic font-normal">Not set</span>}
+                </p>
+                {client.location && (
+                  <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
+                    <span className="truncate">{client.location}</span>
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Card 2: Contact Phone & WhatsApp */}
+          <div className="p-3 rounded-xl bg-gray-50/80 border border-gray-100/90 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
+                <Phone className="w-3 h-3 text-blue-600" />
+                <span>Contact Phone</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setEditingPhone(true)}
+                className="text-gray-400 hover:text-gray-700 p-0.5"
+                title="Edit phone"
+              >
+                <Edit2 className="w-3 h-3" />
+              </button>
+            </div>
+
+            {editingPhone ? (
+              <div className="flex items-center gap-1 pt-1">
+                <Input
+                  value={phoneInput}
+                  onChange={(e) => setPhoneInput(e.target.value)}
+                  className="h-7 text-xs flex-1 bg-white"
+                  placeholder="+91..."
+                />
+                <Button size="icon" variant="ghost" className="h-7 w-7 text-green-600" onClick={handleSavePhone}>
+                  <Check className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 text-gray-400"
+                  onClick={() => { setEditingPhone(false); setPhoneInput(client.phone || ''); }}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-1 pt-0.5">
+                <p className="text-sm font-bold text-gray-900 truncate">
+                  {client.phone || <span className="text-gray-400 italic font-normal text-xs">No phone</span>}
+                </p>
+                {client.phone && (
+                  <button
+                    type="button"
+                    onClick={handleWhatsApp}
+                    className="p-1 rounded-md text-emerald-800 bg-emerald-100/70 hover:bg-emerald-200 transition-colors shrink-0"
+                    title="Chat on WhatsApp"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5 text-[#2C8567]" />
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Card 3: Confirmed Work Price */}
+          <div className="p-3 rounded-xl bg-gray-50/80 border border-gray-100/90 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
+                <IndianRupee className="w-3 h-3 text-[#2C8567]" />
+                <span>Confirmed Price</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setEditingPrice(true)}
+                className="text-gray-400 hover:text-gray-700 p-0.5"
+                title="Edit price & advance"
+              >
+                <Edit2 className="w-3 h-3" />
+              </button>
+            </div>
+
+            {editingPrice ? (
+              <div className="flex items-center gap-1 pt-1">
+                <Input
+                  type="number"
+                  placeholder="Price"
+                  value={priceInput}
+                  onChange={(e) => setPriceInput(e.target.value)}
+                  className="h-7 text-xs w-20 font-mono font-bold bg-white"
+                />
+                <Input
+                  type="number"
+                  placeholder="Adv"
+                  value={advanceInput}
+                  onChange={(e) => setAdvanceInput(e.target.value)}
+                  className="h-7 text-xs w-16 font-mono bg-white"
+                />
+                <Button size="icon" variant="ghost" className="h-7 w-7 text-green-600" onClick={handleSavePrice}>
+                  <Check className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 text-gray-400"
+                  onClick={() => setEditingPrice(false)}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <p className="text-lg font-bold font-mono text-gray-900 leading-tight">
+                  {client.workPrice ? `₹${client.workPrice.toLocaleString('en-IN')}` : '₹0'}
+                </p>
+                <p className="text-[11px] text-gray-500">Agreed Shoot Package</p>
+              </div>
+            )}
+          </div>
+
+          {/* Card 4: Advance & Balance Status */}
+          <div className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-100 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider">
+                Advance & Balance
+              </span>
+              {client.paymentStatus === 'fully-paid' ? (
+                <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded">
+                  Paid in Full ✅
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold text-amber-900 bg-amber-100 px-1.5 py-0.2 rounded">
+                  Due ⏳
+                </span>
+              )}
+            </div>
+
+            <div>
+              <p className="text-sm font-bold font-mono text-emerald-950">
+                Adv: ₹{(client.advancePaid || 0).toLocaleString('en-IN')}
+              </p>
+              <p className="text-xs text-amber-900 font-mono font-semibold">
+                Balance: ₹{Math.max(0, (client.workPrice || 0) - (client.advancePaid || 0)).toLocaleString('en-IN')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Requirements Pills */}
+        {client.requirements && client.requirements.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+            <span className="text-xs font-semibold text-gray-500 mr-0.5">Requirements:</span>
+            {client.requirements.map((req, i) => (
+              <span
+                key={i}
+                className="text-[11px] font-medium text-[#2C8567] bg-[#2C8567]/8 border border-[#2C8567]/20 px-2 py-0.5 rounded-md"
+              >
+                {req}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="notes" className="space-y-4">
-        <TabsList className="bg-white border border-gray-100 p-1 rounded-xl shadow-sm">
-          <TabsTrigger value="notes" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
-            Notes & Requirements ({client.notes?.length || 0})
+      {/* Tabs (Mobile-Friendly Horizontal Swipeable Bar) */}
+      <Tabs defaultValue="deliverables" className="space-y-4">
+        <TabsList className="bg-white border border-gray-100 p-1 rounded-xl shadow-xs flex items-center overflow-x-auto max-w-full modal-scroll scrollbar-none gap-1 justify-start">
+          <TabsTrigger value="deliverables" className="flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap shrink-0">
+            <Clock className="w-3.5 h-3.5 text-purple-600" />
+            <span className="sm:hidden">Milestones</span>
+            <span className="hidden sm:inline">Post-Production Milestones</span>
           </TabsTrigger>
-          <TabsTrigger value="package" className="flex items-center gap-2">
-            <Package className="w-4 h-4" />
-            Package Deliverables {client.packageDetails ? '✓' : ''}
+          <TabsTrigger value="payments" className="flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap shrink-0">
+            <IndianRupee className="w-3.5 h-3.5 text-[#2C8567]" />
+            <span className="sm:hidden">Payments</span>
+            <span className="hidden sm:inline">Payment Installments</span>
           </TabsTrigger>
-          <TabsTrigger value="activity" className="flex items-center gap-2">
-            <History className="w-4 h-4" />
-            Status History & Logs
+          <TabsTrigger value="notes" className="flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap shrink-0">
+            <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+            <span>Notes ({client.notes?.length || 0})</span>
+          </TabsTrigger>
+          <TabsTrigger value="package" className="flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap shrink-0">
+            <Package className="w-3.5 h-3.5 text-amber-600" />
+            <span className="sm:hidden">Package</span>
+            <span className="hidden sm:inline">Package Scope {client.packageDetails ? '✓' : ''}</span>
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap shrink-0">
+            <History className="w-3.5 h-3.5 text-gray-500" />
+            <span className="sm:hidden">History</span>
+            <span className="hidden sm:inline">Audit History</span>
           </TabsTrigger>
         </TabsList>
 
+        {/* Feature 1: Post-Production Deliverables Pipeline */}
+        <TabsContent value="deliverables" className="space-y-4">
+          <DeliverableTracker
+            client={client}
+            onUpdate={async (updatedDeliverables) => {
+              const res = await fetch(`/api/clients/${client._id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ deliverables: updatedDeliverables }),
+              });
+              if (!res.ok) throw new Error('Update failed');
+              const json = await res.json();
+              setClient(json.data);
+            }}
+          />
+        </TabsContent>
+
+        {/* Feature 3: Payment Installment Schedule */}
+        <TabsContent value="payments" className="space-y-4">
+          <PaymentInstallmentsCard
+            client={client}
+            onUpdate={async (updatedInstallments) => {
+              const res = await fetch(`/api/clients/${client._id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ installments: updatedInstallments }),
+              });
+              if (!res.ok) throw new Error('Update failed');
+              const json = await res.json();
+              setClient(json.data);
+            }}
+          />
+        </TabsContent>
+
         {/* Tab 1: Notes */}
         <TabsContent value="notes" className="space-y-4">
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+          <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm space-y-4">
             <h3 className="text-sm font-semibold text-gray-900">Add Note</h3>
             <form onSubmit={handleAddNote} className="space-y-3">
               <Textarea
@@ -744,7 +953,7 @@ export default function ClientProfilePage({
             </form>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+          <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm space-y-3">
             <h3 className="text-sm font-semibold text-gray-900">Notes Timeline</h3>
             {(!client.notes || client.notes.length === 0) ? (
               <p className="text-sm text-gray-400 py-4 text-center">No notes recorded yet.</p>
@@ -768,7 +977,7 @@ export default function ClientProfilePage({
 
         {/* Tab 2: Package Deliverables & PDF Conversion */}
         <TabsContent value="package" className="space-y-4">
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+          <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-3">
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">

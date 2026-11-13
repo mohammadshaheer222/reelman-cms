@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useTransition } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   GripVertical,
   Plus,
@@ -46,6 +47,7 @@ export function KanbanBoard({
   onAddClientForStatus,
   onOpenCallIntake,
 }: KanbanBoardProps) {
+  const router = useRouter();
   const [, startTransition] = useTransition();
 
   const effectiveStatuses = useMemo(() => {
@@ -59,6 +61,9 @@ export function KanbanBoard({
 
   // Quick edit modal target
   const [editTarget, setEditTarget] = useState<{ client: Client; field: EditField } | null>(null);
+
+  // Mobile selected stage pill (defaults to 'all')
+  const [mobileSelectedStage, setMobileSelectedStage] = useState<string>('all');
 
   // Merge initial clients with local overrides
   const effectiveClients = useMemo(() => {
@@ -293,7 +298,45 @@ export function KanbanBoard({
 
   return (
     <>
-      <div className="relative w-full">
+      <div className="relative w-full space-y-3">
+        {/* Mobile Stage Selector Tabs (sm:hidden) */}
+        <div className="sm:hidden flex items-center gap-1.5 overflow-x-auto pb-1 modal-scroll">
+          <button
+            type="button"
+            onClick={() => setMobileSelectedStage('all')}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+              mobileSelectedStage === 'all'
+                ? 'bg-gray-900 text-white shadow-xs'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            All Stages ({effectiveClients.length})
+          </button>
+          {effectiveStatuses.map((st) => {
+            const count = (columns[String(st._id)] || []).length;
+            const isSelected = mobileSelectedStage === String(st._id);
+            return (
+              <button
+                key={st._id}
+                type="button"
+                onClick={() => setMobileSelectedStage(String(st._id))}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${
+                  isSelected
+                    ? 'bg-white shadow-xs text-gray-900 ring-2'
+                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                }`}
+                style={isSelected ? { borderColor: st.color } : {}}
+              >
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: st.color }} />
+                <span>{st.name}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-200/70 text-gray-700 font-mono">
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Kanban Board Container with smooth horizontal scrolling */}
         <div className="flex gap-4 overflow-x-auto pb-6 pt-1 px-0.5 modal-scroll snap-x">
           {effectiveStatuses.map((status) => {
@@ -301,6 +344,8 @@ export function KanbanBoard({
             const isDragOver = dragOverStatusId === status._id;
             const totalStageValue = columnTotalValues[String(status._id)] || 0;
             const isNewColumn = status.name.toLowerCase() === 'new';
+            const isMobileHidden =
+              mobileSelectedStage !== 'all' && mobileSelectedStage !== String(status._id);
 
             return (
               <div
@@ -308,7 +353,9 @@ export function KanbanBoard({
                 onDragOver={(e) => handleDragOverColumn(e, status._id)}
                 onDragLeave={(e) => handleDragLeaveColumn(e, status._id)}
                 onDrop={(e) => handleDrop(e, status)}
-                className={`flex-shrink-0 w-80 flex flex-col rounded-2xl transition-all duration-200 border ${
+                className={`flex-shrink-0 ${
+                  isMobileHidden ? 'hidden sm:flex' : 'flex'
+                } w-full sm:w-80 flex-col rounded-2xl transition-all duration-200 border ${
                   isDragOver
                     ? 'bg-[#2C8567]/5 border-[#2C8567] ring-2 ring-[#2C8567]/30 shadow-lg scale-[1.01]'
                     : 'bg-gray-50/90 border-gray-200/80 shadow-sm'
@@ -406,7 +453,12 @@ export function KanbanBoard({
                           draggable
                           onDragStart={(e) => handleDragStart(e, client)}
                           onDragEnd={handleDragEnd}
-                          className={`group relative bg-white rounded-xl border border-gray-200/80 p-3 shadow-xs hover:shadow-md hover:border-[#2C8567]/40 transition-all cursor-grab active:cursor-grabbing select-none ${
+                          onClick={() => {
+                            if (!isDragging) {
+                              router.push(`/clients/${client._id}`);
+                            }
+                          }}
+                          className={`group relative bg-white rounded-xl border border-gray-200/80 p-3 shadow-xs hover:shadow-md hover:border-[#2C8567]/40 transition-all cursor-pointer select-none ${
                             isDragging
                               ? 'opacity-40 scale-95 ring-2 ring-[#2C8567] shadow-xl rotate-1'
                               : ''

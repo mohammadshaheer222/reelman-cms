@@ -16,14 +16,55 @@ export default function ClientsPage() {
   const [sort, setSort] = useState('newest');
   const [page, setPage] = useState(1);
 
+  // Restore user's preferred view mode from URL search param or localStorage
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlView = params.get('view') as ViewMode | null;
+      if (urlView && ['kanban', 'calendar', 'grid', 'table'].includes(urlView)) {
+        setViewMode(urlView);
+        localStorage.setItem('reelman_clients_view_mode', urlView);
+        return;
+      }
+
+      const saved = localStorage.getItem('reelman_clients_view_mode') as ViewMode | null;
+      if (saved && ['kanban', 'calendar', 'grid', 'table'].includes(saved)) {
+        setViewMode(saved);
+        return;
+      }
+
+      // Default to 'grid' (cards view) on mobile screens ONLY if no user preference was previously saved
+      if (window.innerWidth < 768) {
+        setViewMode('grid');
+      }
+    } catch {
+      // Ignore localStorage access errors
+    }
+  }, []);
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem('reelman_clients_view_mode', mode);
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.set('view', mode);
+        window.history.replaceState({}, '', url.toString());
+      }
+    } catch {
+      // Ignore
+    }
+  }, []);
+
   // Modal state
   const [addClientOpen, setAddClientOpen] = useState(false);
   const [preselectedStatusId, setPreselectedStatusId] = useState<string | undefined>(undefined);
 
   const { statuses, loading: statusesLoading } = useStatuses();
 
-  // For Board mode, load a larger batch (150) so all status columns show pipeline clients properly
-  const limit = viewMode === 'kanban' ? 150 : 12;
+  // Load 150 for Kanban, 30 for grid/list so all clients are visible without excessive paging
+  const limit = viewMode === 'kanban' ? 150 : 30;
 
   const { clients, total, totalPages, loading: clientsLoading, refetch } = useClients({
     search,
@@ -111,7 +152,7 @@ export default function ClientsPage() {
           page={page}
           statuses={statuses}
           viewMode={viewMode}
-          onViewModeChange={setViewMode}
+          onViewModeChange={handleViewModeChange}
           onPageChange={setPage}
           onAddClient={() => {
             setPreselectedStatusId(undefined);

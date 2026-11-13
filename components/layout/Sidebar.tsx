@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import {
   Home,
   Users,
+  Calendar,
   Package,
   History,
   UserCheck,
@@ -19,6 +20,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 export const navItems = [
   { label: 'Home', href: '/', icon: Home, description: 'Overview and revenue metrics' },
   { label: 'Clients', href: '/clients', icon: Users, description: 'Client bookings and status tracking' },
+  { label: 'Calendar', href: '/calendar', icon: Calendar, description: 'Shoot schedule and availability conflicts' },
   { label: 'Notepad', href: '/notepad', icon: StickyNote, description: 'Rough scratchpad for quick phone notes' },
   { label: 'Packages', href: '/packages', icon: Package, description: 'Package builder and PDF proposals' },
   { label: 'History', href: '/activity', icon: History, description: 'Recent audit activity and team logs' },

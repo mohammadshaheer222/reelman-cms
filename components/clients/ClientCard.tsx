@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   MessageSquare,
   Calendar,
@@ -28,6 +29,7 @@ interface ClientCardProps {
 }
 
 export function ClientCard({ client: initialClient, statuses = [], onUpdated }: ClientCardProps) {
+  const router = useRouter();
   const [client, setClient] = useState<Client>(initialClient);
   const [editField, setEditField] = useState<EditField | null>(null);
 
@@ -95,7 +97,10 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
 
   return (
     <>
-      <Card className="p-4 hover:shadow-md hover:border-[#2C8567]/30 transition-all group flex flex-col h-full justify-between">
+      <Card
+        onClick={() => router.push(`/clients/${client._id}`)}
+        className="p-4 hover:shadow-md hover:border-[#2C8567]/30 transition-all group flex flex-col h-full justify-between cursor-pointer"
+      >
         <div>
           {/* Name — click to edit */}
           <div className="flex items-start justify-between gap-2 mb-2">
