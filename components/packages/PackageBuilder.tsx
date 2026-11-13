@@ -128,12 +128,49 @@ export function PackageBuilder({
     }
   };
 
-  // Print / PDF Trigger
-  const handlePrintPDF = () => {
+  // Print / PDF Trigger (with preloading for fonts & images to avoid black cover on iOS Safari)
+  const handlePrintPDF = async () => {
     toast.dismiss();
-    setTimeout(() => {
-      window.print();
-    }, 100);
+    const toastId = toast.loading('Preparing high-quality PDF...');
+
+    try {
+      // 1. Wait for Google fonts to be loaded
+      if (typeof document !== 'undefined' && 'fonts' in document) {
+        await document.fonts.ready;
+      }
+
+      // 2. Pre-decode all images in print-root so Safari never renders them blank or black
+      const printRoot = document.getElementById('print-root');
+      if (printRoot) {
+        const images = Array.from(printRoot.querySelectorAll('img'));
+        await Promise.all(
+          images.map((img) => {
+            if (img.complete) {
+              return img.decode ? img.decode().catch(() => {}) : Promise.resolve();
+            }
+            return new Promise<void>((resolve) => {
+              img.onload = () => {
+                if (img.decode) {
+                  img.decode().catch(() => {}).then(() => resolve());
+                } else {
+                  resolve();
+                }
+              };
+              img.onerror = () => resolve();
+            });
+          })
+        );
+      }
+
+      // 3. Short wait for WebKit layout pass
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    } catch (err) {
+      console.error('Error preparing print:', err);
+    } finally {
+      toast.dismiss(toastId);
+    }
+
+    window.print();
   };
 
   // Save to DB

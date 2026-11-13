@@ -515,6 +515,10 @@ export function PackageBooklet({
     updateField('pagesList', updated);
   };
 
+  // Helper to resolve print-stable class vs screen-responsive class
+  const pCls = (screenCls: string, printCls: string) =>
+    isPrintMode ? printCls : screenCls;
+
   // Render a specific page item by its configuration
   const renderPageContent = (page: BookletPageItem, pageIdx: number) => {
     const pageBg = pkg.pageBackgrounds?.[page.id] || {};
@@ -538,7 +542,7 @@ export function PackageBooklet({
           isPrintMode ? 'rounded-none shadow-none p-12' : 'aspect-[1/1.4142] rounded-xl shadow-xl p-5 sm:p-10 md:p-12'
         } overflow-hidden flex flex-col justify-between select-text transition-all mx-auto ${textColorClass}`}
         style={{
-          backgroundColor: effectiveBgColor,
+          backgroundColor: effectiveBgImage ? 'transparent' : effectiveBgColor,
           ...(isPrintMode && isLast
             ? { breakAfter: 'avoid', pageBreakAfter: 'avoid' }
             : {}),
@@ -548,21 +552,27 @@ export function PackageBooklet({
           setActiveBgPopoverPageId(null);
         }}
       >
-        {/* Real image background layer: 100% supported by WebKit print engine without black background bug */}
+        {/* Real image background layer: 100% supported by WebKit print engine without CORS/data-url blocking */}
         {effectiveBgImage && (
           <img
             src={effectiveBgImage}
             alt="Page Background"
             className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
             style={{ objectPosition: 'center' }}
-            crossOrigin="anonymous"
           />
         )}
+        {/* Tint overlay: uses pure black with opacity for print to prevent WebKit print from rendering transparent gradients as black */}
         {effectiveBgImage && (
           <div
-            className="absolute inset-0 pointer-events-none z-0"
+            className="absolute inset-0 pointer-events-none z-0 print-cover-overlay"
             style={{
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.68) 100%)',
+              backgroundColor: isPrintMode ? '#000000' : undefined,
+              opacity: isPrintMode ? 0.35 : undefined,
+              background: isPrintMode
+                ? undefined
+                : 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.68) 100%)',
+              WebkitPrintColorAdjust: 'exact',
+              printColorAdjust: 'exact',
             }}
           />
         )}
@@ -754,8 +764,18 @@ export function PackageBooklet({
         {/* PAGE 1: COVER */}
         {page.type === 'cover' && (
           <>
-            <div className="relative z-10 text-center mb-4 sm:mb-8 px-2 sm:px-4 mt-auto">
-              <h1 className="text-xl sm:text-3xl md:text-4xl tracking-[0.25em] sm:tracking-[0.35em] uppercase drop-shadow-md">
+            <div
+              className={pCls(
+                'relative z-10 text-center mb-4 sm:mb-8 px-2 sm:px-4 mt-auto',
+                'relative z-10 text-center mb-8 px-4 mt-auto'
+              )}
+            >
+              <h1
+                className={pCls(
+                  'text-xl sm:text-3xl md:text-4xl tracking-[0.25em] sm:tracking-[0.35em] uppercase drop-shadow-md',
+                  'text-4xl tracking-[0.35em] uppercase'
+                )}
+              >
                 <EditableSpan
                   id="coverBrand"
                   label="Brand Header"
@@ -775,7 +795,12 @@ export function PackageBooklet({
                 />
               </h1>
 
-              <p className="text-2xl sm:text-4xl md:text-5xl -mt-1 sm:-mt-3 drop-shadow-md block">
+              <p
+                className={pCls(
+                  'text-2xl sm:text-4xl md:text-5xl -mt-1 sm:-mt-3 drop-shadow-md block',
+                  'text-5xl -mt-3 block'
+                )}
+              >
                 <EditableSpan
                   id="coverSubtitle"
                   label="Cover Subtitle"
@@ -795,7 +820,12 @@ export function PackageBooklet({
                 />
               </p>
 
-              <p className="tracking-[0.2em] sm:tracking-[0.25em] text-[10px] sm:text-xs uppercase mt-2 sm:mt-4 block opacity-90">
+              <p
+                className={pCls(
+                  'tracking-[0.2em] sm:tracking-[0.25em] text-[10px] sm:text-xs uppercase mt-2 sm:mt-4 block opacity-90',
+                  'tracking-[0.25em] text-xs uppercase mt-4 block opacity-90'
+                )}
+              >
                 <EditableSpan
                   id="clientName"
                   label="Client / Proposal"
@@ -824,7 +854,10 @@ export function PackageBooklet({
 
             <div className="relative z-10 text-center">
               <p
-                className="tracking-[0.2em] sm:tracking-[0.25em] text-[8px] sm:text-[10px] uppercase opacity-75"
+                className={pCls(
+                  'tracking-[0.2em] sm:tracking-[0.25em] text-[8px] sm:text-[10px] uppercase opacity-75',
+                  'tracking-[0.25em] text-[10px] uppercase opacity-75'
+                )}
                 style={getStyleFor('coverFooterText', 'body')}
               >
                 <EditableSpan
@@ -855,8 +888,18 @@ export function PackageBooklet({
         {/* PAGE 2: STORY (Who We Are) */}
         {page.type === 'story' && (
           <>
-            <div className="flex-1 flex flex-col justify-center max-w-sm sm:max-w-md mx-auto text-center space-y-4 sm:space-y-6">
-              <h2 className="text-base sm:text-xl md:text-2xl tracking-[0.2em] sm:tracking-[0.28em] uppercase">
+            <div
+              className={pCls(
+                'flex-1 flex flex-col justify-center max-w-sm sm:max-w-md mx-auto text-center space-y-4 sm:space-y-6',
+                'flex-1 flex flex-col justify-center max-w-md mx-auto text-center space-y-6'
+              )}
+            >
+              <h2
+                className={pCls(
+                  'text-base sm:text-xl md:text-2xl tracking-[0.2em] sm:tracking-[0.28em] uppercase',
+                  'text-2xl tracking-[0.28em] uppercase'
+                )}
+              >
                 <EditableSpan
                   id="whoWeAreTitle"
                   label="Page 2 Title"
@@ -876,7 +919,12 @@ export function PackageBooklet({
                 />
               </h2>
 
-              <div className="text-[10px] sm:text-xs md:text-sm tracking-normal sm:tracking-[0.06em] leading-relaxed sm:leading-[1.9] text-justify sm:text-center opacity-90">
+              <div
+                className={pCls(
+                  'text-[10px] sm:text-xs md:text-sm tracking-normal sm:tracking-[0.06em] leading-relaxed sm:leading-[1.9] text-justify sm:text-center opacity-90',
+                  'text-sm tracking-[0.06em] leading-[1.9] text-center opacity-90'
+                )}
+              >
                 <EditableSpan
                   id="whoWeAreText"
                   label="Who We Are Story"
@@ -898,9 +946,12 @@ export function PackageBooklet({
               </div>
             </div>
 
-            <div className="text-center pt-4 sm:pt-6">
+            <div className={pCls('text-center pt-4 sm:pt-6', 'text-center pt-6')}>
               <p
-                className="text-[11px] sm:text-xs tracking-widest opacity-80"
+                className={pCls(
+                  'text-[11px] sm:text-xs tracking-widest opacity-80',
+                  'text-xs tracking-widest opacity-80'
+                )}
                 style={getStyleFor('whoWeAreFooter', 'script', {
                   fontSize: '1.15rem',
                 })}
@@ -936,7 +987,12 @@ export function PackageBooklet({
         {page.type === 'scope' && (
           <>
             <div className="text-right z-10">
-              <h2 className="text-base sm:text-xl tracking-[0.2em] uppercase">
+              <h2
+                className={pCls(
+                  'text-base sm:text-xl tracking-[0.2em] uppercase',
+                  'text-xl tracking-[0.2em] uppercase'
+                )}
+              >
                 <EditableSpan
                   id="pricelistTitle"
                   label="Scope Header"
@@ -955,7 +1011,12 @@ export function PackageBooklet({
                   isPrintMode={isPrintMode}
                 />
               </h2>
-              <p className="text-xl sm:text-3xl -mt-1 sm:-mt-2 mr-1 opacity-90">
+              <p
+                className={pCls(
+                  'text-xl sm:text-3xl -mt-1 sm:-mt-2 mr-1 opacity-90',
+                  'text-3xl -mt-2 mr-1 opacity-90'
+                )}
+              >
                 <EditableSpan
                   id="pricelistSubtitle"
                   label="Scope Subtitle"
@@ -976,12 +1037,22 @@ export function PackageBooklet({
               </p>
             </div>
 
-            <div className="z-10 my-auto space-y-3 sm:space-y-6 max-w-sm w-full">
+            <div
+              className={pCls(
+                'z-10 my-auto space-y-3 sm:space-y-6 max-w-sm w-full',
+                'z-10 my-auto space-y-6 max-w-sm w-full'
+              )}
+            >
               {pkg.events && pkg.events.length > 0
                 ? pkg.events.map((evt, idx) => (
                     <div key={idx} className="space-y-1 relative group/evt">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-xs sm:text-sm tracking-[0.2em] uppercase font-semibold">
+                        <h3
+                          className={pCls(
+                            'text-xs sm:text-sm tracking-[0.2em] uppercase font-semibold',
+                            'text-sm tracking-[0.2em] uppercase font-semibold'
+                          )}
+                        >
                           <EditableSpan
                             id={`event-${idx}`}
                             label={`Event: ${evt.name}`}
@@ -1026,7 +1097,10 @@ export function PackageBooklet({
                         {evt.crew.map((member, mIdx) => (
                           <p
                             key={mIdx}
-                            className="text-[10px] sm:text-xs tracking-wider opacity-85"
+                            className={pCls(
+                              'text-[10px] sm:text-xs tracking-wider opacity-85',
+                              'text-xs tracking-wider opacity-85'
+                            )}
                           >
                             <EditableSpan
                               id={`crew-${idx}-${mIdx}`}
@@ -1077,9 +1151,12 @@ export function PackageBooklet({
               )}
             </div>
 
-            <div className="text-center pt-3 sm:pt-4 z-10">
+            <div className={pCls('text-center pt-3 sm:pt-4 z-10', 'text-center pt-4 z-10')}>
               <p
-                className="text-[9px] sm:text-[10px] tracking-widest opacity-75"
+                className={pCls(
+                  'text-[9px] sm:text-[10px] tracking-widest opacity-75',
+                  'text-[10px] tracking-widest opacity-75'
+                )}
                 style={getStyleFor('contactWebP3', 'body')}
               >
                 <EditableSpan
@@ -1107,8 +1184,13 @@ export function PackageBooklet({
         {/* PAGE 4: DELIVERABLES */}
         {page.type === 'deliverables' && (
           <>
-            <div className="space-y-4 sm:space-y-6 z-10">
-              <h2 className="text-base sm:text-xl tracking-[0.25em] uppercase">
+            <div className={pCls('space-y-4 sm:space-y-6 z-10', 'space-y-6 z-10')}>
+              <h2
+                className={pCls(
+                  'text-base sm:text-xl tracking-[0.25em] uppercase',
+                  'text-xl tracking-[0.25em] uppercase'
+                )}
+              >
                 <EditableSpan
                   id="deliverablesTitle"
                   label="Deliverables Title"
@@ -1128,11 +1210,14 @@ export function PackageBooklet({
                 />
               </h2>
 
-              <ul className="space-y-1.5 sm:space-y-2.5 pt-1">
+              <ul className={pCls('space-y-1.5 sm:space-y-2.5 pt-1', 'space-y-2.5 pt-1')}>
                 {pkg.deliverables.map((item, idx) => (
                   <li
                     key={idx}
-                    className="text-[10px] sm:text-xs sm:text-sm tracking-wider flex items-center justify-between group/deliv opacity-90"
+                    className={pCls(
+                      'text-[10px] sm:text-xs sm:text-sm tracking-wider flex items-center justify-between group/deliv opacity-90',
+                      'text-sm tracking-wider flex items-center justify-between group/deliv opacity-90'
+                    )}
                   >
                     <div className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
@@ -1194,9 +1279,9 @@ export function PackageBooklet({
               )}
             </div>
 
-            <div className="space-y-2 sm:space-y-3 z-10 pt-4 sm:pt-6">
+            <div className={pCls('space-y-2 sm:space-y-3 z-10 pt-4 sm:pt-6', 'space-y-3 z-10 pt-6')}>
               <div className="space-y-0.5">
-                <p className="text-sm sm:text-base tracking-wider font-semibold">
+                <p className={pCls('text-sm sm:text-base tracking-wider font-semibold', 'text-base tracking-wider font-semibold')}>
                   <EditableSpan
                     id="totalAmountLabel"
                     label="Price Label"
@@ -1235,7 +1320,7 @@ export function PackageBooklet({
                   />
                 </p>
                 {pkg.amountNote && (
-                  <p className="text-[9px] sm:text-[11px] tracking-wider italic opacity-80">
+                  <p className={pCls('text-[9px] sm:text-[11px] tracking-wider italic opacity-80', 'text-[11px] tracking-wider italic opacity-80')}>
                     <EditableSpan
                       id="amountNote"
                       label="Amount Note"
@@ -1259,7 +1344,10 @@ export function PackageBooklet({
 
               <div className="text-center pt-2">
                 <p
-                  className="text-[9px] sm:text-[10px] tracking-widest opacity-75"
+                  className={pCls(
+                    'text-[9px] sm:text-[10px] tracking-widest opacity-75',
+                    'text-[10px] tracking-widest opacity-75'
+                  )}
                   style={getStyleFor('contactWebP4', 'body')}
                 >
                   <EditableSpan
@@ -1288,8 +1376,13 @@ export function PackageBooklet({
         {/* PAGE 5: TERMS */}
         {page.type === 'terms' && (
           <>
-            <div className="space-y-3 sm:space-y-4 z-10">
-              <h2 className="text-base sm:text-xl tracking-[0.2em] text-center uppercase mb-2 sm:mb-4">
+            <div className={pCls('space-y-3 sm:space-y-4 z-10', 'space-y-4 z-10')}>
+              <h2
+                className={pCls(
+                  'text-base sm:text-xl tracking-[0.2em] text-center uppercase mb-2 sm:mb-4',
+                  'text-xl tracking-[0.2em] text-center uppercase mb-4'
+                )}
+              >
                 <EditableSpan
                   id="termsTitle"
                   label="Terms Title"
@@ -1309,11 +1402,21 @@ export function PackageBooklet({
                 />
               </h2>
 
-              <div className="space-y-2 sm:space-y-3 max-w-md mx-auto">
+              <div
+                className={pCls(
+                  'space-y-2 sm:space-y-3 max-w-md mx-auto',
+                  'space-y-3 max-w-md mx-auto'
+                )}
+              >
                 {pkg.terms.map((t, idx) => (
                   <div key={idx} className="space-y-0.5 relative group/term">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-[10px] sm:text-xs tracking-wider uppercase font-semibold">
+                      <h3
+                        className={pCls(
+                          'text-[10px] sm:text-xs tracking-wider uppercase font-semibold',
+                          'text-xs tracking-wider uppercase font-semibold'
+                        )}
+                      >
                         •{' '}
                         <EditableSpan
                           id={`term-title-${idx}`}
@@ -1359,7 +1462,12 @@ export function PackageBooklet({
                       )}
                     </div>
 
-                    <p className="text-[9px] sm:text-[11px] leading-relaxed opacity-85">
+                    <p
+                      className={pCls(
+                        'text-[9px] sm:text-[11px] leading-relaxed opacity-85',
+                        'text-[11px] leading-relaxed opacity-85'
+                      )}
+                    >
                       <EditableSpan
                         id={`term-desc-${idx}`}
                         label="Term Description"
@@ -1406,9 +1514,12 @@ export function PackageBooklet({
               </div>
             </div>
 
-            <div className="text-center pt-3 sm:pt-4 z-10">
+            <div className={pCls('text-center pt-3 sm:pt-4 z-10', 'text-center pt-4 z-10')}>
               <p
-                className="text-[11px] sm:text-xs tracking-widest opacity-80"
+                className={pCls(
+                  'text-[11px] sm:text-xs tracking-widest opacity-80',
+                  'text-xs tracking-widest opacity-80'
+                )}
                 style={getStyleFor('p5Script', 'script', {
                   fontSize: '1.15rem',
                 })}
@@ -1444,8 +1555,18 @@ export function PackageBooklet({
         {/* PAGE 6: DELIVERY TIMELINES */}
         {page.type === 'delivery' && (
           <>
-            <div className="space-y-3 sm:space-y-4 z-10 max-w-md mx-auto w-full">
-              <h2 className="text-base sm:text-xl tracking-[0.2em] text-center uppercase mb-2 sm:mb-4">
+            <div
+              className={pCls(
+                'space-y-3 sm:space-y-4 z-10 max-w-md mx-auto w-full',
+                'space-y-4 z-10 max-w-md mx-auto w-full'
+              )}
+            >
+              <h2
+                className={pCls(
+                  'text-base sm:text-xl tracking-[0.2em] text-center uppercase mb-2 sm:mb-4',
+                  'text-xl tracking-[0.2em] text-center uppercase mb-4'
+                )}
+              >
                 <EditableSpan
                   id="deliveriesTitle"
                   label="Delivery Header"
@@ -1468,7 +1589,12 @@ export function PackageBooklet({
               {pkg.deliveries.map((deliv, idx) => (
                 <div key={idx} className="space-y-0.5 relative group/del">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-[10px] sm:text-xs tracking-wider uppercase font-semibold">
+                    <h3
+                      className={pCls(
+                        'text-[10px] sm:text-xs tracking-wider uppercase font-semibold',
+                        'text-xs tracking-wider uppercase font-semibold'
+                      )}
+                    >
                       •{' '}
                       <EditableSpan
                         id={`deliv-title-${idx}`}
@@ -1514,7 +1640,12 @@ export function PackageBooklet({
                     )}
                   </div>
 
-                  <p className="text-[9px] sm:text-[11px] leading-relaxed opacity-85 whitespace-pre-line">
+                  <p
+                    className={pCls(
+                      'text-[9px] sm:text-[11px] leading-relaxed opacity-85 whitespace-pre-line',
+                      'text-[11px] leading-relaxed opacity-85 whitespace-pre-line'
+                    )}
+                  >
                     <EditableSpan
                       id={`deliv-desc-${idx}`}
                       label="Timeline Description"
@@ -1560,9 +1691,12 @@ export function PackageBooklet({
               )}
             </div>
 
-            <div className="text-center pt-3 sm:pt-4 z-10">
+            <div className={pCls('text-center pt-3 sm:pt-4 z-10', 'text-center pt-4 z-10')}>
               <p
-                className="text-[11px] sm:text-xs tracking-widest opacity-80"
+                className={pCls(
+                  'text-[11px] sm:text-xs tracking-widest opacity-80',
+                  'text-xs tracking-widest opacity-80'
+                )}
                 style={getStyleFor('p6Script', 'script', {
                   fontSize: '1.15rem',
                 })}
@@ -1598,8 +1732,13 @@ export function PackageBooklet({
         {/* PAGE 7: POLICIES */}
         {page.type === 'policies' && (
           <>
-            <div className="space-y-3 sm:space-y-4 z-10">
-              <h2 className="text-base sm:text-xl tracking-[0.2em] text-center uppercase mb-2 sm:mb-4">
+            <div className={pCls('space-y-3 sm:space-y-4 z-10', 'space-y-4 z-10')}>
+              <h2
+                className={pCls(
+                  'text-base sm:text-xl tracking-[0.2em] text-center uppercase mb-2 sm:mb-4',
+                  'text-xl tracking-[0.2em] text-center uppercase mb-4'
+                )}
+              >
                 <EditableSpan
                   id="policiesTitle"
                   label="Policy Header"
@@ -1619,7 +1758,12 @@ export function PackageBooklet({
                 />
               </h2>
 
-              <div className="space-y-1.5 sm:space-y-2.5 max-w-md mx-auto">
+              <div
+                className={pCls(
+                  'space-y-1.5 sm:space-y-2.5 max-w-md mx-auto',
+                  'space-y-2.5 max-w-md mx-auto'
+                )}
+              >
                 {pkg.policies.map((policy, idx) => (
                   <div
                     key={idx}
@@ -1627,7 +1771,12 @@ export function PackageBooklet({
                   >
                     <div className="flex items-start gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-current mt-1 shrink-0" />
-                      <p className="text-[9px] sm:text-[11px] leading-relaxed opacity-85">
+                      <p
+                        className={pCls(
+                          'text-[9px] sm:text-[11px] leading-relaxed opacity-85',
+                          'text-[11px] leading-relaxed opacity-85'
+                        )}
+                      >
                         <EditableSpan
                           id={`policy-${idx}`}
                           label="Policy Point"
@@ -1688,9 +1837,12 @@ export function PackageBooklet({
               </div>
             </div>
 
-            <div className="text-center pt-3 sm:pt-4 z-10">
+            <div className={pCls('text-center pt-3 sm:pt-4 z-10', 'text-center pt-4 z-10')}>
               <p
-                className="text-[11px] sm:text-xs tracking-widest opacity-80"
+                className={pCls(
+                  'text-[11px] sm:text-xs tracking-widest opacity-80',
+                  'text-xs tracking-widest opacity-80'
+                )}
                 style={getStyleFor('p7Script', 'script', {
                   fontSize: '1.15rem',
                 })}
@@ -1729,7 +1881,12 @@ export function PackageBooklet({
             <div />
 
             <div className="space-y-3 my-auto text-center">
-              <h2 className="text-base sm:text-xl md:text-2xl tracking-[0.25em] uppercase mb-2 sm:mb-3">
+              <h2
+                className={pCls(
+                  'text-base sm:text-xl md:text-2xl tracking-[0.25em] uppercase mb-2 sm:mb-3',
+                  'text-2xl tracking-[0.25em] uppercase mb-3'
+                )}
+              >
                 <EditableSpan
                   id="getInTouchTitle"
                   label="Contact Header"
@@ -1748,7 +1905,12 @@ export function PackageBooklet({
                   isPrintMode={isPrintMode}
                 />
               </h2>
-              <p className="text-[10px] sm:text-xs tracking-widest opacity-90">
+              <p
+                className={pCls(
+                  'text-[10px] sm:text-xs tracking-widest opacity-90',
+                  'text-xs tracking-widest opacity-90'
+                )}
+              >
                 <EditableSpan
                   id="contactWebP8"
                   label="Website URL"
@@ -1767,7 +1929,12 @@ export function PackageBooklet({
                   isPrintMode={isPrintMode}
                 />
               </p>
-              <p className="text-[10px] sm:text-xs tracking-widest opacity-90">
+              <p
+                className={pCls(
+                  'text-[10px] sm:text-xs tracking-widest opacity-90',
+                  'text-xs tracking-widest opacity-90'
+                )}
+              >
                 <EditableSpan
                   id="contactPhones"
                   label="Phone Numbers"
@@ -1796,9 +1963,12 @@ export function PackageBooklet({
               </p>
             </div>
 
-            <div className="pt-4 sm:pt-6 text-center">
+            <div className={pCls('pt-4 sm:pt-6 text-center', 'pt-6 text-center')}>
               <p
-                className="text-[8px] sm:text-[10px] tracking-[0.25em] uppercase opacity-70"
+                className={pCls(
+                  'text-[8px] sm:text-[10px] tracking-[0.25em] uppercase opacity-70',
+                  'text-[10px] tracking-[0.25em] uppercase opacity-70'
+                )}
                 style={getStyleFor('tagline', 'body')}
               >
                 <EditableSpan
@@ -1826,8 +1996,18 @@ export function PackageBooklet({
         {/* CUSTOM USER-ADDED PAGE */}
         {page.type === 'custom' && (
           <>
-            <div className="flex-1 flex flex-col justify-center max-w-sm sm:max-w-md mx-auto text-center space-y-4 my-auto">
-              <h2 className="text-base sm:text-xl md:text-2xl tracking-[0.2em] uppercase font-semibold">
+            <div
+              className={pCls(
+                'flex-1 flex flex-col justify-center max-w-sm sm:max-w-md mx-auto text-center space-y-4 my-auto',
+                'flex-1 flex flex-col justify-center max-w-md mx-auto text-center space-y-4 my-auto'
+              )}
+            >
+              <h2
+                className={pCls(
+                  'text-base sm:text-xl md:text-2xl tracking-[0.2em] uppercase font-semibold',
+                  'text-2xl tracking-[0.2em] uppercase font-semibold'
+                )}
+              >
                 <EditableSpan
                   id={`custom-title-${page.id}`}
                   label="Custom Page Title"
@@ -1849,7 +2029,12 @@ export function PackageBooklet({
                 />
               </h2>
 
-              <p className="text-lg sm:text-2xl -mt-1 block opacity-90">
+              <p
+                className={pCls(
+                  'text-lg sm:text-2xl -mt-1 block opacity-90',
+                  'text-2xl -mt-1 block opacity-90'
+                )}
+              >
                 <EditableSpan
                   id={`custom-sub-${page.id}`}
                   label="Custom Subtitle"
@@ -1871,7 +2056,12 @@ export function PackageBooklet({
                 />
               </p>
 
-              <div className="text-[10px] sm:text-xs md:text-sm tracking-normal leading-relaxed opacity-90 text-justify sm:text-center pt-2">
+              <div
+                className={pCls(
+                  'text-[10px] sm:text-xs md:text-sm tracking-normal leading-relaxed opacity-90 text-justify sm:text-center pt-2',
+                  'text-sm tracking-normal leading-relaxed opacity-90 text-center pt-2'
+                )}
+              >
                 <EditableSpan
                   id={`custom-content-${page.id}`}
                   label="Custom Content"
@@ -1900,7 +2090,7 @@ export function PackageBooklet({
               </div>
             </div>
 
-            <div className="text-center pt-4 sm:pt-6">
+            <div className={pCls('text-center pt-4 sm:pt-6', 'text-center pt-6')}>
               <p
                 className="text-[10px] tracking-widest uppercase opacity-70"
                 style={getStyleFor(`customFooter-${page.id}`, 'body')}

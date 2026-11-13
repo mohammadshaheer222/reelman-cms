@@ -208,13 +208,21 @@ body {
   z-index: 20;
 }
 
-/* Screen mode: hide print portal */
+/* Screen mode: keep print portal off-screen but in DOM so fonts & images pre-render & decode */
 #print-root {
-  display: none;
+  position: fixed;
+  top: 0;
+  left: -99999px;
+  width: 210mm;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -9999;
 }
 
 @page {
-  size: 210mm 297mm;
+  size: A4 portrait;
   margin: 0;
 }
 
@@ -229,7 +237,7 @@ body {
 /* Print Styles for PDF Export */
 @media print {
   @page {
-    size: 210mm 297mm;
+    size: A4 portrait;
     margin: 0;
   }
 
@@ -271,11 +279,19 @@ body {
     display: block !important;
     visibility: visible !important;
     position: static !important;
+    top: auto !important;
+    left: auto !important;
     width: 210mm !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
     background: transparent !important;
     overflow: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: auto !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .print-only-container {
@@ -286,6 +302,8 @@ body {
     padding: 0 !important;
     background: transparent !important;
     overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .pdf-sheet {
@@ -305,6 +323,30 @@ body {
     border: none !important;
     margin: 0 !important;
     overflow: hidden !important;
+    position: relative !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .pdf-sheet,
+  .pdf-sheet * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .pdf-sheet img {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    display: block !important;
+    opacity: 1 !important;
+  }
+
+  /* Prevent WebKit print from turning alpha gradient into solid black */
+  .print-cover-overlay {
+    background: #000000 !important;
+    opacity: 0.35 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .pdf-sheet:last-child,

@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { User } from '@/types';
 
+const CACHE_KEY = 'reelman_user_session';
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -13,8 +15,26 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        return cached ? JSON.parse(cached) : null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const [loading, setLoading] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      // If we already have a cached user, we don't need to block UI with a full-screen loader
+      return !localStorage.getItem(CACHE_KEY);
+    }
+    return true;
+  });
+
   const isRedirectingRef = useRef(false);
 
   const redirectToLogin = useCallback((expired = true) => {
@@ -22,10 +42,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === 'undefined') return;
 
     const currentPath = window.location.pathname;
-    // Don't redirect if already on login or register page
     if (currentPath === '/login' || currentPath === '/register') return;
 
     isRedirectingRef.current = true;
+    try {
+      localStorage.removeItem(CACHE_KEY);
+    } catch {
+      // ignore
+    }
     setUser(null);
 
     const params = new URLSearchParams();
@@ -48,23 +72,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       if (!res.ok) {
-        redirectToLogin(false);
+        // Do NOT redirect to login on 500 server error — prevents infinite redirect loops
+        console.error('Session check returned status:', res.status);
         return;
       }
       const data = await res.json();
       if (data.user) {
         setUser(data.user);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data.user));
+        } catch {
+          // ignore
+        }
       } else {
         redirectToLogin(true);
       }
-    } catch {
-      redirectToLogin(false);
+    } catch (err) {
+      console.error('Network error checking session:', err);
     } finally {
       setLoading(false);
     }
   }, [redirectToLogin]);
 
-  // Global fetch interceptor: redirect to login if any API returns 401 Unauthorized
+  // Global fetch interceptor: redirect to login if any authenticated API returns 401 Unauthorized
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -92,45 +122,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [redirectToLogin]);
 
+  // Check auth on mount
   useEffect(() => {
-    let ignore = false;
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/auth/me');
-        if (ignore) return;
-        if (res.status === 401) {
-          redirectToLogin(true);
-          return;
-        }
-        if (!res.ok) {
-          redirectToLogin(false);
-          return;
-        }
-        const data = await res.json();
-        if (ignore) return;
-        if (data.user) {
-          setUser(data.user);
-        } else {
-          redirectToLogin(true);
-        }
-      } catch {
-        if (!ignore) {
-          redirectToLogin(false);
-        }
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
-    };
-
-    checkAuth();
-    return () => {
-      ignore = true;
-    };
-  }, [redirectToLogin]);
+    fetchUser();
+  }, [fetchUser]);
 
   const logout = async () => {
+    try {
+      localStorage.removeItem(CACHE_KEY);
+    } catch {
+      // ignore
+    }
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
     } catch {
@@ -138,7 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setUser(null);
       if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+        window.location.href = '/login?logout=true';
       }
     }
   };
@@ -153,7 +155,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (!context) {
-    // Fallback if useAuth is invoked outside AuthProvider
     return {
       user: null,
       loading: false,
@@ -162,7 +163,7 @@ export function useAuth(): AuthContextType {
           await fetch('/api/auth/logout', { method: 'POST' });
         } finally {
           if (typeof window !== 'undefined') {
-            window.location.href = '/login';
+            window.location.href = '/login?logout=true';
           }
         }
       },

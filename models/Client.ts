@@ -20,6 +20,9 @@ export interface IClient extends Document {
   name?: string;
   phone?: string;
   date?: string;
+  workPrice?: number;
+  advancePaid?: number;
+  paymentStatus?: 'unpaid' | 'advance-received' | 'partially-paid' | 'fully-paid';
   notes: mongoose.Types.DocumentArray<INote & Document>;
   status: mongoose.Types.ObjectId;
   statusHistory: IStatusHistory[];
@@ -51,6 +54,13 @@ const ClientSchema = new Schema<IClient>(
     name: { type: String, trim: true },
     phone: { type: String, trim: true },
     date: { type: String, trim: true },
+    workPrice: { type: Number, default: 0 },
+    advancePaid: { type: Number, default: 0 },
+    paymentStatus: {
+      type: String,
+      enum: ['unpaid', 'advance-received', 'partially-paid', 'fully-paid'],
+      default: 'unpaid',
+    },
     notes: [NoteSchema],
     status: { type: Schema.Types.ObjectId, ref: 'Status', required: true },
     statusHistory: [StatusHistorySchema],

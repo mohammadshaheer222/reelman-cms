@@ -46,6 +46,11 @@ export async function proxy(request: NextRequest) {
     }
 
     if (isAuthPath && user) {
+      if (search.includes('expired=true') || search.includes('logout=true')) {
+        const response = NextResponse.next();
+        response.cookies.delete('auth-token');
+        return response;
+      }
       return NextResponse.redirect(new URL('/', request.url));
     }
 

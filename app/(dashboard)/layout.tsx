@@ -10,7 +10,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, loading } = useAuth();
 
-  if (loading) {
+  if (loading && !user) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-3">
@@ -23,7 +23,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user) {
+  if (!user && !loading) {
     // Redirection to login is handled automatically by AuthProvider
     return null;
   }

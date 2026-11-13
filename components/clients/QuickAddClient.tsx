@@ -42,6 +42,8 @@ export function QuickAddClient({
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [date, setDate] = useState('');
+  const [workPrice, setWorkPrice] = useState('');
+  const [advancePaid, setAdvancePaid] = useState('');
   const [noteContent, setNoteContent] = useState('');
   const [statusId, setStatusId] = useState('');
   const [statuses, setStatuses] = useState<Status[]>([]);
@@ -101,6 +103,14 @@ export function QuickAddClient({
           name: name.trim() || undefined,
           phone: phone.trim() || undefined,
           date: date.trim() || undefined,
+          workPrice: parseFloat(workPrice) || 0,
+          advancePaid: parseFloat(advancePaid) || 0,
+          paymentStatus:
+            parseFloat(advancePaid) > 0 && parseFloat(workPrice) > 0 && parseFloat(advancePaid) >= parseFloat(workPrice)
+              ? 'fully-paid'
+              : parseFloat(advancePaid) > 0
+              ? 'advance-received'
+              : 'unpaid',
           noteContent: noteContent.trim() || undefined,
           statusId: statusId || undefined,
         }),
@@ -112,7 +122,7 @@ export function QuickAddClient({
       toast.success('Client added', {
         icon: <CheckCircle2 className="w-4 h-4 text-[#2C8567]" />,
       });
-      setName(''); setPhone(''); setDate(''); setNoteContent(''); setErrors({});
+      setName(''); setPhone(''); setDate(''); setWorkPrice(''); setAdvancePaid(''); setNoteContent(''); setErrors({});
       onOpenChange(false);
       onSuccess?.();
     } catch (err: unknown) {
@@ -207,6 +217,32 @@ export function QuickAddClient({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            {/* Work Price & Advance Paid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="clientWorkPrice" className="text-xs font-medium text-gray-600">Work Price (₹)</Label>
+                <Input
+                  id="clientWorkPrice"
+                  type="number"
+                  placeholder="e.g. 150000"
+                  value={workPrice}
+                  onChange={(e) => setWorkPrice(e.target.value)}
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="clientAdvancePaid" className="text-xs font-medium text-gray-600">Advance Paid (₹)</Label>
+                <Input
+                  id="clientAdvancePaid"
+                  type="number"
+                  placeholder="e.g. 25000"
+                  value={advancePaid}
+                  onChange={(e) => setAdvancePaid(e.target.value)}
+                  className="h-9"
+                />
               </div>
             </div>
 

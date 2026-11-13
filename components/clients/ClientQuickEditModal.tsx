@@ -10,12 +10,13 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Client, Status } from '@/types';
 import { Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils';
 
-type EditField = 'name' | 'phone' | 'date' | 'status';
+export type EditField = 'name' | 'phone' | 'date' | 'status' | 'price';
 
 interface ClientQuickEditModalProps {
   client: Client | null;
@@ -31,6 +32,7 @@ const FIELD_LABEL: Record<EditField, string> = {
   phone: 'Phone',
   date: 'Event Date',
   status: 'Status',
+  price: 'Work Price & Payment',
 };
 
 export function ClientQuickEditModal({
@@ -43,6 +45,9 @@ export function ClientQuickEditModal({
 }: ClientQuickEditModalProps) {
   const [value, setValue] = useState('');
   const [selectedStatusId, setSelectedStatusId] = useState('');
+  const [workPrice, setWorkPrice] = useState('0');
+  const [advancePaid, setAdvancePaid] = useState('0');
+  const [paymentStatus, setPaymentStatus] = useState<'unpaid' | 'advance-received' | 'partially-paid' | 'fully-paid'>('unpaid');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -54,17 +59,27 @@ export function ClientQuickEditModal({
       const currentId = typeof client.status === 'object' ? client.status._id : client.status;
       setSelectedStatusId(currentId || '');
     }
+    if (field === 'price') {
+      setWorkPrice(String(client.workPrice || 0));
+      setAdvancePaid(String(client.advancePaid || 0));
+      setPaymentStatus(client.paymentStatus || (client.advancePaid && client.advancePaid > 0 ? 'advance-received' : 'unpaid'));
+    }
   }, [client, field, open]);
 
   const handleSave = async () => {
     if (!client || !field) return;
     setLoading(true);
 
-    const body: Record<string, string> = {};
+    const body: Record<string, unknown> = {};
     if (field === 'name') body.name = value.trim();
     if (field === 'phone') body.phone = value.trim();
     if (field === 'date') body.date = value;
     if (field === 'status') body.statusId = selectedStatusId;
+    if (field === 'price') {
+      body.workPrice = parseFloat(workPrice) || 0;
+      body.advancePaid = parseFloat(advancePaid) || 0;
+      body.paymentStatus = paymentStatus;
+    }
 
     try {
       const res = await fetch(`/api/clients/${client._id}`, {
@@ -88,7 +103,7 @@ export function ClientQuickEditModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xs p-6">
+      <DialogContent className="max-w-sm p-6">
         <DialogHeader>
           <DialogTitle className="text-base font-semibold text-gray-900">
             Edit {FIELD_LABEL[field]}
@@ -96,7 +111,7 @@ export function ClientQuickEditModal({
           <p className="text-xs text-gray-400 mt-0.5">{client.name || 'Unnamed Client'}</p>
         </DialogHeader>
 
-        <div className="py-2">
+        <div className="py-2 space-y-3">
           {/* NAME */}
           {field === 'name' && (
             <Input
@@ -135,6 +150,82 @@ export function ClientQuickEditModal({
               {value && (
                 <p className="text-xs text-[#2C8567] font-medium">{formatDate(value)}</p>
               )}
+            </div>
+          )}
+
+          {/* WORK PRICE & PAYMENT */}
+          {field === 'price' && (
+            <div className="space-y-3">
+              <div>
+                <Label className="text-xs font-medium text-gray-700">Confirmed Work Price (₹)</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">₹</span>
+                  <Input
+                    autoFocus
+                    type="number"
+                    value={workPrice}
+                    onChange={(e) => setWorkPrice(e.target.value)}
+                    placeholder="Total amount"
+                    className="pl-7 h-10 text-sm font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-gray-700">Advance Received (₹)</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">₹</span>
+                  <Input
+                    type="number"
+                    value={advancePaid}
+                    onChange={(e) => {
+                      setAdvancePaid(e.target.value);
+                      const adv = parseFloat(e.target.value) || 0;
+                      const tot = parseFloat(workPrice) || 0;
+                      if (adv > 0 && tot > 0 && adv >= tot) {
+                        setPaymentStatus('fully-paid');
+                      } else if (adv > 0) {
+                        setPaymentStatus('advance-received');
+                      }
+                    }}
+                    placeholder="Advance paid"
+                    className="pl-7 h-10 text-sm font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-gray-700 mb-1.5 block">Payment Status</Label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[
+                    { key: 'unpaid', label: 'Unpaid', color: 'text-gray-600 bg-gray-50' },
+                    { key: 'advance-received', label: 'Advance Paid', color: 'text-amber-700 bg-amber-50' },
+                    { key: 'partially-paid', label: 'Partially Paid', color: 'text-blue-700 bg-blue-50' },
+                    { key: 'fully-paid', label: 'Fully Paid ✅', color: 'text-emerald-700 bg-emerald-50' },
+                  ].map((p) => (
+                    <button
+                      key={p.key}
+                      type="button"
+                      onClick={() =>
+                        setPaymentStatus(
+                          p.key as
+                            | 'unpaid'
+                            | 'advance-received'
+                            | 'partially-paid'
+                            | 'fully-paid'
+                        )
+                      }
+                      className={`py-1.5 px-2 rounded-lg text-xs font-medium border text-center transition-all ${
+                        paymentStatus === p.key
+                          ? 'border-[#2C8567] bg-[#2C8567]/10 text-[#2C8567] font-semibold ring-1 ring-[#2C8567]'
+                          : `border-gray-200 ${p.color} hover:opacity-80`
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 

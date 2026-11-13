@@ -13,6 +13,11 @@ const createClientSchema = z.object({
   date: z.string().optional(),
   noteContent: z.string().optional(),
   statusId: z.string().optional(),
+  workPrice: z.union([z.number(), z.string().transform((v) => parseFloat(v) || 0)]).optional(),
+  advancePaid: z.union([z.number(), z.string().transform((v) => parseFloat(v) || 0)]).optional(),
+  paymentStatus: z
+    .enum(['unpaid', 'advance-received', 'partially-paid', 'fully-paid'])
+    .optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -81,7 +86,7 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid input' }, { status: 400 });
     }
-    const { name, phone, date, noteContent, statusId } = parsed.data;
+    const { name, phone, date, noteContent, statusId, workPrice, advancePaid, paymentStatus } = parsed.data;
 
     let statusDoc = statusId ? await Status.findById(statusId) : null;
     if (!statusDoc) statusDoc = await Status.findOne({ name: 'New' });
@@ -110,6 +115,9 @@ export async function POST(request: NextRequest) {
       name: name?.trim() || undefined,
       phone: phone?.trim() || undefined,
       date: date?.trim() || undefined,
+      workPrice: typeof workPrice === 'number' ? workPrice : 0,
+      advancePaid: typeof advancePaid === 'number' ? advancePaid : 0,
+      paymentStatus: paymentStatus || (advancePaid && advancePaid > 0 ? 'advance-received' : 'unpaid'),
       notes: initialNotes,
       status: statusDoc._id,
       statusHistory: [

@@ -29,6 +29,9 @@ export interface Client {
   name?: string;
   phone?: string;
   date?: string;
+  workPrice?: number;
+  advancePaid?: number;
+  paymentStatus?: 'unpaid' | 'advance-received' | 'partially-paid' | 'fully-paid';
   notes: Note[];
   status: Status | string;
   statusHistory: StatusHistory[];

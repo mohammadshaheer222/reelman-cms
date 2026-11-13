@@ -16,6 +16,8 @@ import {
   MessageCircle,
   Phone,
   Calendar,
+  IndianRupee,
+  RotateCcw,
 } from 'lucide-react';
 import { Client, Status, Activity } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -66,6 +68,11 @@ export default function ClientProfilePage({
   const [editingDate, setEditingDate] = useState(false);
   const [dateInput, setDateInput] = useState('');
 
+  // Edit price state
+  const [editingPrice, setEditingPrice] = useState(false);
+  const [priceInput, setPriceInput] = useState('');
+  const [advanceInput, setAdvanceInput] = useState('');
+
   // Delete modal
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -93,6 +100,8 @@ export default function ClientProfilePage({
       setNameInput(clientData.data.name || '');
       setPhoneInput(clientData.data.phone || '');
       setDateInput(clientData.data.date || '');
+      setPriceInput(String(clientData.data.workPrice || 0));
+      setAdvanceInput(String(clientData.data.advancePaid || 0));
       setStatuses(statusData.data || []);
 
       if (actRes.ok) {
@@ -170,6 +179,47 @@ export default function ClientProfilePage({
       fetchClientData();
     } catch {
       toast.error('Could not update event date');
+    }
+  };
+
+  const handleSavePrice = async () => {
+    const p = parseFloat(priceInput) || 0;
+    const a = parseFloat(advanceInput) || 0;
+    let st = 'unpaid';
+    if (a > 0 && p > 0 && a >= p) st = 'fully-paid';
+    else if (a > 0) st = 'advance-received';
+    try {
+      const res = await fetch(`/api/clients/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workPrice: p, advancePaid: a, paymentStatus: st }),
+      });
+      if (!res.ok) throw new Error('Failed to update price');
+      toast.success('Confirmed work price & payment updated');
+      setEditingPrice(false);
+      fetchClientData();
+    } catch {
+      toast.error('Could not update price');
+    }
+  };
+
+  const handleMoveToNew = async () => {
+    const newStatus =
+      statuses.find((s) => s.name.toLowerCase() === 'new') ||
+      statuses.find((s) => s.isDefault) ||
+      statuses[0];
+    if (!newStatus) return;
+    try {
+      const res = await fetch(`/api/clients/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ statusId: newStatus._id }),
+      });
+      if (!res.ok) throw new Error('Failed to move to New');
+      toast.success('Moved to New status');
+      fetchClientData();
+    } catch {
+      toast.error('Could not move to New');
     }
   };
 
@@ -457,29 +507,107 @@ export default function ClientProfilePage({
                 </button>
               </div>
             )}
+
+            {/* Confirmed Work Price & Payment */}
+            {editingPrice ? (
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                <IndianRupee className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                <Input
+                  type="number"
+                  placeholder="Work Price (₹)"
+                  value={priceInput}
+                  onChange={(e) => setPriceInput(e.target.value)}
+                  className="h-7 text-xs w-32 font-semibold"
+                />
+                <Input
+                  type="number"
+                  placeholder="Advance Paid (₹)"
+                  value={advanceInput}
+                  onChange={(e) => setAdvanceInput(e.target.value)}
+                  className="h-7 text-xs w-32 font-semibold"
+                />
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSavePrice}>
+                  <Check className="w-3.5 h-3.5 text-green-600" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  onClick={() => {
+                    setEditingPrice(false);
+                    setPriceInput(String(client.workPrice || 0));
+                    setAdvanceInput(String(client.advancePaid || 0));
+                  }}
+                >
+                  <X className="w-3.5 h-3.5 text-gray-400" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 mt-1">
+                <IndianRupee className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                <span className="text-sm text-gray-700">
+                  Confirmed Work Price:{' '}
+                  <span className="font-bold text-gray-900 font-mono">
+                    {client.workPrice ? `₹${client.workPrice.toLocaleString('en-IN')}` : '₹0'}
+                  </span>
+                  {client.advancePaid ? (
+                    <span className="ml-2 text-xs text-blue-700 font-semibold font-mono">
+                      (Adv Paid: ₹{client.advancePaid.toLocaleString('en-IN')})
+                    </span>
+                  ) : null}
+                  {client.paymentStatus === 'fully-paid' && (
+                    <span className="ml-2 text-xs font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                      Paid in Full ✅
+                    </span>
+                  )}
+                </span>
+                <button
+                  onClick={() => setEditingPrice(true)}
+                  className="p-0.5 text-gray-400 hover:text-gray-600 rounded transition-colors"
+                  title="Edit Work Price & Payment"
+                >
+                  <Edit2 className="w-3 h-3" />
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Status selector */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 font-medium">Current Status:</span>
-            <Select value={currentStatusId} onValueChange={handleStatusChange}>
-              <SelectTrigger className="w-[180px] h-9 bg-gray-50">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {statuses.map((s) => (
-                  <SelectItem key={s._id} value={s._id}>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: s.color }}
-                      />
-                      <span>{s.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Status selector & Move to New button */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+            {typeof client.status === 'object' && client.status.name.toLowerCase() !== 'new' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleMoveToNew}
+                className="text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-300 gap-1 h-9 text-xs font-semibold"
+                title="Move client back to New column"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Move to New</span>
+              </Button>
+            )}
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 font-medium">Status:</span>
+              <Select value={currentStatusId} onValueChange={handleStatusChange}>
+                <SelectTrigger className="w-[170px] h-9 bg-gray-50 font-medium">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {statuses.map((s) => (
+                    <SelectItem key={s._id} value={s._id}>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: s.color }}
+                        />
+                        <span>{s.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </div>

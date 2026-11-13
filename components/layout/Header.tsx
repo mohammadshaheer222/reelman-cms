@@ -1,9 +1,12 @@
 'use client';
-import { Menu, Plus } from 'lucide-react';
+
+import { Menu, Plus, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GlobalSearch } from '@/components/shared/GlobalSearch';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { QuickAddClient } from '@/components/clients/QuickAddClient';
+import { CallNotepadModal } from '@/components/clients/CallNotepadModal';
+import { useStatuses } from '@/hooks/useClients';
 
 interface HeaderProps {
   onOpenMobileNav: () => void;
@@ -11,6 +14,26 @@ interface HeaderProps {
 
 export default function Header({ onOpenMobileNav }: HeaderProps) {
   const [addClientOpen, setAddClientOpen] = useState(false);
+  const [notepadOpen, setNotepadOpen] = useState(false);
+  const { statuses } = useStatuses();
+
+  // Listen for global Alt+C keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput =
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable;
+
+      if (!isInput && e.altKey && (e.key === 'c' || e.key === 'C')) {
+        e.preventDefault();
+        setNotepadOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <>
@@ -28,14 +51,28 @@ export default function Header({ onOpenMobileNav }: HeaderProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="sm:hidden w-40">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="sm:hidden w-32">
             <GlobalSearch />
           </div>
+
+          {/* Quick Call Notepad button */}
           <Button
             size="sm"
+            onClick={() => setNotepadOpen(true)}
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white shadow-xs font-medium"
+            title="Open Live Call Notepad (Alt+C)"
+          >
+            <FileText className="w-3.5 h-3.5 animate-pulse" />
+            <span className="hidden md:inline">Call Notepad</span>
+          </Button>
+
+          {/* Add Client button */}
+          <Button
+            size="sm"
+            variant="outline"
             onClick={() => setAddClientOpen(true)}
-            className="flex items-center gap-1.5 shadow-sm"
+            className="flex items-center gap-1.5 shadow-2xs border-gray-200"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Add Client</span>
@@ -43,11 +80,21 @@ export default function Header({ onOpenMobileNav }: HeaderProps) {
         </div>
       </header>
 
+      {/* Quick Add Client Dialog */}
       <QuickAddClient
         open={addClientOpen}
         onOpenChange={setAddClientOpen}
         onSuccess={() => {
-          // If on clients page, will trigger refresh via event or route
+          window.dispatchEvent(new CustomEvent('client-created'));
+        }}
+      />
+
+      {/* Global Live Call Notepad Modal */}
+      <CallNotepadModal
+        open={notepadOpen}
+        onOpenChange={setNotepadOpen}
+        statuses={statuses}
+        onSuccess={() => {
           window.dispatchEvent(new CustomEvent('client-created'));
         }}
       />

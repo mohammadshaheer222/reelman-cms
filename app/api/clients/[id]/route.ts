@@ -38,7 +38,7 @@ export async function PATCH(
   try {
     await connectDB();
     const body = await request.json();
-    const { name, phone, date, statusId, assignedTo, isArchived } = body;
+    const { name, phone, date, statusId, assignedTo, isArchived, workPrice, advancePaid, paymentStatus } = body;
     const client = await Client.findById(id);
     if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 });
 
@@ -47,6 +47,9 @@ export async function PATCH(
     if (date !== undefined) client.date = date;
     if (assignedTo !== undefined) client.assignedTo = assignedTo;
     if (isArchived !== undefined) client.isArchived = isArchived;
+    if (workPrice !== undefined) client.workPrice = Number(workPrice) || 0;
+    if (advancePaid !== undefined) client.advancePaid = Number(advancePaid) || 0;
+    if (paymentStatus !== undefined) client.paymentStatus = paymentStatus;
 
     if (statusId && statusId !== client.status.toString()) {
       const newStatus = await Status.findById(statusId);
