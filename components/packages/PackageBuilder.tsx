@@ -68,14 +68,26 @@ export function PackageBuilder({
 }: PackageBuilderProps) {
   const [pkg, setPkg] = useState<PackageData>(() => {
     const base = initialData || DEFAULT_PACKAGE;
+    const pageBgs = { ...(base.pageBackgrounds || {}) };
+    // Heal any stale empty string in pageBackgrounds.cover.image that blocked coverImage
+    if (base.coverImage && pageBgs.cover && !pageBgs.cover.image) {
+      pageBgs.cover = { ...pageBgs.cover, image: base.coverImage };
+    }
     return {
       ...base,
       pagesList:
         base.pagesList && base.pagesList.length > 0
           ? base.pagesList
           : DEFAULT_BOOKLET_PAGES,
-      pageBackgrounds: base.pageBackgrounds || {},
+      pageBackgrounds: pageBgs,
     };
+  });
+  const [uploadedCover, setUploadedCover] = useState<string | null>(() => {
+    const base = initialData || DEFAULT_PACKAGE;
+    if (base.coverImage && !CURATED_COVERS.some((c) => c.url === base.coverImage)) {
+      return base.coverImage;
+    }
+    return null;
   });
   const [currentPage, setCurrentPage] = useState(0); // 0-7
   const [viewAll, setViewAll] = useState(false);
@@ -99,20 +111,40 @@ export function PackageBuilder({
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
+          const imgUrl = event.target!.result as string;
+          setUploadedCover(imgUrl);
           setPkg((prev) => ({
             ...prev,
-            coverImage: event.target!.result as string,
+            coverImage: imgUrl,
+            pageBackgrounds: {
+              ...(prev.pageBackgrounds || {}),
+              cover: {
+                ...(prev.pageBackgrounds?.cover || {}),
+                image: imgUrl,
+              },
+            },
           }));
           toast.success('Cover image updated');
         }
       };
       reader.readAsDataURL(file);
+      e.target.value = '';
     }
   };
 
   // Remove cover photo (syncs to DB if already saved)
   const handleDeleteCoverImage = async () => {
-    setPkg((prev) => ({ ...prev, coverImage: '' }));
+    setPkg((prev) => ({
+      ...prev,
+      coverImage: '',
+      pageBackgrounds: {
+        ...(prev.pageBackgrounds || {}),
+        cover: {
+          ...(prev.pageBackgrounds?.cover || {}),
+          image: '',
+        },
+      },
+    }));
     toast.success('Cover photo removed');
 
     if (pkg._id) {
@@ -120,7 +152,16 @@ export function PackageBuilder({
         await fetch(`/api/packages/${pkg._id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ coverImage: '' }),
+          body: JSON.stringify({
+            coverImage: '',
+            pageBackgrounds: {
+              ...(pkg.pageBackgrounds || {}),
+              cover: {
+                ...(pkg.pageBackgrounds?.cover || {}),
+                image: '',
+              },
+            },
+          }),
         });
       } catch (err) {
         console.error('Failed to sync deletion:', err);
@@ -149,14 +190,19 @@ export function PackageBuilder({
               return img.decode ? img.decode().catch(() => {}) : Promise.resolve();
             }
             return new Promise<void>((resolve) => {
+              const timer = setTimeout(resolve, 2500);
               img.onload = () => {
+                clearTimeout(timer);
                 if (img.decode) {
                   img.decode().catch(() => {}).then(() => resolve());
                 } else {
                   resolve();
                 }
               };
-              img.onerror = () => resolve();
+              img.onerror = () => {
+                clearTimeout(timer);
+                resolve();
+              };
             });
           })
         );
@@ -180,13 +226,26 @@ export function PackageBuilder({
       const url = pkg._id ? `/api/packages/${pkg._id}` : '/api/packages';
       const method = pkg._id ? 'PATCH' : 'POST';
 
+      const cleanPageBackgrounds = { ...(pkg.pageBackgrounds || {}) };
+      if (pkg.coverImage) {
+        cleanPageBackgrounds.cover = {
+          ...(cleanPageBackgrounds.cover || {}),
+          image: pkg.coverImage,
+        };
+      } else if (cleanPageBackgrounds.cover) {
+        cleanPageBackgrounds.cover = {
+          ...(cleanPageBackgrounds.cover || {}),
+          image: '',
+        };
+      }
+
       const payload = {
         ...pkg,
         pagesList:
           pkg.pagesList && pkg.pagesList.length > 0
             ? pkg.pagesList
             : DEFAULT_BOOKLET_PAGES,
-        pageBackgrounds: pkg.pageBackgrounds || {},
+        pageBackgrounds: cleanPageBackgrounds,
       };
 
       const res = await fetch(url, {
@@ -334,31 +393,101 @@ export function PackageBuilder({
                   className="hidden"
                 />
 
-                {/* Presets */}
-                <div className="grid grid-cols-2 gap-2">
-                  {CURATED_COVERS.map((cov, idx) => (
+                {/* Uploaded / Custom Image Card */}
+                {uploadedCover && (
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
+                      Uploaded Photo
+                    </span>
                     <button
-                      key={idx}
                       type="button"
-                      onClick={() => setPkg({ ...pkg, coverImage: cov.url })}
-                      className={`relative h-16 rounded-lg overflow-hidden border transition-all ${
-                        pkg.coverImage === cov.url
-                          ? 'ring-2 ring-blue-600 border-transparent'
-                          : 'border-gray-200 hover:opacity-90'
+                      onClick={() =>
+                        setPkg((prev) => ({
+                          ...prev,
+                          coverImage: uploadedCover,
+                          pageBackgrounds: {
+                            ...(prev.pageBackgrounds || {}),
+                            cover: {
+                              ...(prev.pageBackgrounds?.cover || {}),
+                              image: uploadedCover,
+                            },
+                          },
+                        }))
+                      }
+                      className={`relative w-full h-20 rounded-xl overflow-hidden border transition-all text-left group ${
+                        pkg.coverImage === uploadedCover
+                          ? 'ring-2 ring-blue-600 border-transparent shadow-sm'
+                          : 'border-gray-200 hover:opacity-95'
                       }`}
                     >
                       <img
-                        src={cov.url}
-                        alt={cov.name}
+                        src={uploadedCover}
+                        alt="Uploaded cover"
                         className="w-full h-full object-cover"
                       />
-                      {pkg.coverImage === cov.url && (
-                        <span className="absolute top-1 right-1 bg-blue-600 text-white rounded-full p-0.5">
-                          <Check className="w-3 h-3" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-2 justify-between">
+                        <span className="text-[11px] font-semibold text-white drop-shadow-sm flex items-center gap-1.5">
+                          {pkg.coverImage === uploadedCover && (
+                            <Check className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                          )}
+                          Your Uploaded Photo
                         </span>
-                      )}
+                        {pkg.coverImage === uploadedCover ? (
+                          <span className="text-[9px] bg-blue-600 text-white px-2 py-0.5 rounded-full font-medium shadow-xs">
+                            Selected
+                          </span>
+                        ) : (
+                          <span className="text-[9px] bg-white/90 text-gray-800 px-2 py-0.5 rounded-full font-medium group-hover:bg-white shadow-xs">
+                            Select
+                          </span>
+                        )}
+                      </div>
                     </button>
-                  ))}
+                  </div>
+                )}
+
+                {/* Presets */}
+                <div className="space-y-1">
+                  <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
+                    Curated Presets
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {CURATED_COVERS.map((cov, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() =>
+                          setPkg((prev) => ({
+                            ...prev,
+                            coverImage: cov.url,
+                            pageBackgrounds: {
+                              ...(prev.pageBackgrounds || {}),
+                              cover: {
+                                ...(prev.pageBackgrounds?.cover || {}),
+                                image: cov.url,
+                              },
+                            },
+                          }))
+                        }
+                        className={`relative h-16 rounded-lg overflow-hidden border transition-all ${
+                          pkg.coverImage === cov.url
+                            ? 'ring-2 ring-blue-600 border-transparent'
+                            : 'border-gray-200 hover:opacity-90'
+                        }`}
+                      >
+                        <img
+                          src={cov.url}
+                          alt={cov.name}
+                          className="w-full h-full object-cover"
+                        />
+                        {pkg.coverImage === cov.url && (
+                          <span className="absolute top-1 right-1 bg-blue-600 text-white rounded-full p-0.5">
+                            <Check className="w-3 h-3" />
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 

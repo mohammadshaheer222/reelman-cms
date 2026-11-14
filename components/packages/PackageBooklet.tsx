@@ -453,6 +453,14 @@ export function PackageBooklet({
       ...(pkg.pageBackgrounds || {}),
       [pageId]: { ...(pkg.pageBackgrounds?.[pageId] || {}), ...bg },
     };
+    if (pageId === 'cover' && bg.image !== undefined && onUpdatePkg) {
+      onUpdatePkg((prev) => ({
+        ...prev,
+        coverImage: bg.image || '',
+        pageBackgrounds: updated,
+      }));
+      return;
+    }
     updateField('pageBackgrounds', updated);
   };
 
@@ -461,6 +469,15 @@ export function PackageBooklet({
     pagesList.forEach((p) => {
       updated[p.id] = { ...bg };
     });
+    if (bg.image !== undefined && onUpdatePkg) {
+      onUpdatePkg((prev) => ({
+        ...prev,
+        coverImage: bg.image || '',
+        pageBackgrounds: updated,
+      }));
+      setActiveBgPopoverPageId(null);
+      return;
+    }
     updateField('pageBackgrounds', updated);
     setActiveBgPopoverPageId(null);
   };
@@ -485,11 +502,9 @@ export function PackageBooklet({
     const effectiveBgColor =
       pageBg.color || (page.type === 'cover' ? '#0a0a0a' : '#F5EFE6');
     const effectiveBgImage =
-      pageBg.image !== undefined
-        ? pageBg.image
-        : page.type === 'cover'
-        ? pkg.coverImage
-        : undefined;
+      page.type === 'cover'
+        ? (pkg.coverImage?.trim() || pageBg.image?.trim() || undefined)
+        : (pageBg.image?.trim() || undefined);
 
     const isDark = isDarkColor(effectiveBgColor) || Boolean(effectiveBgImage);
     const textColorClass = isDark ? 'text-white' : 'text-[#2b2725]';
