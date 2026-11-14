@@ -362,6 +362,9 @@ export function QuickAddClient({
 
       onOpenChange(false);
       onSuccess?.();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('client-created', { detail: data.data }));
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong';
       setErrors({ general: message });

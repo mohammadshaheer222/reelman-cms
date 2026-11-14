@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Users,
   Plus,
@@ -30,9 +31,21 @@ import { timeAgo } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const { stats, recentClients, loading, refetch } = useDashboard();
   const [activities, setActivities] = useState<Activity[]>([]);
+
+  // If user does not have permission to view Home, redirect immediately
+  const allowed = user?.allowedNavItems;
+  const isHomeBlocked = Boolean(user && Array.isArray(allowed) && allowed.length > 0 && !allowed.includes('/'));
+
+  useEffect(() => {
+    if (isHomeBlocked && allowed) {
+      const fallback = allowed.find((item) => item !== '/') || allowed[0] || '/clients';
+      router.replace(fallback);
+    }
+  }, [isHomeBlocked, allowed, router]);
 
   const [addClientOpen, setAddClientOpen] = useState(false);
   const [seeding, setSeeding] = useState(false);
@@ -75,6 +88,10 @@ export default function DashboardPage() {
 
   const formattedRevenue = `₹${(stats?.totalRevenue || 0).toLocaleString('en-IN')}`;
   const formattedAdvance = `₹${(stats?.totalAdvance || 0).toLocaleString('en-IN')}`;
+
+  if (isHomeBlocked) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">

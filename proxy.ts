@@ -45,13 +45,29 @@ export async function proxy(request: NextRequest) {
       return response;
     }
 
+    // If staff user has disabled Home ('/'), redirect away from root to their first permitted route
+    if (isRoot && user) {
+      if (user.allowedNavItems && Array.isArray(user.allowedNavItems) && user.allowedNavItems.length > 0) {
+        if (!user.allowedNavItems.includes('/')) {
+          const target = user.allowedNavItems.find((p) => p !== '/') || user.allowedNavItems[0] || '/clients';
+          return NextResponse.redirect(new URL(target, request.url));
+        }
+      }
+    }
+
     if (isAuthPath && user) {
       if (search.includes('expired=true') || search.includes('logout=true')) {
         const response = NextResponse.next();
         response.cookies.delete('auth-token');
         return response;
       }
-      return NextResponse.redirect(new URL('/', request.url));
+      let target = '/';
+      if (user.allowedNavItems && Array.isArray(user.allowedNavItems) && user.allowedNavItems.length > 0) {
+        if (!user.allowedNavItems.includes('/')) {
+          target = user.allowedNavItems.find((p) => p !== '/') || user.allowedNavItems[0] || '/clients';
+        }
+      }
+      return NextResponse.redirect(new URL(target, request.url));
     }
 
     if (isAuthPath && !user && token) {

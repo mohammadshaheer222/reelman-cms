@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { Search, Filter, ArrowUpDown, Check, ChevronDown } from 'lucide-react';
+import { Search, Filter, ArrowUpDown, Check, ChevronDown, Archive } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -20,6 +20,8 @@ interface ClientFiltersProps {
   sort: string;
   onSortChange: (value: string) => void;
   statuses: Status[];
+  showArchived?: boolean;
+  onShowArchivedChange?: (show: boolean) => void;
 }
 
 export function ClientFilters({
@@ -30,6 +32,8 @@ export function ClientFilters({
   sort,
   onSortChange,
   statuses,
+  showArchived = false,
+  onShowArchivedChange,
 }: ClientFiltersProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -181,6 +185,24 @@ export function ClientFilters({
             <SelectItem value="alpha">Name (A-Z)</SelectItem>
           </SelectContent>
         </Select>
+
+        {onShowArchivedChange && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onShowArchivedChange(!showArchived)}
+            className={`h-9 text-xs rounded-xl border-gray-200/80 shadow-2xs font-medium transition-colors ${
+              showArchived
+                ? 'bg-amber-50 border-amber-300 text-amber-900 font-semibold'
+                : 'bg-white text-gray-600 hover:text-black'
+            }`}
+            title={showArchived ? 'Showing archived clients' : 'Click to view archived clients'}
+          >
+            <Archive className="w-3.5 h-3.5 mr-1 text-gray-400" />
+            <span>{showArchived ? 'Archived' : 'Active'}</span>
+          </Button>
+        )}
       </div>
     </div>
   );

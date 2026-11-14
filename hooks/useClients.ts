@@ -8,6 +8,7 @@ interface UseClientsOptions {
   sort?: string;
   page?: number;
   limit?: number;
+  archived?: boolean;
 }
 
 export function useClients(options: UseClientsOptions = {}) {
@@ -25,6 +26,7 @@ export function useClients(options: UseClientsOptions = {}) {
       if (options.search) params.set('search', options.search);
       if (options.status) params.set('status', options.status);
       if (options.sort) params.set('sort', options.sort);
+      if (options.archived) params.set('archived', 'true');
       params.set('page', String(options.page || 1));
       params.set('limit', String(options.limit || 20));
       const res = await fetch(`/api/clients?${params}`);
@@ -38,7 +40,7 @@ export function useClients(options: UseClientsOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [options.search, options.status, options.sort, options.page, options.limit]);
+  }, [options.search, options.status, options.sort, options.page, options.limit, options.archived]);
 
   useEffect(() => {
     fetchClients();

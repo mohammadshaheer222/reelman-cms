@@ -27,9 +27,16 @@ export async function POST(request: NextRequest) {
       email: user.email,
       role: user.role,
       name: user.name,
+      allowedNavItems: user.allowedNavItems,
     });
     const response = NextResponse.json({
-      user: { _id: user._id, name: user.name, email: user.email, role: user.role },
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        allowedNavItems: user.allowedNavItems,
+      },
     });
     response.cookies.set('auth-token', token, {
       httpOnly: true,

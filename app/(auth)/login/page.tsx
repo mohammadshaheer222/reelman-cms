@@ -37,11 +37,30 @@ function LoginForm() {
 
       toast.success('Signed in successfully');
 
-      // Safely validate redirect path to prevent open redirects
+      // Cache session immediately for instantaneous access
+      if (data.user) {
+        try {
+          localStorage.setItem('reelman_user_session', JSON.stringify(data.user));
+        } catch {}
+      }
+
+      // Determine landing page according to user permissions
+      let defaultPath = '/';
+      const allowed = data.user?.allowedNavItems;
+      if (Array.isArray(allowed) && allowed.length > 0) {
+        if (!allowed.includes('/')) {
+          defaultPath = allowed[0] || '/clients';
+        }
+      }
+
+      // Safely validate redirect path to prevent open redirects or landing on forbidden Home page
       const destination =
-        redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+        redirectParam &&
+        redirectParam.startsWith('/') &&
+        !redirectParam.startsWith('//') &&
+        (redirectParam !== '/' || defaultPath === '/')
           ? redirectParam
-          : '/';
+          : defaultPath;
 
       router.push(destination);
       router.refresh();

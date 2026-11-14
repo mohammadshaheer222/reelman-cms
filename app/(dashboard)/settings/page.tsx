@@ -9,6 +9,9 @@ import {
   Layers,
   Info,
   MessageCircle,
+  Database,
+  Download,
+  Calendar,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Status, Requirement } from '@/types';
@@ -73,6 +76,33 @@ export default function SettingsPage() {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [newReqInput, setNewReqInput] = useState('');
   const [reqSubmitting, setReqSubmitting] = useState(false);
+  const [downloadingBackup, setDownloadingBackup] = useState(false);
+
+  const handleDownloadBackup = async () => {
+    setDownloadingBackup(true);
+    try {
+      const res = await fetch('/api/backup');
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to download backup');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reelman_backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Database backup downloaded successfully');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Backup download failed';
+      toast.error(msg);
+    } finally {
+      setDownloadingBackup(false);
+    }
+  };
 
   const fetchStatuses = async () => {
     setLoading(true);
@@ -453,6 +483,42 @@ export default function SettingsPage() {
         <p className="text-xs text-gray-500 leading-relaxed">
           When team members click the WhatsApp button on a client card or table, the message is automatically tailored to the client&apos;s current status using your custom template with dynamic placeholders for client name and shoot date.
         </p>
+      </div>
+
+      {/* Database Backup & Export */}
+      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <Database className="w-4 h-4 text-emerald-600" />
+              <h3 className="text-sm font-bold text-[#141414]">Database Backup & Disaster Recovery</h3>
+            </div>
+            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+              Export an instant, complete snapshot of all studio data (clients, packages, statuses, activities, notes, and requirements) in JSON format.
+            </p>
+          </div>
+
+          <Button
+            onClick={handleDownloadBackup}
+            disabled={downloadingBackup || user?.role !== 'admin'}
+            className="flex items-center gap-2 bg-[#141414] hover:bg-black text-white rounded-xl shadow-xs px-4 py-2 text-xs font-semibold shrink-0"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{downloadingBackup ? 'Generating Backup...' : 'Download Backup (.json)'}</span>
+          </Button>
+        </div>
+
+        <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-200/70 text-xs text-gray-600 space-y-2">
+          <div className="flex items-center gap-1.5 font-semibold text-gray-800">
+            <Calendar className="w-3.5 h-3.5 text-[#dc2626]" />
+            <span>Scheduled Monthly Backups</span>
+          </div>
+          <p className="text-[11px] text-gray-500 leading-relaxed">
+            • <strong>Automated Cloud Backups</strong>: Configured continuously inside MongoDB Atlas (automated snapshots retention).<br />
+            • <strong>CLI Command</strong>: Run <code className="bg-gray-200 px-1 py-0.5 rounded text-gray-900 font-mono">npm run backup</code> on your server or set a monthly cron job to save backups into the <code className="font-mono">/backups</code> directory.<br />
+            • <strong>1-Click Backup</strong>: Use the download button above anytime to keep an offline copy on your computer or phone.
+          </p>
+        </div>
       </div>
 
       {/* Add/Edit Status Modal */}

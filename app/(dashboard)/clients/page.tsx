@@ -15,6 +15,7 @@ export default function ClientsPage() {
   const [status, setStatus] = useState('all');
   const [sort, setSort] = useState('newest');
   const [page, setPage] = useState(1);
+  const [showArchived, setShowArchived] = useState(false);
 
   // Restore user's preferred view mode from URL search param or localStorage
   useEffect(() => {
@@ -72,6 +73,7 @@ export default function ClientsPage() {
     sort,
     page: viewMode === 'kanban' ? 1 : page,
     limit,
+    archived: showArchived,
   });
 
   const loading = (clientsLoading || statusesLoading) && clients.length === 0;
@@ -146,6 +148,11 @@ export default function ClientsPage() {
           setPage(1);
         }}
         statuses={statuses}
+        showArchived={showArchived}
+        onShowArchivedChange={(v) => {
+          setShowArchived(v);
+          setPage(1);
+        }}
       />
 
       {/* Content */}

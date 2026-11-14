@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import Client from '@/models/Client';
 import Status from '@/models/Status';
 import Activity from '@/models/Activity';
 import { requireAuth } from '@/lib/apiMiddleware';
 import { generateId } from '@/lib/utils';
+import { ensureDefaultStatuses } from '@/lib/defaultStatuses';
 import { z } from 'zod';
 
 const createClientSchema = z.object({
@@ -37,12 +39,15 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort') || 'newest';
     const archived = searchParams.get('archived') === 'true';
 
-    const query: Record<string, unknown> = { isArchived: archived };
-    if (statusId) {
+    const query: Record<string, unknown> = { isArchived: archived ? true : { $ne: true } };
+    if (statusId && statusId !== 'all') {
       if (statusId.includes(',')) {
-        const ids = statusId.split(',').map((s) => s.trim()).filter(Boolean);
+        const ids = statusId
+          .split(',')
+          .map((s) => s.trim())
+          .filter((id) => mongoose.Types.ObjectId.isValid(id));
         if (ids.length > 0) query.status = { $in: ids };
-      } else {
+      } else if (mongoose.Types.ObjectId.isValid(statusId)) {
         query.status = statusId;
       }
     }
@@ -77,14 +82,32 @@ export async function GET(request: NextRequest) {
         .lean(),
       Client.countDocuments(query),
     ]);
+
+    // Ensure every client has a valid status object (fall back to default if dangling reference)
+    const sanitizedClients = clients.map((c) => {
+      if (!c.status || typeof c.status !== 'object') {
+        return {
+          ...c,
+          status: {
+            _id: 'default-new',
+            name: 'New',
+            color: '#6366f1',
+            whatsappMessage: '',
+          },
+        };
+      }
+      return c;
+    });
+
     return NextResponse.json({
-      data: clients,
+      data: sanitizedClients,
       total,
       page,
       totalPages: Math.ceil(total / limit),
       limit,
     });
-  } catch {
+  } catch (err) {
+    console.error('Fetch clients error:', err);
     return NextResponse.json({ error: 'Failed to fetch clients' }, { status: 500 });
   }
 }
@@ -114,9 +137,17 @@ export async function POST(request: NextRequest) {
       paymentStatus,
     } = parsed.data;
 
-    let statusDoc = statusId ? await Status.findById(statusId) : null;
+    let statusDoc = null;
+    if (statusId && mongoose.Types.ObjectId.isValid(statusId)) {
+      statusDoc = await Status.findById(statusId);
+    }
     if (!statusDoc) statusDoc = await Status.findOne({ name: 'New' });
     if (!statusDoc) statusDoc = await Status.findOne().sort({ order: 1 });
+    if (!statusDoc) {
+      // Auto-recover default statuses if none exist
+      const seeded = await ensureDefaultStatuses();
+      statusDoc = seeded.find((s) => s.name === 'New') || seeded[0];
+    }
     if (!statusDoc) {
       return NextResponse.json(
         { error: 'No statuses found. Please visit /api/seed first.' },
