@@ -66,15 +66,22 @@ export default function ActivityPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-gray-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Global Activity</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Complete audit trail of client updates, notes, status changes, and transactions.
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+              Audit Logs & Team Activity
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] tracking-tight">
+            Activity Feed<span className="text-[#dc2626]">.</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-500 font-normal">
+            Real-time audit trail of client bookings, stage moves, notes, and transactions.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchActivities}>
-          <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+        <Button variant="outline" size="sm" onClick={fetchActivities} className="rounded-xl shadow-2xs font-semibold self-start sm:self-auto">
+          <RefreshCw className="w-3.5 h-3.5 mr-1.5 text-[#dc2626]" />
           Refresh Feed
         </Button>
       </div>

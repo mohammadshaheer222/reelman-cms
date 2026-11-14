@@ -239,8 +239,8 @@ export function LiveCallIntake({
       {/* Top Header */}
       <div className="flex items-center justify-between pb-3 border-b border-gray-100">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#2C8567] text-white flex items-center justify-center shadow-sm shadow-[#2C8567]/30">
-            <PhoneCall className="w-4 h-4 animate-pulse" />
+          <div className="w-8 h-8 rounded-xl bg-[#141414] text-white flex items-center justify-center shadow-xs">
+            <PhoneCall className="w-4 h-4 text-[#dc2626] animate-pulse" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -543,7 +543,7 @@ export function LiveCallIntake({
                 size="sm"
                 onClick={() => handleSave(false)}
                 disabled={submitting}
-                className="flex-1 sm:flex-none text-xs bg-[#2C8567] hover:bg-[#236d54] text-white gap-1.5 h-9 shadow-sm"
+                className="flex-1 sm:flex-none text-xs bg-[#141414] hover:bg-black text-white gap-1.5 h-9 shadow-xs rounded-xl font-semibold"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>{submitting ? 'Saving Lead…' : 'Save Client'}</span>

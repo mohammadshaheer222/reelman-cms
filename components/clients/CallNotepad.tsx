@@ -102,8 +102,8 @@ export function CallNotepad({
       {/* Notepad Toolbar Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3.5 border-b border-gray-100 bg-gray-50/60 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#2C8567] text-white flex items-center justify-center shadow-2xs">
-            <StickyNote className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-xl bg-[#141414] text-white flex items-center justify-center shadow-2xs">
+            <StickyNote className="w-4 h-4 text-[#dc2626]" />
           </div>
           <div>
             <div className="flex items-center gap-2">

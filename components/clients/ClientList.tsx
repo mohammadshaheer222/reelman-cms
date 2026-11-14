@@ -136,27 +136,27 @@ export function ClientList({
           </p>
 
           {/* View mode switcher */}
-          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 self-start sm:self-auto overflow-x-auto max-w-full modal-scroll">
+          <div className="flex items-center bg-gray-100/90 p-1 rounded-2xl border border-gray-200/60 self-start sm:self-auto overflow-x-auto max-w-full modal-scroll">
             <button
               type="button"
               onClick={() => setViewMode('kanban')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'kanban'
-                  ? 'bg-white text-gray-900 shadow-xs'
+                  ? 'bg-white text-[#141414] shadow-xs'
                   : 'text-gray-500 hover:text-gray-900'
               }`}
               title="Board View"
             >
-              <Kanban className="w-3.5 h-3.5 text-[#2C8567]" />
+              <Kanban className="w-3.5 h-3.5 text-[#dc2626]" />
               <span>Board</span>
             </button>
 
             <button
               type="button"
               onClick={() => setViewMode('calendar')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'calendar'
-                  ? 'bg-white text-gray-900 shadow-xs'
+                  ? 'bg-white text-[#141414] shadow-xs'
                   : 'text-gray-500 hover:text-gray-900'
               }`}
               title="Shoot Calendar & Conflict Detector"
@@ -168,9 +168,9 @@ export function ClientList({
             <button
               type="button"
               onClick={() => setViewMode('grid')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'grid'
-                  ? 'bg-white text-gray-900 shadow-xs'
+                  ? 'bg-white text-[#141414] shadow-xs'
                   : 'text-gray-500 hover:text-gray-900'
               }`}
               title="Cards View"
@@ -182,9 +182,9 @@ export function ClientList({
             <button
               type="button"
               onClick={() => setViewMode('table')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'table'
-                  ? 'bg-white text-gray-900 shadow-xs'
+                  ? 'bg-white text-[#141414] shadow-xs'
                   : 'text-gray-500 hover:text-gray-900'
               }`}
               title="List View"
@@ -221,23 +221,23 @@ export function ClientList({
           </div>
         ) : (
           /* Table View */
-          <div className="bg-white rounded-xl border border-gray-100 overflow-x-auto shadow-xs">
+          <div className="bg-white rounded-2xl border border-gray-100/90 overflow-x-auto shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-50/50">
-                  <TableHead>Client</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>
+                <TableRow className="bg-gray-50/70 border-b border-gray-100">
+                  <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Client</TableHead>
+                  <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Phone</TableHead>
+                  <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-[#2C8567]" />
+                      <Calendar className="w-3.5 h-3.5 text-[#dc2626]" />
                       Event Date
                     </div>
                   </TableHead>
-                  <TableHead>Requirements</TableHead>
-                  <TableHead>Price & Payment</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Notes</TableHead>
-                  <TableHead>Added</TableHead>
+                  <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Requirements</TableHead>
+                  <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Price & Payment</TableHead>
+                  <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</TableHead>
+                  <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Notes</TableHead>
+                  <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Added</TableHead>
                   <TableHead className="w-20"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -258,7 +258,7 @@ export function ClientList({
                         <button
                           type="button"
                           onClick={(e) => openEdit(e, c, 'name')}
-                          className="text-left w-full font-semibold text-gray-900 hover:text-[#2C8567] transition-colors truncate block"
+                          className="text-left w-full font-bold text-[#141414] hover:text-[#dc2626] transition-colors truncate block"
                           title="Click to edit name"
                         >
                           {c.name || <span className="text-gray-400 italic font-normal">+ Add name</span>}
@@ -276,7 +276,7 @@ export function ClientList({
                           <button
                             type="button"
                             onClick={(e) => openEdit(e, c, 'phone')}
-                            className="text-xs text-gray-700 font-mono hover:text-[#2C8567] transition-colors whitespace-nowrap"
+                            className="text-xs text-gray-700 font-mono hover:text-[#dc2626] transition-colors whitespace-nowrap"
                             title="Click to edit phone"
                           >
                             {c.phone || <span className="text-gray-400 italic">+ Add phone</span>}
@@ -315,8 +315,8 @@ export function ClientList({
                         >
                           {c.date ? (
                             <div>
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#2C8567]/10 text-[#2C8567] font-semibold text-xs border border-[#2C8567]/20 hover:bg-[#2C8567]/20 transition-colors whitespace-nowrap">
-                                <Calendar className="w-3 h-3 shrink-0" />
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-800 font-semibold text-xs border border-gray-200/60 hover:bg-gray-200/60 transition-colors whitespace-nowrap">
+                                <Calendar className="w-3 h-3 text-[#dc2626] shrink-0" />
                                 {formatDate(c.date)}
                               </span>
                               {c.dates && c.dates.length > 1 && (
@@ -331,7 +331,7 @@ export function ClientList({
                               )}
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400 italic hover:text-[#2C8567] transition-colors">
+                            <span className="text-xs text-gray-400 italic hover:text-[#dc2626] transition-colors">
                               + Set date
                             </span>
                           )}
@@ -345,7 +345,7 @@ export function ClientList({
                             {c.requirements.map((req, i) => (
                               <span
                                 key={i}
-                                className="inline-block text-[10px] font-medium text-[#2C8567] bg-[#2C8567]/10 border border-[#2C8567]/20 px-1.5 py-0.5 rounded truncate max-w-[130px]"
+                                className="inline-block text-[10px] font-semibold text-gray-700 bg-gray-100 border border-gray-200/60 px-2 py-0.5 rounded-full truncate max-w-[130px]"
                                 title={req}
                               >
                                 {req}
@@ -365,8 +365,8 @@ export function ClientList({
                           className="text-left group/price"
                           title="Click to edit work price & payment"
                         >
-                          <div className="flex items-center gap-1 font-semibold text-gray-900 group-hover/price:text-[#2C8567] font-mono text-xs">
-                            <IndianRupee className="w-3 h-3 text-emerald-700" />
+                          <div className="flex items-center gap-1 font-bold text-[#141414] group-hover/price:text-[#dc2626] font-mono text-xs">
+                            <IndianRupee className="w-3 h-3 text-[#141414]" />
                             <span>
                               {c.workPrice ? c.workPrice.toLocaleString('en-IN') : <span className="text-gray-400 italic font-normal">+ Set Price</span>}
                             </span>
@@ -424,7 +424,7 @@ export function ClientList({
                           )}
                           <Link
                             href={`/clients/${c._id}`}
-                            className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-400 hover:text-[#2C8567] hover:bg-[#2C8567]/8 transition-colors"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-xl text-gray-400 hover:text-[#dc2626] hover:bg-gray-100 transition-colors"
                             title="View client"
                           >
                             <ArrowRight className="w-4 h-4" />

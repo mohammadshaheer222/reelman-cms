@@ -315,13 +315,13 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
 
                     {/* Link display if exists */}
                     {milestone.link && (
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <LinkIcon className="w-3 h-3 text-[#2C8567]" />
+                      <div className="flex items-center gap-1.5 mt-1.5 min-w-0">
+                        <LinkIcon className="w-3 h-3 text-[#2C8567] shrink-0" />
                         <a
                           href={milestone.link}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-xs text-[#2C8567] hover:underline font-medium truncate max-w-[260px] sm:max-w-md"
+                          className="text-xs text-[#2C8567] hover:underline font-medium truncate max-w-[190px] xs:max-w-[240px] sm:max-w-md inline-block"
                         >
                           {milestone.link}
                         </a>
@@ -331,14 +331,14 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                 </div>
 
                 {/* Actions & Status Controls */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto pt-2.5 sm:pt-0 border-t border-gray-100 sm:border-0">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto pt-2.5 sm:pt-0 border-t border-gray-100 sm:border-0 min-w-0">
                   {/* Status Toggle Buttons (Full-width grid on mobile, inline on desktop) */}
                   {!readOnly && (
-                    <div className="grid grid-cols-3 sm:flex p-0.5 rounded-lg bg-gray-100 border border-gray-200/80 text-xs w-full sm:w-auto">
+                    <div className="grid grid-cols-3 sm:flex p-0.5 rounded-lg bg-gray-100 border border-gray-200/80 text-xs w-full sm:w-auto shrink-0">
                       <button
                         type="button"
                         onClick={() => handleStatusChange(milestone.id, 'pending')}
-                        className={`py-1.5 px-2 rounded-md transition-all font-medium text-center ${
+                        className={`py-1.5 px-2 rounded-md transition-all font-medium text-center truncate ${
                           milestone.status === 'pending'
                             ? 'bg-white text-gray-900 shadow-2xs font-semibold'
                             : 'text-gray-500 hover:text-gray-900'
@@ -349,7 +349,7 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                       <button
                         type="button"
                         onClick={() => handleStatusChange(milestone.id, 'in-progress')}
-                        className={`py-1.5 px-2 rounded-md transition-all font-medium text-center ${
+                        className={`py-1.5 px-2 rounded-md transition-all font-medium text-center truncate ${
                           milestone.status === 'in-progress'
                             ? 'bg-blue-600 text-white shadow-2xs font-semibold'
                             : 'text-gray-500 hover:text-gray-900'
@@ -360,7 +360,7 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                       <button
                         type="button"
                         onClick={() => handleStatusChange(milestone.id, 'completed')}
-                        className={`py-1.5 px-2 rounded-md transition-all font-medium text-center ${
+                        className={`py-1.5 px-2 rounded-md transition-all font-medium text-center truncate ${
                           milestone.status === 'completed'
                             ? 'bg-[#2C8567] text-white shadow-2xs font-semibold'
                             : 'text-gray-500 hover:text-gray-900'
@@ -372,7 +372,7 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                   )}
 
                   {/* Actions row: Link & WhatsApp */}
-                  <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+                  <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto pt-1 sm:pt-0">
                     {/* Add / Edit Link Button */}
                     {!readOnly && (
                       <Button
@@ -383,10 +383,10 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                           setEditingLinkId(milestone.id);
                           setLinkInput(milestone.link || '');
                         }}
-                        className="h-8 text-xs text-gray-600 hover:text-gray-900 gap-1 px-2.5 bg-gray-50 hover:bg-gray-100 sm:bg-transparent"
+                        className="h-8 text-xs text-gray-600 hover:text-gray-900 gap-1 px-2.5 bg-gray-50 hover:bg-gray-100 sm:bg-transparent flex-1 sm:flex-initial justify-center cursor-pointer"
                         title="Attach Drive/Gallery link for couple"
                       >
-                        <LinkIcon className="w-3 h-3 text-gray-500" />
+                        <LinkIcon className="w-3 h-3 text-gray-500 shrink-0" />
                         <span>{milestone.link ? 'Edit Link' : 'Add Link'}</span>
                       </Button>
                     )}
@@ -398,10 +398,10 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                         variant="outline"
                         size="sm"
                         onClick={() => handleNotifyClient(milestone)}
-                        className="h-8 text-xs text-[#2C8567] border-emerald-200 hover:bg-emerald-50 gap-1 px-2.5 font-semibold shrink-0"
+                        className="h-8 text-xs text-[#2C8567] border-emerald-200 hover:bg-emerald-50 gap-1 px-2.5 font-semibold shrink-0 flex-1 sm:flex-initial justify-center cursor-pointer"
                         title="Send WhatsApp update to client"
                       >
-                        <MessageCircle className="w-3.5 h-3.5 text-[#2C8567]" />
+                        <MessageCircle className="w-3.5 h-3.5 text-[#2C8567] shrink-0" />
                         <span>Notify Client</span>
                       </Button>
                     )}
@@ -411,30 +411,32 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
 
               {/* In-place Link Editor */}
               {editingLinkId === milestone.id && !readOnly && (
-                <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-center gap-2">
+                <div className="mt-3 pt-2.5 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <Input
                     placeholder="Paste Google Drive, Pixieset, or gallery URL..."
                     value={linkInput}
                     onChange={(e) => setLinkInput(e.target.value)}
-                    className="h-8 text-xs flex-1"
+                    className="h-8 text-xs flex-1 min-w-0"
                   />
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => handleSaveLink(milestone.id)}
-                    className="h-8 text-xs bg-[#2C8567] hover:bg-[#236d54] text-white px-3"
-                  >
-                    Save Link
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditingLinkId(null)}
-                    className="h-8 text-xs px-2"
-                  >
-                    Cancel
-                  </Button>
+                  <div className="flex items-center gap-2 justify-end shrink-0">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditingLinkId(null)}
+                      className="h-8 text-xs px-2.5"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleSaveLink(milestone.id)}
+                      className="h-8 text-xs bg-[#2C8567] hover:bg-[#236d54] text-white px-3 font-semibold"
+                    >
+                      Save Link
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

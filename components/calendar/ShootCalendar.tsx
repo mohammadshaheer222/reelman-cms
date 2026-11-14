@@ -160,8 +160,8 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
               {currentMonthShootsCount}
             </p>
           </div>
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-50 text-[#2C8567] flex items-center justify-center shrink-0">
-            <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gray-100 text-[#141414] flex items-center justify-center shrink-0">
+            <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#dc2626]" />
           </div>
         </div>
 
@@ -307,9 +307,9 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                 setAddModalOpen(true);
               }}
               size="sm"
-              className="h-8 bg-[#2C8567] hover:bg-[#236d54] text-white text-xs font-semibold gap-1 shadow-2xs"
+              className="h-8 bg-[#141414] hover:bg-black text-white text-xs font-semibold gap-1.5 rounded-xl shadow-xs"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5 text-[#dc2626]" />
               <span>Add Client</span>
             </Button>
           </div>
@@ -381,7 +381,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                       <span
                         className={`text-[11px] sm:text-sm font-semibold inline-flex items-center justify-center ${
                           isToday
-                            ? 'w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#2C8567] text-white font-bold text-[10px] sm:text-xs'
+                            ? 'w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#141414] text-white font-bold text-[10px] sm:text-xs'
                             : 'text-gray-700'
                         }`}
                       >
@@ -409,7 +409,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                     {/* Mobile: Compact Event Dots Indicator */}
                     <div className="sm:hidden flex items-center justify-center gap-1 my-0.5 flex-wrap">
                       {dayShoots.slice(0, 3).map((shoot) => {
-                        const statusColor = shoot.status?.color || '#2C8567';
+                        const statusColor = shoot.status?.color || '#dc2626';
                         return (
                           <span
                             key={shoot._id}
@@ -428,7 +428,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                     {/* Desktop: Shoot Cards for this day */}
                     <div className="hidden sm:block space-y-1 my-1 overflow-hidden">
                       {dayShoots.slice(0, 2).map((shoot) => {
-                        const statusColor = shoot.status?.color || '#2C8567';
+                        const statusColor = shoot.status?.color || '#dc2626';
                         return (
                           <div
                             key={shoot._id}
@@ -465,7 +465,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                           e.stopPropagation();
                           handleBookOnDate(dateStr);
                         }}
-                        className="text-[10px] font-semibold text-[#2C8567] bg-white border border-emerald-200 hover:bg-emerald-50 px-1.5 py-0.5 rounded shadow-2xs flex items-center gap-0.5"
+                        className="text-[10px] font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 px-2 py-0.5 rounded-full shadow-2xs flex items-center gap-0.5"
                       >
                         <Plus className="w-2.5 h-2.5" />
                         <span>Book</span>
@@ -491,7 +491,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                 .sort((a, b) => a.date.localeCompare(b.date))
                 .map((event) => {
                   const hasConflict = conflicts[event.date]?.length >= 2;
-                  const statusColor = event.status?.color || '#2C8567';
+                  const statusColor = event.status?.color || '#dc2626';
 
                   return (
                     <div
@@ -521,7 +521,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                           <div className="flex items-center gap-2 flex-wrap">
                             <Link
                               href={`/clients/${event._id}`}
-                              className="font-bold text-gray-900 text-sm sm:text-base hover:text-[#2C8567] transition-colors"
+                              className="font-bold text-[#141414] text-sm sm:text-base hover:text-[#dc2626] transition-colors"
                             >
                               {event.name}
                             </Link>
@@ -573,7 +573,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                             onClick={() => openWhatsApp(event.phone!)}
                             className="h-8 text-xs gap-1 text-emerald-800 border-emerald-200 hover:bg-emerald-50"
                           >
-                            <MessageCircle className="w-3.5 h-3.5 text-[#2C8567]" />
+                            <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
                             <span className="hidden sm:inline">WhatsApp</span>
                           </Button>
                         )}
@@ -651,7 +651,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                     if (d) handleBookOnDate(d);
                   }}
                   size="sm"
-                  className="mt-3 bg-[#2C8567] hover:bg-[#236d54] text-white text-xs"
+                  className="mt-3 bg-[#141414] hover:bg-black text-white text-xs rounded-xl"
                 >
                   <Plus className="w-3.5 h-3.5 mr-1" />
                   Book Shoot on this Date
@@ -659,7 +659,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
               </div>
             ) : (
               selectedDayShoots.map((shoot) => {
-                const statusColor = shoot.status?.color || '#2C8567';
+                const statusColor = shoot.status?.color || '#dc2626';
                 return (
                   <div
                     key={shoot._id}
@@ -724,7 +724,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                           variant="outline"
                           size="sm"
                           onClick={() => openWhatsApp(shoot.phone!)}
-                          className="h-7 text-xs text-[#2C8567] border-emerald-200 hover:bg-emerald-50 px-2.5"
+                          className="h-7 text-xs text-gray-700 border-gray-200 hover:bg-gray-100 rounded-lg px-2.5"
                         >
                           <MessageCircle className="w-3 h-3 mr-1" />
                           WhatsApp
@@ -768,7 +768,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                   setSelectedDayDate(null);
                   if (d) handleBookOnDate(d);
                 }}
-                className="text-xs bg-[#2C8567] hover:bg-[#236d54] text-white"
+                className="text-xs bg-[#141414] hover:bg-black text-white rounded-xl shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5 mr-1" />
                 Add Shoot on This Day

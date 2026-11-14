@@ -104,7 +104,7 @@ function LoginForm() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full mt-2" disabled={loading}>
+          <Button type="submit" className="w-full mt-2 bg-[#141414] hover:bg-black text-white rounded-xl font-semibold shadow-xs transition-all" disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -113,7 +113,7 @@ function LoginForm() {
             ) : (
               <>
                 Sign In
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <ArrowRight className="w-4 h-4 ml-2 text-[#dc2626]" />
               </>
             )}
           </Button>
@@ -124,7 +124,7 @@ function LoginForm() {
             First time here?{' '}
             <Link
               href="/register"
-              className="font-medium text-[#2C8567] hover:underline"
+              className="font-semibold text-[#dc2626] hover:underline"
             >
               Create an admin account
             </Link>
@@ -137,22 +137,31 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#fafbfc]">
       <div className="w-full max-w-md">
         {/* Logo header */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 bg-[#2C8567] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2C8567]/20 mb-3">
-            <Camera className="w-6 h-6 text-white" />
+          <img
+            src="/logo.png"
+            alt="Reelman Flow Logo"
+            className="w-14 h-14 rounded-2xl object-cover shadow-md border border-gray-100 mb-3 hover:scale-105 transition-transform"
+          />
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Reelman</h1>
+            <span className="text-sm font-semibold text-[#2C8567] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+              Flow
+            </span>
           </div>
-          <h1 className="text-xl font-bold text-gray-900">Reelman Production</h1>
-          <p className="text-sm text-gray-500">Sign in to your CRM dashboard</p>
+          <p className="text-xs text-gray-400 font-medium mt-1">
+            Studio Management & Production CRM
+          </p>
         </div>
 
         <Suspense
           fallback={
-            <Card className="shadow-sm border-gray-100 p-6">
+            <Card className="rounded-2xl shadow-sm border-gray-100 p-6">
               <div className="h-48 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 animate-spin text-[#2C8567]" />
+                <Loader2 className="w-6 h-6 animate-spin text-[#dc2626]" />
               </div>
             </Card>
           }

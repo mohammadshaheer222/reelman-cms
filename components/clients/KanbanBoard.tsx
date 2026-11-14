@@ -253,7 +253,7 @@ export function KanbanBoard({
     toast.success(
       `Moved "${client.name || 'Client'}" → New`,
       {
-        icon: <RotateCcw className="w-3.5 h-3.5 text-[#2C8567]" />,
+        icon: <RotateCcw className="w-3.5 h-3.5 text-[#dc2626]" />,
       }
     );
 
@@ -357,28 +357,29 @@ export function KanbanBoard({
                   isMobileHidden ? 'hidden sm:flex' : 'flex'
                 } w-full sm:w-80 flex-col rounded-2xl transition-all duration-200 border ${
                   isDragOver
-                    ? 'bg-[#2C8567]/5 border-[#2C8567] ring-2 ring-[#2C8567]/30 shadow-lg scale-[1.01]'
-                    : 'bg-gray-50/90 border-gray-200/80 shadow-sm'
+                    ? 'bg-red-50/20 border-[#dc2626] ring-2 ring-red-500/20 shadow-md scale-[1.01]'
+                    : 'bg-[#f8f9fa] border-gray-200/70 shadow-2xs'
                 }`}
                 style={{
                   minHeight: '520px',
                 }}
               >
                 {/* Column Header */}
-                <div className="p-3.5 pb-2.5 border-b border-gray-200/60 bg-white/80 backdrop-blur-xs rounded-t-2xl">
+                <div className="p-3.5 pb-2.5 border-b border-gray-200/60 bg-white/90 backdrop-blur-xs rounded-t-2xl">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0">
                       <span
-                        className="w-3 h-3 rounded-full shrink-0 shadow-xs"
+                        className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
                         style={{ backgroundColor: status.color }}
                       />
-                      <h3 className="font-semibold text-sm text-gray-800 truncate" title={status.name}>
+                      <h3 className="font-bold text-xs sm:text-sm text-[#141414] truncate" title={status.name}>
                         {status.name}
                       </h3>
                       <span
-                        className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono border"
                         style={{
-                          backgroundColor: `${status.color}18`,
+                          backgroundColor: `${status.color}15`,
+                          borderColor: `${status.color}30`,
                           color: status.color,
                         }}
                       >
@@ -396,7 +397,7 @@ export function KanbanBoard({
                             onOpenCallIntake(status._id);
                           }
                         }}
-                        className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                        className="p-1 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                         title={`Add client to "${status.name}"`}
                       >
                         <Plus className="w-4 h-4" />
@@ -407,7 +408,7 @@ export function KanbanBoard({
                   {/* Total for this column */}
                   {totalStageValue > 0 && (
                     <div className="flex items-center justify-between text-[11px] text-gray-500 font-medium pt-1 mt-1 border-t border-gray-100/70">
-                      <span>Total:</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total:</span>
                       <span className="font-bold text-gray-900 font-mono">
                         ₹{totalStageValue.toLocaleString('en-IN')}
                       </span>
@@ -419,10 +420,10 @@ export function KanbanBoard({
                 <div className="flex-1 p-2.5 flex flex-col gap-2.5 overflow-y-auto max-h-[calc(100vh-250px)] modal-scroll">
                   {columnClients.length === 0 ? (
                     <div
-                      className={`flex-1 flex flex-col items-center justify-center p-6 text-center border-2 border-dashed rounded-xl transition-colors ${
+                      className={`flex-1 flex flex-col items-center justify-center p-6 text-center border-2 border-dashed rounded-2xl transition-colors ${
                         isDragOver
-                          ? 'border-[#2C8567] bg-[#2C8567]/10 text-[#2C8567]'
-                          : 'border-gray-200/70 text-gray-400'
+                          ? 'border-[#dc2626] bg-red-50/30 text-[#dc2626]'
+                          : 'border-gray-200/80 text-gray-400 bg-white/40'
                       }`}
                     >
                       <p className="text-xs font-medium">
@@ -431,7 +432,7 @@ export function KanbanBoard({
                       <button
                         type="button"
                         onClick={() => onAddClientForStatus?.(status._id)}
-                        className="mt-2 text-[11px] font-semibold text-[#2C8567] hover:underline inline-flex items-center gap-1"
+                        className="mt-2 text-[11px] font-semibold text-[#dc2626] hover:underline inline-flex items-center gap-1"
                       >
                         <Plus className="w-3 h-3" /> Add client
                       </button>
@@ -458,20 +459,20 @@ export function KanbanBoard({
                               router.push(`/clients/${client._id}`);
                             }
                           }}
-                          className={`group relative bg-white rounded-xl border border-gray-200/80 p-3 shadow-xs hover:shadow-md hover:border-[#2C8567]/40 transition-all cursor-pointer select-none ${
+                          className={`group relative bg-white rounded-2xl border border-gray-100 p-3.5 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:border-gray-200 transition-all cursor-pointer select-none ${
                             isDragging
-                              ? 'opacity-40 scale-95 ring-2 ring-[#2C8567] shadow-xl rotate-1'
+                              ? 'opacity-40 scale-95 ring-2 ring-[#141414] shadow-xl rotate-1'
                               : ''
                           }`}
                         >
                           {/* Card Top: Drag handle + Name + View link */}
-                          <div className="flex items-start justify-between gap-1.5 mb-1.5">
+                          <div className="flex items-start justify-between gap-1.5 mb-2">
                             <div className="flex items-center gap-1.5 min-w-0 flex-1">
                               <GripVertical className="w-3.5 h-3.5 text-gray-300 group-hover:text-gray-500 shrink-0 transition-colors" />
                               <button
                                 type="button"
                                 onClick={(e) => openEdit(e, client, 'name')}
-                                className="font-semibold text-xs sm:text-sm text-gray-900 hover:text-[#2C8567] transition-colors truncate text-left"
+                                className="font-bold text-xs sm:text-sm text-[#141414] hover:text-[#dc2626] transition-colors truncate text-left"
                                 title="Click to edit name"
                               >
                                 {client.name || (
@@ -485,7 +486,7 @@ export function KanbanBoard({
                             <Link
                               href={`/clients/${client._id}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="text-gray-300 hover:text-[#2C8567] p-0.5 rounded transition-colors shrink-0"
+                              className="text-gray-300 hover:text-[#dc2626] p-0.5 rounded transition-colors shrink-0"
                               title="Open client details"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
@@ -493,16 +494,16 @@ export function KanbanBoard({
                           </div>
 
                           {/* Event Date & Location badge */}
-                          <div className="space-y-1 mb-2">
+                          <div className="space-y-1 mb-2.5">
                             <button
                               type="button"
                               onClick={(e) => openEdit(e, client, 'date')}
                               title="Click to set/change event date"
-                              className="w-full text-left inline-flex items-center justify-between gap-1 py-1 px-2 rounded-md bg-[#2C8567]/6 hover:bg-[#2C8567]/12 border border-[#2C8567]/15 text-[11px] font-medium text-gray-800 transition-colors"
+                              className="w-full text-left inline-flex items-center justify-between gap-1 py-1.5 px-2.5 rounded-xl bg-gray-50 hover:bg-gray-100/80 border border-gray-200/60 text-[11px] font-medium text-gray-800 transition-colors"
                             >
                               <div className="flex items-center gap-1.5 truncate">
-                                <Calendar className="w-3 h-3 text-[#2C8567] shrink-0" />
-                                <span className="font-semibold truncate">
+                                <Calendar className="w-3.5 h-3.5 text-[#dc2626] shrink-0" />
+                                <span className="font-semibold truncate text-[#141414]">
                                   {client.date ? (
                                     formatDate(client.date)
                                   ) : (
@@ -511,7 +512,7 @@ export function KanbanBoard({
                                 </span>
                               </div>
                               {client.dates && client.dates.length > 1 && (
-                                <span className="text-[10px] font-bold text-[#2C8567] bg-[#2C8567]/10 px-1 py-0.2 rounded shrink-0">
+                                <span className="text-[10px] font-bold text-gray-700 bg-white border border-gray-200 px-1.5 py-0.2 rounded-full shrink-0">
                                   +{client.dates.length - 1} days
                                 </span>
                               )}
@@ -529,7 +530,7 @@ export function KanbanBoard({
                                 {client.requirements.slice(0, 3).map((req, rIdx) => (
                                   <span
                                     key={rIdx}
-                                    className="text-[9px] font-medium text-[#2C8567] bg-[#2C8567]/8 border border-[#2C8567]/20 px-1.5 py-0.5 rounded truncate max-w-[130px]"
+                                    className="text-[9px] font-semibold text-gray-700 bg-gray-100 border border-gray-200/60 px-2 py-0.5 rounded-full truncate max-w-[130px]"
                                   >
                                     {req}
                                   </span>
@@ -544,16 +545,16 @@ export function KanbanBoard({
                           </div>
 
                           {/* Confirmed Work Price & Payment details */}
-                          <div className="mb-2">
+                          <div className="mb-2.5">
                             <button
                               type="button"
                               onClick={(e) => openEdit(e, client, 'price')}
-                              className="w-full text-left flex items-center justify-between gap-1 py-1 px-2 rounded-md bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/80 text-[11px] transition-colors"
+                              className="w-full text-left flex items-center justify-between gap-1 py-1.5 px-2.5 rounded-xl bg-gray-50 hover:bg-gray-100/70 border border-gray-200/60 text-[11px] transition-colors"
                               title="Click to edit work price & payment"
                             >
                               <div className="flex items-center gap-1 min-w-0">
-                                <IndianRupee className="w-3 h-3 text-emerald-700 shrink-0" />
-                                <span className="font-bold text-emerald-900 truncate font-mono">
+                                <IndianRupee className="w-3 h-3 text-[#141414] shrink-0" />
+                                <span className="font-bold text-[#141414] truncate font-mono">
                                   {hasWorkPrice
                                     ? `₹${client.workPrice!.toLocaleString('en-IN')}`
                                     : '+ Add Price'}
@@ -562,26 +563,26 @@ export function KanbanBoard({
 
                               <div className="shrink-0 flex items-center gap-1 text-[10px]">
                                 {client.paymentStatus === 'fully-paid' ? (
-                                  <span className="font-bold text-emerald-700 bg-emerald-100/90 px-1.5 py-0.2 rounded">
+                                  <span className="font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-2 py-0.2 rounded-full">
                                     Paid ✅
                                   </span>
                                 ) : hasAdvance ? (
-                                  <span className="font-semibold text-blue-700 bg-blue-100/80 px-1.5 py-0.2 rounded font-mono">
+                                  <span className="font-semibold text-blue-700 bg-blue-50 border border-blue-200/70 px-2 py-0.2 rounded-full font-mono">
                                     Adv: ₹{client.advancePaid!.toLocaleString('en-IN')}
                                   </span>
                                 ) : (
-                                  <span className="text-gray-500">Unpaid</span>
+                                  <span className="text-gray-400 font-medium">Unpaid</span>
                                 )}
                               </div>
                             </button>
                           </div>
 
                           {/* Phone & WhatsApp row */}
-                          <div className="flex items-center justify-between gap-1 py-1 px-2 bg-gray-50/90 rounded-md border border-gray-100 text-[11px] mb-2">
+                          <div className="flex items-center justify-between gap-1 py-1 px-2.5 bg-gray-50/70 rounded-xl border border-gray-100 text-[11px] mb-2.5">
                             <button
                               type="button"
                               onClick={(e) => openEdit(e, client, 'phone')}
-                              className="flex items-center gap-1.5 text-gray-700 hover:text-[#2C8567] truncate font-mono text-[11px]"
+                              className="flex items-center gap-1.5 text-gray-700 hover:text-[#dc2626] truncate font-mono text-[11px]"
                               title="Click to edit phone"
                             >
                               <Phone className="w-3 h-3 text-gray-400 shrink-0" />
@@ -598,7 +599,7 @@ export function KanbanBoard({
                                   <a
                                     href={`tel:${client.phone}`}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="p-1 text-gray-500 hover:text-[#2C8567] hover:bg-white rounded transition-colors"
+                                    className="p-1 text-gray-400 hover:text-[#dc2626] hover:bg-gray-100 rounded-lg transition-colors"
                                     title="Call client"
                                   >
                                     <Phone className="w-3 h-3" />
@@ -606,7 +607,7 @@ export function KanbanBoard({
                                   <button
                                     type="button"
                                     onClick={(e) => handleWhatsAppClick(e, client)}
-                                    className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded transition-colors"
+                                    className="p-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
                                     title="Chat on WhatsApp"
                                   >
                                     <MessageCircle className="w-3 h-3" />

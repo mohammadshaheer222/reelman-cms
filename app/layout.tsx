@@ -21,7 +21,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   interactiveWidget: 'resizes-content',
-  themeColor: '#2C8567',
+  themeColor: '#141414',
 };
 
 export default function RootLayout({
@@ -30,13 +30,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full scroll-smooth">
       <head>
         <link rel="icon" href="/icon.png" type="image/png" sizes="192x192" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-icon.png" />
       </head>
-      <body className="min-h-full flex flex-col bg-gray-50 text-gray-900 font-sans antialiased">
+      <body className="min-h-full flex flex-col bg-[#fafbfc] text-[#141414] font-sans antialiased selection:bg-red-500/15 selection:text-red-700">
         {children}
         <Toaster richColors position="top-right" />
       </body>

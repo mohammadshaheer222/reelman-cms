@@ -78,35 +78,44 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-gray-100 shadow-xs">
+      {/* Top Banner / Studio Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
-            Welcome back, {user?.name || 'Producer'} 👋
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 bg-gray-50 px-2.5 py-0.5 rounded-full border border-gray-200/60">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#dc2626] animate-pulse" />
+              Creator Studio CRM
+            </span>
+            <span className="text-xs text-gray-300">•</span>
+            <span className="text-xs text-gray-500 font-medium">Real-time pipeline</span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] tracking-tight">
+            Welcome back, {user?.name || 'Producer'}
+            <span className="text-[#dc2626]">.</span>
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            Overview of your clients, studio bookings, and shoots.
+          <p className="text-xs sm:text-sm text-gray-500 mt-1 font-normal leading-relaxed">
+            Monitor creator bookings, shoot schedules, deliverable milestones, and payment collections.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           {needsSeed && (
             <Button
               variant="outline"
               size="sm"
               onClick={handleSeed}
               disabled={seeding}
-              className="text-amber-700 bg-amber-50 border-amber-200 hover:bg-amber-100 text-xs"
+              className="text-amber-700 bg-amber-50 border-amber-200 hover:bg-amber-100 text-xs rounded-xl font-medium"
             >
-              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+              <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
               {seeding ? 'Initializing...' : 'Initialize Pipeline'}
             </Button>
           )}
           <Button
             size="sm"
             onClick={() => setAddClientOpen(true)}
-            className="flex items-center gap-1.5 bg-[#2C8567] hover:bg-[#236d54] text-white shadow-xs font-semibold px-4"
+            className="flex items-center gap-2 bg-[#141414] hover:bg-black text-white rounded-xl shadow-xs px-4 py-2 font-semibold transition-all hover:shadow-sm"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-[#dc2626]" />
             <span>New Client</span>
           </Button>
         </div>
@@ -121,28 +130,28 @@ export default function DashboardPage() {
             title="Total Clients"
             value={stats?.totalClients ?? 0}
             icon={Users}
-            color="text-[#2C8567] bg-[#2C8567]/10"
+            color="text-[#141414] bg-gray-100"
             description="Registered studio clients"
           />
           <StatsCard
             title="Active Pipeline"
             value={stats?.activeClients ?? 0}
             icon={Clock}
-            color="text-emerald-700 bg-emerald-50"
+            color="text-[#dc2626] bg-red-50 border border-red-100/60"
             description="Leads currently in pipeline"
           />
           <StatsCard
             title="Confirmed Bookings"
             value={formattedRevenue}
             icon={IndianRupee}
-            color="text-blue-700 bg-blue-50"
+            color="text-emerald-700 bg-emerald-50 border border-emerald-100/60"
             description="Agreed shoot value"
           />
           <StatsCard
             title="Advance Received"
             value={formattedAdvance}
             icon={CheckCircle2}
-            color="text-amber-700 bg-amber-50"
+            color="text-blue-700 bg-blue-50 border border-blue-100/60"
             description="Advance payments collected"
           />
         </div>
@@ -152,74 +161,74 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Link
           href="/clients"
-          className="p-4 rounded-xl bg-white border border-gray-100 shadow-2xs hover:shadow-sm hover:border-[#2C8567]/30 transition-all flex items-center justify-between group"
+          className="p-4 rounded-2xl bg-white border border-gray-100/90 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 transition-all duration-300 flex items-center justify-between group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-[#2C8567] flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-gray-100 text-[#141414] flex items-center justify-center font-bold group-hover:bg-[#141414] group-hover:text-white transition-colors duration-300">
               <Layers className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900 group-hover:text-[#2C8567] transition-colors">
+              <p className="text-sm font-bold text-[#141414] group-hover:text-black transition-colors">
                 Clients & Pipeline
               </p>
-              <p className="text-xs text-gray-400">Track client stages & bookings</p>
+              <p className="text-xs text-gray-400 font-normal">Track client stages & bookings</p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#2C8567] group-hover:translate-x-0.5 transition-all" />
+          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#dc2626] group-hover:translate-x-1 transition-all" />
         </Link>
 
         <Link
           href="/calendar"
-          className="p-4 rounded-xl bg-white border border-gray-100 shadow-2xs hover:shadow-sm hover:border-blue-400/30 transition-all flex items-center justify-between group"
+          className="p-4 rounded-2xl bg-white border border-gray-100/90 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 transition-all duration-300 flex items-center justify-between group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
               <CalendarIcon className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+              <p className="text-sm font-bold text-[#141414] group-hover:text-blue-600 transition-colors">
                 Shoot Calendar
               </p>
-              <p className="text-xs text-gray-400">Schedule & conflict detector</p>
+              <p className="text-xs text-gray-400 font-normal">Schedule & conflict detector</p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
+          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
         </Link>
 
         <Link
           href="/notepad"
-          className="p-4 rounded-xl bg-white border border-gray-100 shadow-2xs hover:shadow-sm hover:border-[#2C8567]/30 transition-all flex items-center justify-between group"
+          className="p-4 rounded-2xl bg-white border border-gray-100/90 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 transition-all duration-300 flex items-center justify-between group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-[#2C8567] flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold group-hover:bg-amber-600 group-hover:text-white transition-colors duration-300">
               <StickyNote className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900 group-hover:text-[#2C8567] transition-colors">
-                Notepad
+              <p className="text-sm font-bold text-[#141414] group-hover:text-amber-600 transition-colors">
+                Call Notepad
               </p>
-              <p className="text-xs text-gray-400">Quick rough notes during calls</p>
+              <p className="text-xs text-gray-400 font-normal">Quick notes during inquiries</p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#2C8567] group-hover:translate-x-0.5 transition-all" />
+          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
         </Link>
 
         <Link
           href="/packages"
-          className="p-4 rounded-xl bg-white border border-gray-100 shadow-2xs hover:shadow-sm hover:border-[#2C8567]/30 transition-all flex items-center justify-between group"
+          className="p-4 rounded-2xl bg-white border border-gray-100/90 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 transition-all duration-300 flex items-center justify-between group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-[#2C8567] flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-red-50 text-[#dc2626] flex items-center justify-center font-bold group-hover:bg-[#dc2626] group-hover:text-white transition-colors duration-300">
               <Package className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900 group-hover:text-[#2C8567] transition-colors">
-                Packages & Proposals
+              <p className="text-sm font-bold text-[#141414] group-hover:text-[#dc2626] transition-colors">
+                Proposals & PDF
               </p>
-              <p className="text-xs text-gray-400">Customize wedding proposals</p>
+              <p className="text-xs text-gray-400 font-normal">Client booklets & packages</p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#2C8567] group-hover:translate-x-0.5 transition-all" />
+          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#dc2626] group-hover:translate-x-1 transition-all" />
         </Link>
       </div>
 
@@ -239,9 +248,9 @@ export default function DashboardPage() {
                 Recent Activity
               </CardTitle>
             </div>
-            <Button asChild variant="ghost" size="sm" className="text-xs text-[#2C8567]">
-              <Link href="/activity" className="flex items-center gap-1">
-                View All <ArrowRight className="w-3.5 h-3.5" />
+            <Button asChild variant="ghost" size="sm" className="text-xs text-gray-500 hover:text-black hover:bg-gray-100 rounded-xl">
+              <Link href="/activity" className="flex items-center gap-1 font-semibold">
+                View All <ArrowRight className="w-3.5 h-3.5 text-[#dc2626]" />
               </Link>
             </Button>
           </CardHeader>

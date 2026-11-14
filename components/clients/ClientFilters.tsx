@@ -75,7 +75,7 @@ export function ClientFilters({
           placeholder="Search clients by name, location, requirements, or notes..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9 h-9 bg-white"
+          className="pl-9 h-9 bg-white rounded-xl border-gray-200/80 shadow-2xs text-xs sm:text-sm"
         />
       </div>
 
@@ -87,7 +87,7 @@ export function ClientFilters({
             variant="outline"
             size="sm"
             onClick={() => setDropdownOpen((prev) => !prev)}
-            className="h-9 bg-white border-gray-200 text-xs font-medium gap-1.5 min-w-[130px] justify-between"
+            className="h-9 bg-white border-gray-200/80 text-xs font-semibold gap-1.5 min-w-[130px] justify-between rounded-xl shadow-2xs"
           >
             <div className="flex items-center gap-1.5 truncate">
               <Filter className="w-3.5 h-3.5 text-gray-400 shrink-0" />
@@ -100,7 +100,7 @@ export function ClientFilters({
               </span>
             </div>
             {selectedStatusIds.length > 0 ? (
-              <span className="w-4 h-4 rounded-full bg-[#2C8567] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+              <span className="w-4 h-4 rounded-full bg-[#dc2626] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
                 {selectedStatusIds.length}
               </span>
             ) : (
@@ -109,16 +109,16 @@ export function ClientFilters({
           </Button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1.5 w-56 p-2 bg-white shadow-xl rounded-xl border border-gray-100 z-50 animate-in fade-in zoom-in-95">
+            <div className="absolute right-0 top-full mt-1.5 w-56 p-2 bg-white shadow-xl rounded-2xl border border-gray-100 z-50 animate-in fade-in zoom-in-95">
               <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-gray-100 px-1">
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                   Filter by Status
                 </span>
                 {selectedStatusIds.length > 0 && (
                   <button
                     type="button"
                     onClick={clearStatuses}
-                    className="text-[10px] text-gray-400 hover:text-red-600 font-semibold"
+                    className="text-[10px] text-gray-400 hover:text-[#dc2626] font-semibold"
                   >
                     Reset
                   </button>
@@ -129,14 +129,14 @@ export function ClientFilters({
                 <button
                   type="button"
                   onClick={clearStatuses}
-                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors ${
                     selectedStatusIds.length === 0
-                      ? 'bg-[#2C8567]/10 text-[#2C8567] font-semibold'
+                      ? 'bg-gray-100 text-[#141414] font-bold'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   <span>All Statuses</span>
-                  {selectedStatusIds.length === 0 && <Check className="w-3.5 h-3.5 text-[#2C8567]" />}
+                  {selectedStatusIds.length === 0 && <Check className="w-3.5 h-3.5 text-[#dc2626]" />}
                 </button>
 
                 {statuses.map((s) => {
@@ -146,20 +146,20 @@ export function ClientFilters({
                       key={s._id}
                       type="button"
                       onClick={() => toggleStatus(s._id)}
-                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors ${
                         isChecked
-                          ? 'bg-[#2C8567]/10 text-[#2C8567] font-semibold'
+                          ? 'bg-red-50 text-[#dc2626] font-bold'
                           : 'text-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       <div className="flex items-center gap-2 truncate">
                         <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          className="w-2 h-2 rounded-full shrink-0"
                           style={{ backgroundColor: s.color }}
                         />
                         <span className="truncate">{s.name}</span>
                       </div>
-                      {isChecked && <Check className="w-3.5 h-3.5 text-[#2C8567]" />}
+                      {isChecked && <Check className="w-3.5 h-3.5 text-[#dc2626]" />}
                     </button>
                   );
                 })}
@@ -170,7 +170,7 @@ export function ClientFilters({
 
         {/* Sort Select */}
         <Select value={sort} onValueChange={onSortChange}>
-          <SelectTrigger className="w-[140px] h-9 bg-white text-xs">
+          <SelectTrigger className="w-[140px] h-9 bg-white text-xs rounded-xl border-gray-200/80 shadow-2xs font-medium">
             <ArrowUpDown className="w-3.5 h-3.5 mr-2 text-gray-400" />
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>

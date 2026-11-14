@@ -272,7 +272,7 @@ export function QuickAddClient({
       setPackageDetails((prev) => (prev ? `${prev}\n\n${extracted}` : extracted));
       setActiveTab('package');
       toast.success(`Converted ${file.name} to package text`, {
-        icon: <CheckCircle2 className="w-4 h-4 text-[#2C8567]" />,
+        icon: <CheckCircle2 className="w-4 h-4 text-[#dc2626]" />,
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error extracting PDF text';
@@ -341,7 +341,7 @@ export function QuickAddClient({
       if (!res.ok) throw new Error(data.error || 'Failed to create client');
 
       toast.success('Client added successfully', {
-        icon: <CheckCircle2 className="w-4 h-4 text-[#2C8567]" />,
+        icon: <CheckCircle2 className="w-4 h-4 text-[#dc2626]" />,
       });
 
       // Reset form
@@ -990,7 +990,7 @@ export function QuickAddClient({
               type="submit"
               size="sm"
               disabled={submitting}
-              className="h-9 bg-[#2C8567] hover:bg-[#236d54] text-white font-semibold px-5 text-xs shadow-xs"
+              className="h-9 bg-[#141414] hover:bg-black text-white font-semibold px-5 text-xs shadow-xs rounded-xl transition-all"
             >
               {submitting ? 'Adding Client…' : 'Add Client'}
             </Button>

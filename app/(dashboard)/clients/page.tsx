@@ -98,11 +98,18 @@ export default function ClientsPage() {
   return (
     <div className="space-y-5">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-gray-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Clients</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Manage your client pipeline, track shooting stages, and view bookings.
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+              Pipeline Management
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] tracking-tight">
+            Clients & Bookings<span className="text-[#dc2626]">.</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5 font-normal">
+            Manage creator shoots, lead statuses, confirmed proposals, and delivery milestones.
           </p>
         </div>
 
@@ -113,9 +120,9 @@ export default function ClientsPage() {
               setPreselectedStatusId(undefined);
               setAddClientOpen(true);
             }}
-            className="flex items-center gap-1.5 shadow-sm bg-[#2C8567] hover:bg-[#236d54] text-white"
+            className="flex items-center gap-2 bg-[#141414] hover:bg-black text-white rounded-xl shadow-xs px-4 py-2 font-semibold transition-all hover:shadow-sm"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-[#dc2626]" />
             <span>Add Client</span>
           </Button>
         </div>

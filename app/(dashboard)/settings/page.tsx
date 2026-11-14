@@ -38,7 +38,8 @@ import { toast } from 'sonner';
 import { formatStatusWhatsAppMessage } from '@/lib/whatsapp';
 
 const PRESET_COLORS = [
-  '#2C8567', // Primary Emerald
+  '#dc2626', // Signature Red
+  '#141414', // Carbon Black
   '#6366f1', // Indigo
   '#22c55e', // Green
   '#f59e0b', // Amber
@@ -46,7 +47,6 @@ const PRESET_COLORS = [
   '#06b6d4', // Cyan
   '#3b82f6', // Blue
   '#f97316', // Orange
-  '#ef4444', // Red
   '#6b7280', // Gray
   '#ec4899', // Pink
   '#14b8a6', // Teal
@@ -61,7 +61,7 @@ export default function SettingsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingStatus, setEditingStatus] = useState<Status | null>(null);
   const [name, setName] = useState('');
-  const [color, setColor] = useState('#2C8567');
+  const [color, setColor] = useState('#dc2626');
   const [whatsappMessage, setWhatsappMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -143,7 +143,7 @@ export default function SettingsPage() {
   const handleOpenAdd = () => {
     setEditingStatus(null);
     setName('');
-    setColor('#2C8567');
+    setColor('#dc2626');
     setWhatsappMessage('');
     setModalOpen(true);
   };
@@ -241,10 +241,17 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-gray-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Settings</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+              System Configuration
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] tracking-tight">
+            Pipeline Settings<span className="text-[#dc2626]">.</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-500 font-normal">
             Configure client workflow stages, colors, and automated WhatsApp prefill templates.
           </p>
         </div>
@@ -256,18 +263,18 @@ export default function SettingsPage() {
               size="sm"
               onClick={() => handleSeed(true)}
               disabled={seeding}
-              className="text-[#2C8567] bg-[#2C8567]/5 border-[#2C8567]/20 hover:bg-[#2C8567]/10"
+              className="text-gray-700 bg-white border-gray-200 hover:bg-gray-50 rounded-xl text-xs font-semibold shadow-2xs"
               title="Populates default 10 statuses and WhatsApp prefill messages"
             >
-              <Sparkles className="w-4 h-4 mr-1.5" />
+              <Sparkles className="w-4 h-4 mr-1.5 text-amber-500" />
               {seeding ? 'Syncing...' : 'Sync Default Templates'}
             </Button>
             <Button
               size="sm"
               onClick={handleOpenAdd}
-              className="flex items-center gap-1.5 bg-[#2C8567] hover:bg-[#236d54] text-white shadow-sm"
+              className="flex items-center gap-2 bg-[#141414] hover:bg-black text-white rounded-xl shadow-xs px-4 py-2 font-semibold transition-all hover:shadow-sm"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-[#dc2626]" />
               New Status
             </Button>
           </div>
@@ -275,11 +282,13 @@ export default function SettingsPage() {
       </div>
 
       {/* Statuses List Card */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Layers className="w-5 h-5 text-[#2C8567]" />
-            <h2 className="text-base font-semibold text-gray-900">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#141414]">
+              <Layers className="w-4 h-4 text-[#dc2626]" />
+            </div>
+            <h2 className="text-base font-bold text-[#141414]">
               Pipeline Statuses & WhatsApp Prefills ({statuses.length})
             </h2>
           </div>
@@ -296,7 +305,7 @@ export default function SettingsPage() {
           <div className="p-8 text-center space-y-3">
             <p className="text-sm text-gray-500">No statuses found in the system.</p>
             {isAdmin && (
-              <Button size="sm" onClick={() => handleSeed(false)} disabled={seeding} className="bg-[#2C8567] hover:bg-[#236d54] text-white">
+              <Button size="sm" onClick={() => handleSeed(false)} disabled={seeding} className="bg-[#141414] hover:bg-black text-white rounded-xl shadow-xs">
                 <Sparkles className="w-4 h-4 mr-1.5" />
                 Initialize Default 10 Statuses
               </Button>
@@ -338,7 +347,7 @@ export default function SettingsPage() {
                   <TableCell className="max-w-[320px]">
                     {s.whatsappMessage ? (
                       <div className="flex items-start gap-1.5 text-xs text-gray-600">
-                        <MessageCircle className="w-3.5 h-3.5 text-[#2C8567] shrink-0 mt-0.5" />
+                        <MessageCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                         <span className="line-clamp-2 leading-relaxed font-sans" title={s.whatsappMessage}>
                           {s.whatsappMessage}
                         </span>
@@ -355,7 +364,7 @@ export default function SettingsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleOpenEdit(s)}
-                          className="h-8 w-8 text-gray-400 hover:text-[#2C8567]"
+                          className="h-8 w-8 text-gray-400 hover:text-[#dc2626] rounded-xl"
                           title="Edit status & WhatsApp template"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -384,7 +393,7 @@ export default function SettingsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
           <div>
             <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#2C8567]" />
+              <Sparkles className="w-4 h-4 text-[#dc2626]" />
               <span>Client Requirements & Services ({requirements.length})</span>
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
@@ -404,7 +413,7 @@ export default function SettingsPage() {
               type="submit"
               size="sm"
               disabled={reqSubmitting || !newReqInput.trim()}
-              className="h-8 text-xs bg-[#2C8567] hover:bg-[#236d54] text-white gap-1"
+              className="h-8 text-xs bg-[#141414] hover:bg-black text-white gap-1 rounded-xl shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add</span>
@@ -438,8 +447,8 @@ export default function SettingsPage() {
       {/* System info */}
       <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
         <div className="flex items-center gap-2">
-          <Info className="w-4 h-4 text-[#2C8567]" />
-          <h3 className="text-sm font-semibold text-gray-900">System Environment & WhatsApp Settings</h3>
+          <Info className="w-4 h-4 text-[#dc2626]" />
+          <h3 className="text-sm font-bold text-[#141414]">System Environment & WhatsApp Settings</h3>
         </div>
         <p className="text-xs text-gray-500 leading-relaxed">
           When team members click the WhatsApp button on a client card or table, the message is automatically tailored to the client&apos;s current status using your custom template with dynamic placeholders for client name and shoot date.
@@ -482,7 +491,7 @@ export default function SettingsPage() {
                       onClick={() => setColor(c)}
                       className={`w-6 h-6 rounded-full flex items-center justify-center transition-transform ${
                         color.toLowerCase() === c.toLowerCase()
-                          ? 'scale-110 ring-2 ring-offset-2 ring-[#2C8567]'
+                          ? 'scale-110 ring-2 ring-offset-2 ring-[#dc2626]'
                           : 'hover:scale-105'
                       }`}
                       style={{ backgroundColor: c }}
@@ -499,7 +508,7 @@ export default function SettingsPage() {
               <div className="space-y-1.5 pt-1">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="whatsappMessage" className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
-                    <MessageCircle className="w-3.5 h-3.5 text-[#2C8567]" />
+                    <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
                     Prefill WhatsApp Message
                   </Label>
                   <div className="flex items-center gap-1">
@@ -529,15 +538,15 @@ export default function SettingsPage() {
                   value={whatsappMessage}
                   onChange={(e) => setWhatsappMessage(e.target.value)}
                   placeholder="e.g. Hello {name}! 👋 Thank you for choosing Reelman Production for {date}..."
-                  className="text-xs sm:text-sm font-sans resize-none leading-relaxed focus-visible:ring-[#2C8567]"
+                  className="text-xs sm:text-sm font-sans resize-none leading-relaxed focus-visible:ring-[#dc2626]"
                 />
                 <p className="text-[10px] text-gray-400">
                   When clicking WhatsApp for a client in this status, this message will open pre-filled.
                 </p>
 
                 {whatsappMessage && (
-                  <div className="mt-2 p-2.5 bg-green-50/60 rounded-xl border border-green-100 text-xs text-gray-700">
-                    <span className="text-[10px] font-semibold text-[#2C8567] block mb-1">
+                  <div className="mt-2 p-2.5 bg-gray-50 rounded-xl border border-gray-150 text-xs text-gray-700">
+                    <span className="text-[10px] font-semibold text-emerald-700 block mb-1">
                       Live Preview (sample client):
                     </span>
                     <p className="whitespace-pre-line leading-relaxed text-gray-800 text-[11px]">
@@ -555,6 +564,7 @@ export default function SettingsPage() {
                 size="sm"
                 onClick={() => setModalOpen(false)}
                 disabled={submitting}
+                className="rounded-xl"
               >
                 Cancel
               </Button>
@@ -562,7 +572,7 @@ export default function SettingsPage() {
                 type="submit"
                 size="sm"
                 disabled={submitting}
-                className="bg-[#2C8567] hover:bg-[#236d54] text-white"
+                className="bg-[#141414] hover:bg-black text-white rounded-xl shadow-xs"
               >
                 {submitting ? 'Saving...' : editingStatus ? 'Update Status' : 'Create Status'}
               </Button>

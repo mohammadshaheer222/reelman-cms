@@ -302,10 +302,10 @@ export default function TeamPage() {
                     <button
                       type="button"
                       onClick={() => handleOpenAccess(member)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/60 text-gray-700 hover:text-[#2C8567] transition-all shadow-2xs"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-medium border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-black transition-all shadow-2xs"
                       title="Configure sidebar menu items visible to this user"
                     >
-                      <SlidersHorizontal className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#2C8567]" />
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#dc2626]" />
                       <span>
                         {!member.allowedNavItems || member.allowedNavItems.length === 0 || member.allowedNavItems.length === navItems.length
                           ? 'All 7 Tabs'
@@ -447,8 +447,8 @@ export default function TeamPage() {
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-[#2C8567] flex items-center justify-center shrink-0">
-                <SlidersHorizontal className="w-4 h-4" />
+              <div className="w-9 h-9 rounded-xl bg-[#141414] text-white flex items-center justify-center shrink-0">
+                <SlidersHorizontal className="w-4 h-4 text-[#dc2626]" />
               </div>
               <div>
                 <DialogTitle className="text-base font-bold text-gray-900">
@@ -471,7 +471,7 @@ export default function TeamPage() {
                 <button
                   type="button"
                   onClick={handleSelectAllNavItems}
-                  className="text-xs font-semibold text-[#2C8567] hover:underline"
+                  className="text-xs font-semibold text-[#dc2626] hover:underline"
                 >
                   Enable All
                 </button>
@@ -505,7 +505,7 @@ export default function TeamPage() {
                       <div
                         className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
                           isChecked
-                            ? 'bg-[#2C8567] text-white shadow-2xs'
+                            ? 'bg-[#141414] text-white shadow-2xs'
                             : 'bg-gray-100 text-gray-400'
                         }`}
                       >
@@ -547,7 +547,7 @@ export default function TeamPage() {
               size="sm"
               onClick={handleSaveAccess}
               disabled={savingAccess}
-              className="bg-[#2C8567] hover:bg-[#236d54] text-white text-xs font-semibold px-4"
+              className="bg-[#141414] hover:bg-black text-white text-xs font-semibold px-4 rounded-xl shadow-xs"
             >
               {savingAccess ? 'Saving...' : 'Save Permissions'}
             </Button>

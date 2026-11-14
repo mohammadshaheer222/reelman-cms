@@ -12,12 +12,14 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   if (loading && !user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-[#fafbfc]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 bg-[#2C8567] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2C8567]/20 animate-pulse">
-            <Camera className="w-6 h-6 text-white" />
-          </div>
-          <p className="text-sm font-medium text-gray-500">Checking session...</p>
+          <img
+            src="/logo.png"
+            alt="Reelman Flow Logo"
+            className="w-12 h-12 rounded-2xl object-cover shadow-md border border-gray-100 animate-pulse"
+          />
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Loading Reelman Flow...</p>
         </div>
       </div>
     );
@@ -29,7 +31,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-[#fafbfc]">
       {/* Sidebar (Desktop and Mobile Drawer) */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 

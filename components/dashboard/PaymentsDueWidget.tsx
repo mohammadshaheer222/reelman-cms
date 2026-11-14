@@ -170,9 +170,9 @@ export function PaymentsDueWidget() {
 
   if (loading) {
     return (
-      <Card className="shadow-xs border-gray-100 p-5">
+      <Card className="rounded-2xl shadow-[0_2px_16px_rgba(0,0,0,0.03)] border-gray-100/90 p-5">
         <div className="flex items-center gap-2">
-          <IndianRupee className="w-4 h-4 text-[#2C8567] animate-pulse" />
+          <IndianRupee className="w-4 h-4 text-[#dc2626] animate-pulse" />
           <p className="text-xs text-gray-400">Loading payments due this month...</p>
         </div>
       </Card>
@@ -180,28 +180,28 @@ export function PaymentsDueWidget() {
   }
 
   return (
-    <Card className="shadow-xs border-gray-100 flex flex-col justify-between overflow-hidden">
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 gap-2 border-b border-gray-100/70">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-900 flex items-center justify-center font-bold">
+    <Card className="rounded-2xl shadow-[0_2px_16px_rgba(0,0,0,0.03)] border-gray-100/90 flex flex-col justify-between overflow-hidden">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 gap-2 border-b border-gray-100/80">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-900 border border-amber-200/50 flex items-center justify-center font-bold">
             <IndianRupee className="w-4 h-4" />
           </div>
           <div>
-            <CardTitle className="text-base font-bold text-gray-900">
+            <CardTitle className="text-base font-bold text-[#141414]">
               Payments Due This Month
             </CardTitle>
-            <p className="text-xs text-gray-500">
-              Never chase payments without records • {items.length} pending installment{items.length === 1 ? '' : 's'}
+            <p className="text-xs text-gray-400 font-normal">
+              Track creator dues & automated client follow-ups • {items.length} pending installment{items.length === 1 ? '' : 's'}
             </p>
           </div>
         </div>
 
         {totalDueThisMonth > 0 && (
-          <div className="text-left sm:text-right">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-800">
+          <div className="text-left sm:text-right bg-amber-50/60 border border-amber-200/50 px-3 py-1.5 rounded-xl">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800">
               Total Outstanding
             </span>
-            <p className="text-lg font-bold font-mono text-amber-950 leading-tight">
+            <p className="text-base sm:text-lg font-bold font-mono text-amber-950 leading-tight">
               ₹{totalDueThisMonth.toLocaleString('en-IN')}
             </p>
           </div>
@@ -216,45 +216,45 @@ export function PaymentsDueWidget() {
             <p>No overdue or pending payments due this month.</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100 space-y-2">
+          <div className="divide-y divide-gray-100">
             {items.slice(0, 5).map((item, idx) => (
               <div
                 key={`${item.client._id}-${item.installment.id}-${idx}`}
-                className="pt-2.5 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-gray-50/60 p-2 rounded-xl transition-colors"
+                className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-gray-50/70 -mx-2 px-2.5 rounded-xl transition-all"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Link
                       href={`/clients/${item.client._id}`}
-                      className="font-bold text-gray-900 text-sm hover:text-[#2C8567] transition-colors truncate"
+                      className="font-bold text-[#141414] text-sm hover:text-[#dc2626] transition-colors truncate"
                     >
                       {item.client.name || 'Unnamed Client'}
                     </Link>
 
                     {item.isOverdue ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200">
-                        <AlertTriangle className="w-2.5 h-2.5" />
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200/70">
+                        <AlertTriangle className="w-2.5 h-2.5 text-[#dc2626]" />
                         <span>Overdue</span>
                       </span>
                     ) : item.daysDiff === 0 ? (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/70">
                         Due Today
                       </span>
                     ) : item.daysDiff > 0 ? (
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                      <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200/50">
                         In {item.daysDiff}d
                       </span>
                     ) : null}
                   </div>
 
                   <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500 flex-wrap">
-                    <span className="font-semibold text-gray-700">
+                    <span className="font-semibold text-gray-800">
                       {item.installment.name}
                     </span>
                     <span>•</span>
                     {item.client.date && (
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-gray-400" />
+                      <span className="flex items-center gap-1 font-medium">
+                        <Calendar className="w-3 h-3 text-[#dc2626]" />
                         <span>
                           {new Date(item.client.date).toLocaleDateString('en-IN', {
                             day: 'numeric',
@@ -267,22 +267,22 @@ export function PaymentsDueWidget() {
                 </div>
 
                 <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                  <span className="text-base font-bold font-mono text-gray-900">
+                  <span className="text-base font-bold font-mono text-[#141414]">
                     ₹{item.installment.amount.toLocaleString('en-IN')}
                   </span>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     {item.client.phone && (
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => handleSendReminder(item)}
-                        className="h-7 text-xs text-emerald-800 border-emerald-200 hover:bg-emerald-50 px-2 gap-1"
+                        className="h-8 text-xs text-emerald-800 border-emerald-200 hover:bg-emerald-50 px-3 rounded-xl gap-1.5 font-medium shadow-2xs"
                         title="Send WhatsApp payment reminder"
                       >
-                        <MessageCircle className="w-3 h-3 text-[#2C8567]" />
-                        <span className="hidden sm:inline">Remind</span>
+                        <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="hidden sm:inline">WhatsApp</span>
                       </Button>
                     )}
 
@@ -290,10 +290,10 @@ export function PaymentsDueWidget() {
                       type="button"
                       size="sm"
                       onClick={() => handleQuickMarkPaid(item)}
-                      className="h-7 text-xs bg-gray-900 hover:bg-black text-white px-2.5 font-semibold"
+                      className="h-8 text-xs bg-[#141414] hover:bg-black text-white px-3.5 rounded-xl font-semibold shadow-xs"
                       title="Mark installment paid"
                     >
-                      <Check className="w-3 h-3 mr-1" />
+                      <Check className="w-3.5 h-3.5 mr-1" />
                       <span>Paid</span>
                     </Button>
                   </div>

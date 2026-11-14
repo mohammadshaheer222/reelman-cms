@@ -99,7 +99,7 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
     <>
       <Card
         onClick={() => router.push(`/clients/${client._id}`)}
-        className="p-4 hover:shadow-md hover:border-[#2C8567]/30 transition-all group flex flex-col h-full justify-between cursor-pointer"
+        className="rounded-2xl border border-gray-100/90 bg-white p-5 shadow-[0_2px_16px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.06)] hover:border-gray-200 transition-all group flex flex-col h-full justify-between cursor-pointer"
       >
         <div>
           {/* Name — click to edit */}
@@ -108,10 +108,10 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
               <button
                 type="button"
                 onClick={(e) => openEdit(e, 'name')}
-                className="text-left w-full hover:text-[#2C8567] transition-colors"
+                className="text-left w-full hover:text-[#dc2626] transition-colors"
                 title="Click to edit name"
               >
-                <h3 className="font-semibold text-gray-900 hover:text-[#2C8567] transition-colors truncate">
+                <h3 className="font-bold text-base text-[#141414] hover:text-[#dc2626] transition-colors truncate">
                   {client.name || (
                     <span className="text-gray-400 italic font-normal">+ Add Name</span>
                   )}
@@ -124,7 +124,7 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
               type="button"
               onClick={(e) => openEdit(e, 'status')}
               title="Click to change status"
-              className="shrink-0 hover:scale-105 hover:opacity-80 transition-all active:scale-95"
+              className="shrink-0 hover:scale-105 hover:opacity-90 transition-all active:scale-95"
             >
               <StatusBadge status={client.status} />
             </button>
@@ -135,11 +135,11 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
             type="button"
             onClick={(e) => openEdit(e, 'date')}
             title="Click to set event date"
-            className="w-full text-left flex items-center justify-between gap-1.5 mt-2 py-1.5 px-2 bg-[#2C8567]/5 hover:bg-[#2C8567]/10 border border-[#2C8567]/15 hover:border-[#2C8567]/30 rounded-lg text-xs transition-colors group/date"
+            className="w-full text-left flex items-center justify-between gap-1.5 mt-2 py-1.5 px-2.5 bg-gray-50 hover:bg-gray-100/80 border border-gray-200/60 rounded-xl text-xs transition-colors group/date"
           >
             <div className="flex items-center gap-1.5 truncate">
-              <Calendar className="w-3.5 h-3.5 text-[#2C8567] shrink-0" />
-              <span className="font-semibold text-gray-800 truncate">
+              <Calendar className="w-3.5 h-3.5 text-[#dc2626] shrink-0" />
+              <span className="font-semibold text-[#141414] truncate">
                 {client.date ? (
                   formatDate(client.date)
                 ) : (
@@ -148,7 +148,7 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
               </span>
             </div>
             {client.dates && client.dates.length > 1 && (
-              <span className="text-[10px] font-bold text-[#2C8567] bg-[#2C8567]/10 px-1.5 py-0.2 rounded shrink-0">
+              <span className="text-[10px] font-bold text-gray-700 bg-white border border-gray-200 px-2 py-0.5 rounded-full shrink-0">
                 +{client.dates.length - 1} days
               </span>
             )}
@@ -156,7 +156,7 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
 
           {/* Location */}
           {client.location && (
-            <div className="flex items-center gap-1 mt-1 text-[11px] text-gray-500 truncate px-1">
+            <div className="flex items-center gap-1 mt-1.5 text-[11px] text-gray-400 truncate px-1">
               <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
               <span className="truncate">{client.location}</span>
             </div>
@@ -164,11 +164,11 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
 
           {/* Requirements */}
           {client.requirements && client.requirements.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1.5">
+            <div className="flex flex-wrap gap-1 mt-2">
               {client.requirements.map((req, i) => (
                 <span
                   key={i}
-                  className="text-[9px] font-medium text-[#2C8567] bg-[#2C8567]/8 border border-[#2C8567]/20 px-1.5 py-0.5 rounded truncate max-w-[130px]"
+                  className="text-[10px] font-semibold text-gray-700 bg-gray-100 border border-gray-200/60 px-2 py-0.5 rounded-full truncate max-w-[130px]"
                 >
                   {req}
                 </span>
@@ -179,44 +179,44 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
           {/* Confirmed Work Price & Payment — click to edit */}
           <div
             onClick={(e) => openEdit(e, 'price')}
-            className="flex items-center justify-between gap-1.5 mt-1.5 py-1.5 px-2 bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/80 rounded-lg text-xs cursor-pointer transition-colors"
+            className="flex items-center justify-between gap-1.5 mt-2 py-1.5 px-2.5 bg-gray-50 hover:bg-gray-100/70 border border-gray-200/60 rounded-xl text-xs cursor-pointer transition-colors"
             title="Click to edit confirmed work price & payment"
           >
             <div className="flex items-center gap-1 min-w-0">
-              <IndianRupee className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-              <span className="font-bold text-emerald-900 truncate font-mono">
+              <IndianRupee className="w-3.5 h-3.5 text-[#141414] shrink-0" />
+              <span className="font-bold text-[#141414] truncate font-mono">
                 {hasWorkPrice
                   ? `₹${client.workPrice!.toLocaleString('en-IN')}`
                   : '+ Add Work Price'}
               </span>
             </div>
 
-            <div className="shrink-0 flex items-center gap-1 text-[11px]">
+            <div className="shrink-0 flex items-center gap-1 text-[10px]">
               {client.paymentStatus === 'fully-paid' ? (
-                <span className="font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">
+                <span className="font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 rounded-full">
                   Paid ✅
                 </span>
               ) : hasAdvance ? (
-                <span className="font-semibold text-blue-700 bg-blue-100/80 px-1.5 py-0.2 rounded font-mono">
+                <span className="font-semibold text-blue-700 bg-blue-50 border border-blue-200/70 px-2 py-0.5 rounded-full font-mono">
                   Adv: ₹{client.advancePaid!.toLocaleString('en-IN')}
                 </span>
               ) : (
-                <span className="text-gray-400">Unpaid</span>
+                <span className="text-gray-400 font-medium">Unpaid</span>
               )}
             </div>
           </div>
 
           {/* Phone — click to edit, WhatsApp button separate */}
           <div
-            className="flex items-center justify-between gap-2 mt-1.5 py-1.5 px-2 bg-gray-50/80 rounded-lg border border-gray-100 cursor-pointer hover:bg-gray-100/60 hover:border-gray-200 transition-colors"
+            className="flex items-center justify-between gap-2 mt-2 py-1.5 px-2.5 bg-gray-50/70 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100/60 hover:border-gray-200 transition-colors"
             onClick={(e) => openEdit(e, 'phone')}
             title="Click to edit phone number"
           >
             <div className="flex items-center gap-1.5 min-w-0 flex-1">
               <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-              <span className="text-xs font-medium text-gray-700 truncate">
+              <span className="text-xs font-mono font-medium text-gray-700 truncate">
                 {client.phone || (
-                  <span className="text-gray-400 italic font-normal">+ Add phone</span>
+                  <span className="text-gray-400 italic font-sans">+ Add phone</span>
                 )}
               </span>
             </div>
@@ -224,10 +224,10 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
               <button
                 type="button"
                 onClick={handleWhatsAppClick}
-                className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-green-700 bg-green-100 hover:bg-green-200 px-2 py-0.5 rounded-md transition-colors"
+                className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 px-2 py-0.5 rounded-full transition-colors"
                 title="Send WhatsApp message"
               >
-                <MessageCircle className="w-3 h-3 text-green-600" />
+                <MessageCircle className="w-3 h-3 text-emerald-600" />
                 <span>WhatsApp</span>
               </button>
             )}
@@ -235,22 +235,22 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
 
           {/* Latest Note */}
           {latestNote ? (
-            <p className="text-xs text-gray-500 line-clamp-2 mt-2 bg-gray-50/70 p-2 rounded-lg border border-gray-100/60 leading-relaxed">
+            <p className="text-xs text-gray-500 line-clamp-2 mt-2.5 bg-gray-50/70 p-2.5 rounded-xl border border-gray-100/70 leading-relaxed font-normal">
               {latestNote.content}
             </p>
           ) : (
-            <p className="text-xs text-gray-400 italic mt-2">No notes yet</p>
+            <p className="text-xs text-gray-400 italic mt-2.5">No notes yet</p>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-50 mt-3">
+        <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-100 mt-3">
           <div className="flex items-center gap-2">
             {!isNewStatus && (
               <button
                 type="button"
                 onClick={handleMoveToNew}
-                className="text-[10px] font-semibold text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200/90 rounded px-1.5 py-0.5 transition-colors flex items-center gap-0.5"
+                className="text-[10px] font-semibold text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200/90 rounded-full px-2 py-0.5 transition-colors flex items-center gap-0.5"
                 title="1-click Move back to New column"
               >
                 <RotateCcw className="w-2.5 h-2.5" />
@@ -258,8 +258,8 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
               </button>
             )}
 
-            <span className="flex items-center gap-1">
-              <MessageSquare className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-1 font-medium">
+              <MessageSquare className="w-3.5 h-3.5 text-gray-400" />
               {client.notes?.length || 0}
             </span>
             <span title={`Added: ${formatDate(client.createdAt)}`}>
@@ -270,7 +270,7 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
           <Link
             href={`/clients/${client._id}`}
             onClick={(e) => e.stopPropagation()}
-            className="text-gray-300 hover:text-[#2C8567] transition-colors"
+            className="text-gray-300 hover:text-[#dc2626] transition-colors p-1"
           >
             <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>

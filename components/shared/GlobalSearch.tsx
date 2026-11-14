@@ -44,13 +44,13 @@ export function GlobalSearch() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
           type="text"
-          placeholder="Search clients by name, ID, or notes..."
+          placeholder="Search creators, clients, bookings..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => {
             if (query.trim().length >= 2) setOpen(true);
           }}
-          className="pl-9 pr-9 bg-gray-50 border-gray-200 focus:bg-white h-9 text-sm rounded-lg"
+          className="pl-9 pr-9 bg-gray-50/90 border-gray-200/70 focus:bg-white focus:border-gray-300 h-9 text-xs sm:text-sm rounded-xl transition-all shadow-2xs"
         />
         {loading && (
           <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 animate-spin" />
