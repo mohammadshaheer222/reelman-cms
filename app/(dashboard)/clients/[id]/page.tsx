@@ -52,6 +52,7 @@ import {
 import { formatDate, formatDateTime, timeAgo } from '@/lib/utils';
 import { openWhatsApp, formatBookingSummaryWhatsAppMessage } from '@/lib/whatsapp';
 import { WhatsAppModal } from '@/components/clients/WhatsAppModal';
+import { ALL_DISTRICT_OPTIONS } from '@/lib/geoTracking';
 import { toast } from 'sonner';
 
 export default function ClientProfilePage({
@@ -85,6 +86,7 @@ export default function ClientProfilePage({
 
   // Edit location state
   const [editingLocation, setEditingLocation] = useState(false);
+  const [districtInput, setDistrictInput] = useState('');
   const [locationInput, setLocationInput] = useState('');
 
   // Edit price state
@@ -127,6 +129,7 @@ export default function ClientProfilePage({
       setNameInput(clientData.data.name || '');
       setPhoneInput(clientData.data.phone || '');
       setDateInput(clientData.data.date || '');
+      setDistrictInput(clientData.data.district || '');
       setLocationInput(clientData.data.location || '');
       setPriceInput(String(clientData.data.workPrice || 0));
       setAdvanceInput(String(clientData.data.advancePaid || 0));
@@ -216,7 +219,10 @@ export default function ClientProfilePage({
       const res = await fetch(`/api/clients/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ location: locationInput.trim() }),
+        body: JSON.stringify({
+          district: districtInput.trim() || undefined,
+          location: locationInput.trim() || undefined,
+        }),
       });
       if (!res.ok) throw new Error('Failed to update location');
       toast.success('Shoot location updated');
@@ -465,7 +471,7 @@ export default function ClientProfilePage({
   return (
     <div className="w-full max-w-full overflow-x-hidden min-w-0 space-y-4 sm:space-y-6 pb-12">
       {/* 1. Mobile-First Navigation & Quick Actions Topbar */}
-      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-gray-100 shadow-xs space-y-3">
+      <div className="bg-white dark:bg-[#14171d] p-3 sm:p-4 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs space-y-3">
         {/* Row 1: Breadcrumbs & Management Actions (Archive, Delete) */}
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0">
@@ -479,13 +485,13 @@ export default function ClientProfilePage({
                   router.push('/clients');
                 }
               }}
-              className="text-gray-600 hover:text-gray-900 h-8 px-2 text-xs font-semibold rounded-lg flex items-center gap-1 cursor-pointer shrink-0"
+              className="text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white h-8 px-2 text-xs font-semibold rounded-lg flex items-center gap-1 cursor-pointer shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back</span>
             </Button>
-            <span className="text-gray-300">/</span>
-            <span className="text-xs font-bold text-gray-900 truncate">
+            <span className="text-gray-300 dark:text-neutral-600">/</span>
+            <span className="text-xs font-bold text-gray-900 dark:text-white truncate">
               {client.name || 'Client'}
             </span>
           </div>
@@ -495,7 +501,7 @@ export default function ClientProfilePage({
               variant="ghost"
               size="sm"
               onClick={handleToggleArchive}
-              className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg cursor-pointer"
+              className="h-8 w-8 p-0 text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-lg cursor-pointer"
               title={client.isArchived ? 'Restore client' : 'Archive client'}
             >
               <Archive className="w-3.5 h-3.5" />
@@ -505,7 +511,7 @@ export default function ClientProfilePage({
               variant="ghost"
               size="sm"
               onClick={() => setDeleteConfirmOpen(true)}
-              className="h-8 w-8 p-0 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg cursor-pointer"
+              className="h-8 w-8 p-0 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg cursor-pointer"
               title="Delete client record"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -514,15 +520,15 @@ export default function ClientProfilePage({
         </div>
 
         {/* Row 2: Communication Actions (WhatsApp Chat & Proposal PDF) */}
-        <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-end gap-2 pt-1 border-t border-gray-100/80">
+        <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-end gap-2 pt-1 border-t border-gray-100/80 dark:border-neutral-800">
           <Button
             variant="outline"
             size="sm"
             onClick={handleWhatsApp}
-            className="text-emerald-800 bg-emerald-50/90 border-emerald-200 hover:bg-emerald-100 text-xs h-8.5 px-3 gap-1.5 font-semibold rounded-xl cursor-pointer w-full sm:w-auto"
+            className="text-emerald-800 dark:text-emerald-300 bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-xs h-8.5 px-3 gap-1.5 font-semibold rounded-xl cursor-pointer w-full sm:w-auto"
             title="Open WhatsApp chat with client"
           >
-            <MessageCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <MessageCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span className="truncate">WhatsApp Chat</span>
           </Button>
 
@@ -530,11 +536,11 @@ export default function ClientProfilePage({
             asChild
             variant="outline"
             size="sm"
-            className="text-purple-700 bg-purple-50/80 border-purple-200 hover:bg-purple-100 text-xs h-8.5 px-3 gap-1.5 font-semibold rounded-xl cursor-pointer w-full sm:w-auto"
+            className="text-purple-700 dark:text-purple-300 bg-purple-50/80 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-xs h-8.5 px-3 gap-1.5 font-semibold rounded-xl cursor-pointer w-full sm:w-auto"
             title="Create or view proposal PDF"
           >
             <Link href="/packages">
-              <Sparkles className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+              <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0" />
               <span className="truncate">PDF Proposal</span>
             </Link>
           </Button>
@@ -542,8 +548,8 @@ export default function ClientProfilePage({
       </div>
 
       {/* 2. Client Hero Overview Header */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-gray-100 shadow-xs space-y-4 sm:space-y-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-gray-100 pb-4">
+      <div className="bg-white dark:bg-[#14171d] p-4 sm:p-6 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs space-y-4 sm:space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-gray-100 dark:border-neutral-800 pb-4">
           {/* Client Name & Identity */}
           <div className="space-y-1.5 min-w-0">
             <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -700,36 +706,71 @@ export default function ClientProfilePage({
                   {client.date ? formatDate(client.date) : <span className="text-gray-400 italic font-normal">Date not set</span>}
                 </p>
                 {editingLocation ? (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Input
-                      placeholder="Venue / City"
-                      value={locationInput}
-                      onChange={(e) => setLocationInput(e.target.value)}
-                      className="h-6 text-xs bg-white min-w-0 flex-1"
-                    />
-                    <Button size="icon" variant="ghost" className="h-6 w-6 text-emerald-600 shrink-0" onClick={handleSaveLocation}>
-                      <Check className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 w-6 text-gray-400 shrink-0"
-                      onClick={() => { setEditingLocation(false); setLocationInput(client.location || ''); }}
+                  <div className="space-y-1.5 mt-2">
+                    <select
+                      value={districtInput}
+                      onChange={(e) => setDistrictInput(e.target.value)}
+                      className="w-full h-7 text-xs bg-white rounded-lg border border-gray-200 px-2 text-gray-800 focus:outline-hidden focus:border-[#dc2626]"
                     >
-                      <X className="w-3 h-3" />
-                    </Button>
+                      <option value="">Select District...</option>
+                      <optgroup label="🌴 Kerala Districts">
+                        {ALL_DISTRICT_OPTIONS.filter((d) => d.region === 'Kerala').map((d) => (
+                          <option key={d.value} value={d.value}>
+                            {d.label}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="🇮🇳 Other States">
+                        {ALL_DISTRICT_OPTIONS.filter((d) => d.region !== 'Kerala').map((d) => (
+                          <option key={d.value} value={d.value}>
+                            {d.label}
+                          </option>
+                        ))}
+                      </optgroup>
+                    </select>
+
+                    <div className="flex items-center gap-1">
+                      <Input
+                        placeholder="Manual Venue / Specific Location"
+                        value={locationInput}
+                        onChange={(e) => setLocationInput(e.target.value)}
+                        className="h-6 text-xs bg-white min-w-0 flex-1"
+                      />
+                      <Button size="icon" variant="ghost" className="h-6 w-6 text-emerald-600 shrink-0" onClick={handleSaveLocation}>
+                        <Check className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6 text-gray-400 shrink-0"
+                        onClick={() => {
+                          setEditingLocation(false);
+                          setDistrictInput(client.district || '');
+                          setLocationInput(client.location || '');
+                        }}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between text-xs text-gray-500 mt-0.5 min-w-0">
-                    <span className="truncate flex items-center gap-1 min-w-0">
-                      <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
-                      <span className="truncate">{client.location || 'Location not added'}</span>
+                    <span className="truncate flex items-center gap-1.5 min-w-0">
+                      <MapPin className="w-3 h-3 text-[#dc2626] shrink-0" />
+                      <span className="truncate">
+                        {client.district && (
+                          <span className="font-bold text-gray-800 bg-gray-100 px-1 py-0.2 rounded-md text-[10px] mr-1">
+                            {client.district}
+                          </span>
+                        )}
+                        {client.location || (!client.district ? 'Location not added' : '')}
+                      </span>
                     </span>
                     <button
                       type="button"
                       onClick={() => setEditingLocation(true)}
                       className="text-gray-400 hover:text-gray-600 ml-1 shrink-0"
-                      title="Edit location"
+                      title="Edit district & location"
                     >
                       <Edit2 className="w-2.5 h-2.5" />
                     </button>
@@ -908,18 +949,18 @@ export default function ClientProfilePage({
       </div>
 
       {/* 3. Studio Communication & Client Sharing Hub (Clean, Minimal, Luminous Studio Card) */}
-      <div className="bg-gradient-to-br from-emerald-50/60 via-white to-gray-50/80 p-4 sm:p-5 rounded-2xl shadow-xs border border-emerald-100/80 space-y-3">
+      <div className="bg-gradient-to-br from-emerald-50/60 via-white to-gray-50/80 dark:from-emerald-950/20 dark:via-[#14171d] dark:to-[#101216] p-4 sm:p-5 rounded-2xl shadow-xs border border-emerald-100/80 dark:border-neutral-800 space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="space-y-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="px-2 py-0.5 rounded-full bg-[#2C8567] text-white text-[10px] font-bold uppercase tracking-wider shrink-0">
                 Client Hub
               </span>
-              <h3 className="text-sm sm:text-base font-bold text-gray-900 truncate">
+              <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate">
                 Live Client Portal & WhatsApp Summary
               </h3>
             </div>
-            <p className="text-xs text-gray-600 leading-relaxed">
+            <p className="text-xs text-gray-600 dark:text-neutral-400 leading-relaxed">
               Clients can view their real-time editing milestones, Google Drive deliverables, and invoice receipts through their dedicated link without logging in.
             </p>
           </div>
@@ -927,12 +968,12 @@ export default function ClientProfilePage({
           {/* Responsive Action Buttons (Stacked on Mobile, Clean row on Desktop) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full md:w-auto shrink-0 pt-1 md:pt-0">
             {/* Copy & View Portal Link */}
-            <div className="inline-flex rounded-xl border border-gray-200 overflow-hidden text-xs bg-white shadow-2xs w-full sm:w-auto">
+            <div className="inline-flex rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden text-xs bg-white dark:bg-neutral-800 shadow-2xs w-full sm:w-auto">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleCopyPortalLink}
-                className="h-9 px-3 text-xs text-gray-700 hover:text-gray-900 hover:bg-gray-50 border-r border-gray-200 gap-1.5 rounded-none font-semibold cursor-pointer flex-1 justify-center"
+                className="h-9 px-3 text-xs text-gray-700 dark:text-neutral-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-neutral-700 border-r border-gray-200 dark:border-neutral-700 gap-1.5 rounded-none font-semibold cursor-pointer flex-1 justify-center"
                 title="Copy client portal link to clipboard"
               >
                 {portalCopied ? (
@@ -942,7 +983,7 @@ export default function ClientProfilePage({
                   </>
                 ) : (
                   <>
-                    <Share2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                    <Share2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                     <span>Copy Portal Link</span>
                   </>
                 )}
@@ -951,7 +992,7 @@ export default function ClientProfilePage({
                 asChild
                 variant="ghost"
                 size="sm"
-                className="h-9 px-3 text-xs text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-none cursor-pointer shrink-0"
+                className="h-9 px-3 text-xs text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-neutral-700 rounded-none cursor-pointer shrink-0"
                 title="Preview client portal in a new tab"
               >
                 <a href={`/portal/${client._id}`} target="_blank" rel="noreferrer">
@@ -975,7 +1016,7 @@ export default function ClientProfilePage({
 
       {/* 4. Feature Navigation Tabs (Mobile-Safe Horizontal Scrollable Bar) */}
       <Tabs defaultValue="deliverables" className="w-full max-w-full space-y-4 min-w-0">
-        <div className="w-full max-w-full overflow-hidden bg-white p-1.5 rounded-2xl border border-gray-100 shadow-2xs">
+        <div className="w-full max-w-full overflow-hidden bg-white dark:bg-[#14171d] p-1.5 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-2xs">
           <div className="w-full overflow-x-auto scrollbar-none flex items-center">
             <TabsList className="bg-transparent p-0 flex items-center gap-1.5 justify-start w-max min-w-full">
               <TabsTrigger
@@ -1087,8 +1128,8 @@ export default function ClientProfilePage({
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-gray-900">Add New Note</h3>
+          <div className="bg-white dark:bg-[#14171d] p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs space-y-4">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Add New Note</h3>
             <form onSubmit={handleAddNote} className="space-y-3">
               <Textarea
                 placeholder="Log discussion points, couple song choices, venue contact, or shoot reminders..."
@@ -1111,10 +1152,10 @@ export default function ClientProfilePage({
             </form>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-xs space-y-3">
-            <h3 className="text-sm font-bold text-gray-900">Notes Timeline</h3>
+          <div className="bg-white dark:bg-[#14171d] p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs space-y-3">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Notes Timeline</h3>
             {(!client.notes || client.notes.length === 0) ? (
-              <p className="text-xs text-gray-400 py-6 text-center">No notes recorded yet. Add your first note above.</p>
+              <p className="text-xs text-gray-400 dark:text-neutral-500 py-6 text-center">No notes recorded yet. Add your first note above.</p>
             ) : (
               <div className="space-y-3 pt-1">
                 {client.notes
@@ -1135,24 +1176,24 @@ export default function ClientProfilePage({
 
         {/* Tab 4: Package Deliverables & PDF Conversion */}
         <TabsContent value="package" className="w-full min-w-0 space-y-4">
-          <div className="bg-amber-50/50 border border-amber-100 p-3.5 rounded-2xl flex items-start gap-3 text-xs text-amber-950">
-            <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50 p-3.5 rounded-2xl flex items-start gap-3 text-xs text-amber-950 dark:text-amber-200">
+            <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
             <div className="space-y-0.5 min-w-0">
               <p className="font-bold">Agreed Scope & PDF Quotation Extraction</p>
-              <p className="text-amber-800 leading-relaxed">
+              <p className="text-amber-800 dark:text-amber-300 leading-relaxed">
                 Document agreed hours of coverage, camera crew, teaser lengths, and album specifications. You can type directly or upload an existing quotation PDF to extract text automatically.
               </p>
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-3">
+          <div className="bg-white dark:bg-[#14171d] p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-neutral-800 pb-3">
               <div>
-                <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <Package className="w-4 h-4 text-[#2C8567]" />
                   <span>Contracted Deliverables & Inclusions</span>
                 </h3>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="text-xs text-gray-400 dark:text-neutral-400 mt-0.5">
                   Package scope, hours of coverage, deliverables (converted from PDF or edited).
                 </p>
               </div>
@@ -1273,23 +1314,23 @@ export default function ClientProfilePage({
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-gray-100 shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-gray-900">Pipeline Stage Transitions</h3>
+          <div className="bg-white dark:bg-[#14171d] p-4 sm:p-6 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs space-y-4">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Pipeline Stage Transitions</h3>
             {(!client.statusHistory || client.statusHistory.length === 0) ? (
-              <p className="text-xs text-gray-400 py-3">No status changes recorded yet.</p>
+              <p className="text-xs text-gray-400 dark:text-neutral-500 py-3">No status changes recorded yet.</p>
             ) : (
-              <div className="relative pl-6 space-y-4 border-l-2 border-gray-100">
+              <div className="relative pl-6 space-y-4 border-l-2 border-gray-100 dark:border-neutral-800">
                 {client.statusHistory
                   .slice()
                   .reverse()
                   .map((sh, idx) => (
                     <div key={idx} className="relative">
-                      <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-[#2C8567] border-2 border-white ring-2 ring-[#2C8567]/20" />
-                      <p className="text-sm font-medium text-gray-900">
+                      <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-[#2C8567] border-2 border-white dark:border-neutral-900 ring-2 ring-[#2C8567]/20" />
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
                         Status changed to{' '}
                         <span className="font-bold text-[#2C8567]">{sh.statusName}</span>
                       </p>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-gray-400 dark:text-neutral-500 mt-0.5">
                         {formatDateTime(sh.changedAt)} ({timeAgo(sh.changedAt)})
                       </p>
                     </div>
@@ -1298,19 +1339,19 @@ export default function ClientProfilePage({
             )}
           </div>
 
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-gray-100 shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-gray-900">Client Activity Log</h3>
+          <div className="bg-white dark:bg-[#14171d] p-4 sm:p-6 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs space-y-4">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Client Activity Log</h3>
             {activities.length === 0 ? (
-              <p className="text-xs text-gray-400 py-3">No activity logged yet.</p>
+              <p className="text-xs text-gray-400 dark:text-neutral-500 py-3">No activity logged yet.</p>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 dark:divide-neutral-800">
                 {activities.map((act) => (
                   <div key={act._id} className="py-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm text-gray-800 font-medium break-words">{act.description}</p>
-                      <span className="text-xs text-gray-400 capitalize">{act.action}</span>
+                      <p className="text-sm text-gray-800 dark:text-neutral-200 font-medium break-words">{act.description}</p>
+                      <span className="text-xs text-gray-400 dark:text-neutral-500 capitalize">{act.action}</span>
                     </div>
-                    <span className="text-xs text-gray-400 whitespace-nowrap shrink-0">
+                    <span className="text-xs text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
                       {timeAgo(act.createdAt)}
                     </span>
                   </div>

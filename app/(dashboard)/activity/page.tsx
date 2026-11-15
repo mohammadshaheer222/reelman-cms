@@ -66,17 +66,17 @@ export default function ActivityPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-gray-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14171d] p-5 sm:p-6 rounded-2xl border border-gray-100/90 dark:border-neutral-800 shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
         <div>
           <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-neutral-500">
               Audit Logs & Team Activity
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] dark:text-white tracking-tight">
             Activity Feed<span className="text-[#dc2626]">.</span>
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 font-normal">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-neutral-400 font-normal">
             Real-time audit trail of client bookings, stage moves, notes, and transactions.
           </p>
         </div>
@@ -95,19 +95,19 @@ export default function ActivityPage() {
           description="Actions taken by team members on clients, projects, and payments will appear here."
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <div className="relative pl-6 space-y-6 border-l-2 border-gray-100">
+        <div className="bg-white dark:bg-[#14171d] rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-sm p-6">
+          <div className="relative pl-6 space-y-6 border-l-2 border-gray-100 dark:border-neutral-800">
             {activities.map((act) => {
               const userObj = typeof act.userId === 'object' ? act.userId : null;
               const clientObj = typeof act.clientId === 'object' ? act.clientId : null;
 
               return (
                 <div key={act._id} className="relative group">
-                  <div className="absolute -left-[33px] top-1 w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-xs">
+                  <div className="absolute -left-[33px] top-1 w-6 h-6 rounded-full bg-white dark:bg-[#101318] border border-gray-200 dark:border-neutral-700 flex items-center justify-center shadow-xs">
                     {getActionIcon(act.action)}
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
                       {act.description}
                     </p>
                     <span

@@ -21,6 +21,7 @@ import { Status, Client } from '@/types';
 import { toast } from 'sonner';
 import { openWhatsApp, formatStatusWhatsAppMessage } from '@/lib/whatsapp';
 import { formatDate } from '@/lib/utils';
+import { ALL_DISTRICT_OPTIONS } from '@/lib/geoTracking';
 
 const EVENT_TYPE_CHIPS = [
   { label: '💍 Wedding', value: 'Wedding' },
@@ -70,6 +71,7 @@ export function LiveCallIntake({
   const [phone, setPhone] = useState('');
   const [eventType, setEventType] = useState('');
   const [date, setDate] = useState('');
+  const [district, setDistrict] = useState('');
   const [location, setLocation] = useState('');
   const [budget, setBudget] = useState('');
   const [callNotes, setCallNotes] = useState('');
@@ -175,6 +177,8 @@ export function LiveCallIntake({
           name: trimmedName || undefined,
           phone: trimmedPhone || undefined,
           date: date.trim() || undefined,
+          district: district.trim() || undefined,
+          location: location.trim() || undefined,
           noteContent: structuredNote || undefined,
           statusId: statusId || undefined,
         }),
@@ -429,17 +433,44 @@ export function LiveCallIntake({
               )}
             </div>
 
-            {/* Venue / Location */}
-            <div className="space-y-1">
-              <Label className="text-xs font-semibold text-gray-700">Venue / Location</Label>
-              <div className="relative">
-                <Building2 className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                <Input
-                  placeholder="e.g. Taj West End, Bangalore"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="h-9 text-sm pl-8 bg-white border-gray-200"
-                />
+            {/* District & Location */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold text-gray-700">District / Region</Label>
+                <select
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="w-full h-9 text-xs bg-white rounded-xl border border-gray-200 px-2.5 text-gray-800 focus:outline-hidden focus:border-[#2C8567] transition-colors"
+                >
+                  <option value="">Select District...</option>
+                  <optgroup label="🌴 Kerala Districts">
+                    {ALL_DISTRICT_OPTIONS.filter((d) => d.region === 'Kerala').map((d) => (
+                      <option key={d.value} value={d.value}>
+                        {d.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="🇮🇳 Other States">
+                    {ALL_DISTRICT_OPTIONS.filter((d) => d.region !== 'Kerala').map((d) => (
+                      <option key={d.value} value={d.value}>
+                        {d.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold text-gray-700">Specific Venue</Label>
+                <div className="relative">
+                  <Building2 className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  <Input
+                    placeholder="e.g. Taj West End, Grand Hyatt"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="h-9 text-xs pl-8 bg-white border-gray-200"
+                  />
+                </div>
               </div>
             </div>
 

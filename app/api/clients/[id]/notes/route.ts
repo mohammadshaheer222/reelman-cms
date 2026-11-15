@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import Client from '@/models/Client';
+import User from '@/models/User';
 import Activity from '@/models/Activity';
 import { requireAuth } from '@/lib/apiMiddleware';
 

@@ -13,6 +13,7 @@ import {
   RotateCcw,
   MapPin,
   Sparkles,
+  Trash2,
 } from 'lucide-react';
 import { Client, Status } from '@/types';
 import { StatusBadge } from './StatusBadge';
@@ -21,17 +22,26 @@ import { Card } from '@/components/ui/card';
 import { openWhatsApp, formatStatusWhatsAppMessage } from '@/lib/whatsapp';
 import { toast } from 'sonner';
 import { ClientQuickEditModal, EditField } from './ClientQuickEditModal';
+import { DeleteClientModal } from './DeleteClientModal';
 
 interface ClientCardProps {
   client: Client;
   statuses?: Status[];
   onUpdated?: (updated: Client) => void;
+  onDeleted?: (deletedId: string) => void;
 }
 
-export function ClientCard({ client: initialClient, statuses = [], onUpdated }: ClientCardProps) {
+export function ClientCard({ client: initialClient, statuses = [], onUpdated, onDeleted }: ClientCardProps) {
   const router = useRouter();
   const [client, setClient] = useState<Client>(initialClient);
   const [editField, setEditField] = useState<EditField | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDeleteModalOpen(true);
+  };
 
   const latestNote =
     client.notes && client.notes.length > 0 ? client.notes[client.notes.length - 1] : null;
@@ -119,15 +129,26 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
               </button>
             </div>
 
-            {/* Status — click to change */}
-            <button
-              type="button"
-              onClick={(e) => openEdit(e, 'status')}
-              title="Click to change status"
-              className="shrink-0 hover:scale-105 hover:opacity-90 transition-all active:scale-95"
-            >
-              <StatusBadge status={client.status} />
-            </button>
+            {/* Status & Delete */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={(e) => openEdit(e, 'status')}
+                title="Click to change status"
+                className="shrink-0 hover:scale-105 hover:opacity-90 transition-all active:scale-95"
+              >
+                <StatusBadge status={client.status} />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-[#dc2626] hover:bg-red-50/80 transition-all shrink-0 border border-transparent hover:border-red-100"
+                title="Delete Client"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           {/* Date — click to edit */}
@@ -154,13 +175,26 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
             )}
           </button>
 
-          {/* Location */}
-          {client.location && (
-            <div className="flex items-center gap-1 mt-1.5 text-[11px] text-gray-400 truncate px-1">
-              <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
-              <span className="truncate">{client.location}</span>
+          {/* District & Location — click to edit */}
+          <div
+            onClick={(e) => openEdit(e, 'location')}
+            className="flex items-center gap-1.5 mt-1.5 text-[11px] text-gray-500 truncate px-1 cursor-pointer hover:text-gray-800 transition-colors"
+            title="Click to edit district & manual location"
+          >
+            <MapPin className="w-3.5 h-3.5 text-[#dc2626] shrink-0" />
+            <div className="truncate flex items-center gap-1">
+              {client.district && (
+                <span className="font-bold text-gray-800 bg-gray-100 px-1.5 py-0.2 rounded-md text-[10px]">
+                  {client.district}
+                </span>
+              )}
+              {client.location ? (
+                <span className="truncate">{client.location}</span>
+              ) : !client.district ? (
+                <span className="text-gray-400 italic">+ Add location</span>
+              ) : null}
             </div>
-          )}
+          </div>
 
           {/* Requirements */}
           {client.requirements && client.requirements.length > 0 && (
@@ -285,6 +319,14 @@ export function ClientCard({ client: initialClient, statuses = [], onUpdated }: 
         open={editField !== null}
         onOpenChange={(open) => !open && setEditField(null)}
         onSuccess={handleUpdated}
+      />
+
+      {/* Delete Client Modal */}
+      <DeleteClientModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        client={client}
+        onDeleted={onDeleted}
       />
     </>
   );

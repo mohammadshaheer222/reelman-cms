@@ -15,8 +15,9 @@ import { Client, Status } from '@/types';
 import { Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils';
+import { ALL_DISTRICT_OPTIONS } from '@/lib/geoTracking';
 
-export type EditField = 'name' | 'phone' | 'date' | 'status' | 'price';
+export type EditField = 'name' | 'phone' | 'date' | 'status' | 'price' | 'location';
 
 interface ClientQuickEditModalProps {
   client: Client | null;
@@ -33,6 +34,7 @@ const FIELD_LABEL: Record<EditField, string> = {
   date: 'Event Date',
   status: 'Status',
   price: 'Work Price & Payment',
+  location: 'District & Manual Location',
 };
 
 export function ClientQuickEditModal({
@@ -44,6 +46,7 @@ export function ClientQuickEditModal({
   onSuccess,
 }: ClientQuickEditModalProps) {
   const [value, setValue] = useState('');
+  const [district, setDistrict] = useState('');
   const [selectedStatusId, setSelectedStatusId] = useState('');
   const [workPrice, setWorkPrice] = useState('0');
   const [advancePaid, setAdvancePaid] = useState('0');
@@ -64,6 +67,10 @@ export function ClientQuickEditModal({
       setAdvancePaid(String(client.advancePaid || 0));
       setPaymentStatus(client.paymentStatus || (client.advancePaid && client.advancePaid > 0 ? 'advance-received' : 'unpaid'));
     }
+    if (field === 'location') {
+      setDistrict(client.district || '');
+      setValue(client.location || '');
+    }
   }, [client, field, open]);
 
   const handleSave = async () => {
@@ -75,6 +82,10 @@ export function ClientQuickEditModal({
     if (field === 'phone') body.phone = value.trim();
     if (field === 'date') body.date = value;
     if (field === 'status') body.statusId = selectedStatusId;
+    if (field === 'location') {
+      body.district = district.trim() || undefined;
+      body.location = value.trim() || undefined;
+    }
     if (field === 'price') {
       body.workPrice = parseFloat(workPrice) || 0;
       body.advancePaid = parseFloat(advancePaid) || 0;
@@ -198,10 +209,10 @@ export function ClientQuickEditModal({
                 <Label className="text-xs font-medium text-gray-700 mb-1.5 block">Payment Status</Label>
                 <div className="grid grid-cols-2 gap-1.5">
                   {[
-                    { key: 'unpaid', label: 'Unpaid', color: 'text-gray-600 bg-gray-50' },
-                    { key: 'advance-received', label: 'Advance Paid', color: 'text-amber-700 bg-amber-50' },
-                    { key: 'partially-paid', label: 'Partially Paid', color: 'text-blue-700 bg-blue-50' },
-                    { key: 'fully-paid', label: 'Fully Paid ✅', color: 'text-emerald-700 bg-emerald-50' },
+                    { key: 'unpaid', label: 'Unpaid', color: 'text-gray-600 dark:text-neutral-300 bg-gray-50 dark:bg-neutral-800 border-gray-200 dark:border-neutral-700' },
+                    { key: 'advance-received', label: 'Advance Paid', color: 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/50' },
+                    { key: 'partially-paid', label: 'Partially Paid', color: 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900/50' },
+                    { key: 'fully-paid', label: 'Fully Paid ✅', color: 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/50' },
                   ].map((p) => (
                     <button
                       key={p.key}
@@ -218,7 +229,7 @@ export function ClientQuickEditModal({
                       className={`py-1.5 px-2 rounded-lg text-xs font-medium border text-center transition-all ${
                         paymentStatus === p.key
                           ? 'border-[#2C8567] bg-[#2C8567]/10 text-[#2C8567] font-semibold ring-1 ring-[#2C8567]'
-                          : `border-gray-200 ${p.color} hover:opacity-80`
+                          : `${p.color} hover:opacity-80`
                       }`}
                     >
                       {p.label}
@@ -242,18 +253,58 @@ export function ClientQuickEditModal({
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all ${
                       isSelected
                         ? 'border-[#2C8567] bg-[#2C8567]/5 ring-1 ring-[#2C8567]'
-                        : 'border-gray-100 bg-gray-50 hover:bg-gray-100'
+                        : 'border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-800/60 hover:bg-gray-100 dark:hover:bg-neutral-800'
                     }`}
                   >
                     <span
                       className="w-2.5 h-2.5 rounded-full shrink-0"
                       style={{ backgroundColor: s.color }}
                     />
-                    <span className="text-sm text-gray-800 flex-1">{s.name}</span>
+                    <span className="text-sm text-gray-800 dark:text-neutral-200 flex-1">{s.name}</span>
                     {isSelected && <Check className="w-3.5 h-3.5 text-[#2C8567] shrink-0" />}
                   </button>
                 );
               })}
+            </div>
+          )}
+
+          {/* LOCATION & DISTRICT */}
+          {field === 'location' && (
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold text-gray-700 dark:text-neutral-300">District / Region</Label>
+                <select
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="w-full h-9.5 text-xs bg-white dark:bg-[#101318] rounded-xl border border-gray-200 dark:border-neutral-800 px-3 text-gray-800 dark:text-white focus:outline-hidden focus:border-[#dc2626] transition-colors"
+                >
+                  <option value="">Select District (Kerala & India)...</option>
+                  <optgroup label="🌴 Kerala Districts">
+                    {ALL_DISTRICT_OPTIONS.filter((d) => d.region === 'Kerala').map((d) => (
+                      <option key={d.value} value={d.value}>
+                        {d.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="🇮🇳 Other States & Destinations">
+                    {ALL_DISTRICT_OPTIONS.filter((d) => d.region !== 'Kerala').map((d) => (
+                      <option key={d.value} value={d.value}>
+                        {d.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold text-gray-700">Manual Location / Specific Venue</Label>
+                <Input
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  placeholder="e.g. Grand Hyatt Bolgatty, Kovalam Beach"
+                  className="h-9.5 text-xs"
+                />
+              </div>
             </div>
           )}
         </div>

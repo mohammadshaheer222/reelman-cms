@@ -8,14 +8,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-[#141414] text-white hover:bg-black shadow-xs hover:shadow-sm',
+        default: 'bg-[#141414] dark:bg-neutral-100 text-white dark:text-[#141414] hover:bg-black dark:hover:bg-white shadow-xs hover:shadow-sm font-semibold',
         brand: 'bg-[#2C8567] text-white hover:bg-[#236d54] shadow-xs hover:shadow-emerald-600/20',
-        destructive: 'bg-red-500 text-white hover:bg-red-600 shadow-xs',
-        outline: 'border border-gray-200/90 bg-white hover:bg-gray-50/80 hover:text-gray-900 text-gray-700 shadow-2xs',
-        secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200/80',
-        ghost: 'hover:bg-gray-100/80 hover:text-gray-900 text-gray-700',
-        link: 'text-[#2C8567] underline-offset-4 hover:underline',
-        pill: 'rounded-full bg-[#141414] text-white hover:bg-black shadow-xs',
+        destructive: 'bg-red-600 text-white hover:bg-red-700 shadow-xs',
+        outline: 'border border-gray-200/90 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-gray-50/80 dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-white text-gray-700 dark:text-gray-200 shadow-2xs',
+        secondary: 'bg-gray-100 dark:bg-neutral-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-neutral-700',
+        ghost: 'hover:bg-gray-100/80 dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-white text-gray-700 dark:text-gray-300',
+        link: 'text-[#2C8567] dark:text-emerald-400 underline-offset-4 hover:underline',
+        pill: 'rounded-full bg-[#141414] dark:bg-neutral-100 text-white dark:text-[#141414] hover:bg-black dark:hover:bg-white shadow-xs',
         pillBrand: 'rounded-full bg-[#2C8567] text-white hover:bg-[#236d54] shadow-xs',
       },
       size: {

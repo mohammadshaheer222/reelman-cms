@@ -1,4 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import './User';
+import './Client';
 
 export interface IActivity extends Document {
   clientId?: mongoose.Types.ObjectId;

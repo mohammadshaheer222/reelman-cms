@@ -194,28 +194,28 @@ export function PaymentInstallmentsCard({
   return (
     <div className="space-y-4">
       {/* Top Banner: Financial Summary & Collection Progress */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-[#14171d] p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-emerald-50 text-[#2C8567]">
+              <span className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-[#2C8567] dark:text-emerald-300">
                 <IndianRupee className="w-4 h-4" />
               </span>
-              <h3 className="text-base font-bold text-gray-900">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">
                 Payment Installment Schedule
               </h3>
             </div>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-gray-500 dark:text-neutral-400 mt-0.5">
               Structured 3-tier milestone schedule: Advance, Event Day, and Final Delivery.
             </p>
           </div>
 
           {/* Quick Stats Pill (Responsive 2-col on mobile) */}
           <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 text-xs font-semibold w-full sm:w-auto">
-            <span className="px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-center sm:text-left">
+            <span className="px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-center sm:text-left">
               Collected: <strong className="font-mono text-sm block sm:inline">₹{totalCollected.toLocaleString('en-IN')}</strong>
             </span>
-            <span className="px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-center sm:text-left">
+            <span className="px-2.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-center sm:text-left">
               Balance: <strong className="font-mono text-sm block sm:inline">₹{remainingBalance.toLocaleString('en-IN')}</strong>
             </span>
           </div>
@@ -223,13 +223,13 @@ export function PaymentInstallmentsCard({
 
         {/* Progress Bar */}
         <div className="space-y-1">
-          <div className="flex items-center justify-between text-xs text-gray-600 font-medium">
+          <div className="flex items-center justify-between text-xs text-gray-600 dark:text-neutral-400 font-medium">
             <span>Payment Progress ({percentCollected}%)</span>
-            <span className="font-mono font-bold text-gray-900">
+            <span className="font-mono font-bold text-gray-900 dark:text-white">
               ₹{totalCollected.toLocaleString('en-IN')} / ₹{workPrice.toLocaleString('en-IN')}
             </span>
           </div>
-          <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden border border-gray-200/60">
+          <div className="w-full bg-gray-100 dark:bg-neutral-800 rounded-full h-2.5 overflow-hidden border border-gray-200/60 dark:border-neutral-700">
             <div
               className={`h-2.5 rounded-full transition-all duration-500 ${
                 percentCollected === 100
@@ -255,8 +255,8 @@ export function PaymentInstallmentsCard({
               key={inst.id}
               className={`p-4 rounded-xl border flex flex-col justify-between transition-all ${
                 isPaid
-                  ? 'bg-emerald-50/40 border-emerald-200 shadow-2xs'
-                  : 'bg-white border-gray-100 hover:border-gray-200 shadow-xs'
+                  ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/60 shadow-2xs'
+                  : 'bg-white dark:bg-[#14171d] border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:hover:border-neutral-700 shadow-xs'
               }`}
             >
               <div className="space-y-3">
@@ -321,11 +321,11 @@ export function PaymentInstallmentsCard({
                 ) : (
                   <div className="flex items-baseline justify-between pt-1">
                     <div>
-                      <p className="text-2xl font-bold font-mono text-gray-900">
+                      <p className="text-2xl font-bold font-mono text-gray-900 dark:text-white">
                         ₹{inst.amount.toLocaleString('en-IN')}
                       </p>
                       {isPaid && inst.paidAmount && inst.paidAmount !== inst.amount && (
-                        <p className="text-[11px] text-emerald-700 font-medium">
+                        <p className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">
                           Paid: ₹{inst.paidAmount.toLocaleString('en-IN')}
                         </p>
                       )}
@@ -338,7 +338,7 @@ export function PaymentInstallmentsCard({
                           setEditingInstallmentId(inst.id);
                           setEditAmountVal(String(inst.amount));
                         }}
-                        className="text-gray-400 hover:text-gray-700 p-1"
+                        className="text-gray-400 dark:text-neutral-500 hover:text-gray-700 dark:hover:text-neutral-300 p-1"
                         title="Edit Amount"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
@@ -349,10 +349,10 @@ export function PaymentInstallmentsCard({
 
                 {/* Paid Details if Paid */}
                 {isPaid && (
-                  <div className="text-[11px] text-gray-600 bg-emerald-100/40 p-2 rounded-lg border border-emerald-200/60 flex items-center justify-between">
+                  <div className="text-[11px] text-gray-600 dark:text-neutral-300 bg-emerald-100/40 dark:bg-emerald-950/40 p-2 rounded-lg border border-emerald-200/60 dark:border-emerald-800/60 flex items-center justify-between">
                     <span>Mode: <strong className="uppercase">{inst.paymentMethod || 'UPI'}</strong></span>
                     {inst.paidAt && (
-                      <span className="text-gray-500">
+                      <span className="text-gray-500 dark:text-neutral-400">
                         {new Date(inst.paidAt).toLocaleDateString('en-IN', {
                           day: 'numeric',
                           month: 'short',
@@ -365,7 +365,7 @@ export function PaymentInstallmentsCard({
 
               {/* Action Buttons */}
               {!readOnly && (
-                <div className="pt-4 border-t border-gray-100 mt-4 flex items-center justify-between gap-2">
+                <div className="pt-4 border-t border-gray-100 dark:border-neutral-800 mt-4 flex items-center justify-between gap-2">
                   {isPaid ? (
                     <>
                       <Button
@@ -373,7 +373,7 @@ export function PaymentInstallmentsCard({
                         variant="outline"
                         size="sm"
                         onClick={() => handleTogglePending(inst.id)}
-                        className="h-7 text-xs text-gray-500 hover:text-gray-800"
+                        className="h-7 text-xs text-gray-500 dark:text-neutral-400 hover:text-gray-800 dark:hover:text-white"
                       >
                         Undo
                       </Button>
@@ -394,7 +394,7 @@ export function PaymentInstallmentsCard({
                         variant="outline"
                         size="sm"
                         onClick={() => handleSendReminder(inst)}
-                        className="h-7 text-xs text-gray-600 hover:text-gray-900 gap-1"
+                        className="h-7 text-xs text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white gap-1"
                       >
                         <MessageCircle className="w-3 h-3 text-[#2C8567]" />
                         <span>Reminder</span>
@@ -403,7 +403,7 @@ export function PaymentInstallmentsCard({
                         type="button"
                         size="sm"
                         onClick={() => handleOpenMarkPaid(inst)}
-                        className="h-7 text-xs bg-gray-900 hover:bg-black text-white px-3 font-semibold"
+                        className="h-7 text-xs bg-gray-900 dark:bg-neutral-800 hover:bg-black dark:hover:bg-neutral-700 text-white px-3 font-semibold"
                       >
                         Mark Paid ✅
                       </Button>

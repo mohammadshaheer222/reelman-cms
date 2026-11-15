@@ -208,12 +208,12 @@ export default function TeamPage() {
 
   if (currentUser && currentUser.role !== 'admin') {
     return (
-      <div className="bg-white p-12 rounded-2xl border border-gray-100 text-center max-w-md mx-auto my-12 shadow-sm">
-        <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="bg-white dark:bg-[#14171d] p-12 rounded-2xl border border-gray-100 dark:border-neutral-800 text-center max-w-md mx-auto my-12 shadow-sm">
+        <div className="w-12 h-12 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4">
           <ShieldAlert className="w-6 h-6" />
         </div>
-        <h2 className="text-lg font-bold text-gray-900">Admin Access Required</h2>
-        <p className="text-sm text-gray-500 mt-2">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white">Admin Access Required</h2>
+        <p className="text-sm text-gray-500 dark:text-neutral-400 mt-2">
           Only organization administrators can view and manage the team roster and user credentials.
         </p>
       </div>
@@ -225,8 +225,8 @@ export default function TeamPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Team Management</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Team Management</h1>
+          <p className="text-sm text-gray-500 dark:text-neutral-400 mt-1">
             Manage your crew, assign roles, and handle staff access accounts.
           </p>
         </div>
@@ -239,7 +239,7 @@ export default function TeamPage() {
       {loading ? (
         <TableLoadingSkeleton rows={5} cols={5} />
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+        <div className="bg-white dark:bg-[#14171d] rounded-2xl border border-gray-100 dark:border-neutral-800 overflow-hidden shadow-sm">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50/50">

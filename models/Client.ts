@@ -1,4 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import './User';
+import './Status';
 
 export interface INote {
   _id: mongoose.Types.ObjectId;
@@ -45,6 +47,7 @@ export interface IClient extends Document {
   phone?: string;
   date?: string;
   dates?: string[];
+  district?: string;
   location?: string;
   requirements?: string[];
   packageDetails?: string;
@@ -85,6 +88,7 @@ const ClientSchema = new Schema<IClient>(
     phone: { type: String, trim: true },
     date: { type: String, trim: true },
     dates: [{ type: String, trim: true }],
+    district: { type: String, trim: true },
     location: { type: String, trim: true },
     requirements: [{ type: String, trim: true }],
     packageDetails: { type: String, trim: true },

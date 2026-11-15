@@ -74,12 +74,12 @@ export function ClientFilters({
   return (
     <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
       <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-neutral-500" />
         <Input
           placeholder="Search clients by name, location, requirements, or notes..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9 h-9 bg-white rounded-xl border-gray-200/80 shadow-2xs text-xs sm:text-sm"
+          className="pl-9 h-9 bg-white dark:bg-[#101318] rounded-xl border-gray-200/80 dark:border-neutral-800 shadow-2xs text-xs sm:text-sm text-gray-900 dark:text-neutral-100"
         />
       </div>
 
@@ -91,10 +91,10 @@ export function ClientFilters({
             variant="outline"
             size="sm"
             onClick={() => setDropdownOpen((prev) => !prev)}
-            className="h-9 bg-white border-gray-200/80 text-xs font-semibold gap-1.5 min-w-[130px] justify-between rounded-xl shadow-2xs"
+            className="h-9 bg-white dark:bg-[#14171d] border-gray-200/80 dark:border-neutral-800 text-gray-700 dark:text-neutral-200 text-xs font-semibold gap-1.5 min-w-[130px] justify-between rounded-xl shadow-2xs hover:bg-gray-50 dark:hover:bg-neutral-800"
           >
             <div className="flex items-center gap-1.5 truncate">
-              <Filter className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+              <Filter className="w-3.5 h-3.5 text-gray-400 dark:text-neutral-500 shrink-0" />
               <span className="truncate">
                 {selectedStatusIds.length === 0
                   ? 'All Statuses'
@@ -113,9 +113,9 @@ export function ClientFilters({
           </Button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1.5 w-56 p-2 bg-white shadow-xl rounded-2xl border border-gray-100 z-50 animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-gray-100 px-1">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+            <div className="absolute right-0 top-full mt-1.5 w-56 p-2 bg-white dark:bg-[#14171d] shadow-xl rounded-2xl border border-gray-100 dark:border-neutral-800 z-50 animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-gray-100 dark:border-neutral-800 px-1">
+                <span className="text-[11px] font-bold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
                   Filter by Status
                 </span>
                 {selectedStatusIds.length > 0 && (
@@ -135,8 +135,8 @@ export function ClientFilters({
                   onClick={clearStatuses}
                   className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors ${
                     selectedStatusIds.length === 0
-                      ? 'bg-gray-100 text-[#141414] font-bold'
-                      : 'text-gray-700 hover:bg-gray-50'
+                      ? 'bg-gray-100 dark:bg-neutral-800 text-[#141414] dark:text-white font-bold'
+                      : 'text-gray-700 dark:text-neutral-300 hover:bg-gray-50 dark:hover:bg-neutral-800'
                   }`}
                 >
                   <span>All Statuses</span>
@@ -174,8 +174,8 @@ export function ClientFilters({
 
         {/* Sort Select */}
         <Select value={sort} onValueChange={onSortChange}>
-          <SelectTrigger className="w-[140px] h-9 bg-white text-xs rounded-xl border-gray-200/80 shadow-2xs font-medium">
-            <ArrowUpDown className="w-3.5 h-3.5 mr-2 text-gray-400" />
+          <SelectTrigger className="w-[140px] h-9 bg-white dark:bg-[#14171d] text-gray-700 dark:text-neutral-200 text-xs rounded-xl border-gray-200/80 dark:border-neutral-800 shadow-2xs font-medium">
+            <ArrowUpDown className="w-3.5 h-3.5 mr-2 text-gray-400 dark:text-neutral-500" />
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
@@ -192,14 +192,14 @@ export function ClientFilters({
             variant="outline"
             size="sm"
             onClick={() => onShowArchivedChange(!showArchived)}
-            className={`h-9 text-xs rounded-xl border-gray-200/80 shadow-2xs font-medium transition-colors ${
+            className={`h-9 text-xs rounded-xl border-gray-200/80 dark:border-neutral-800 shadow-2xs font-medium transition-colors ${
               showArchived
-                ? 'bg-amber-50 border-amber-300 text-amber-900 font-semibold'
-                : 'bg-white text-gray-600 hover:text-black'
+                ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-300 font-semibold'
+                : 'bg-white dark:bg-[#14171d] text-gray-600 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-neutral-800'
             }`}
             title={showArchived ? 'Showing archived clients' : 'Click to view archived clients'}
           >
-            <Archive className="w-3.5 h-3.5 mr-1 text-gray-400" />
+            <Archive className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-neutral-500" />
             <span>{showArchived ? 'Archived' : 'Active'}</span>
           </Button>
         )}

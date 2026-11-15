@@ -50,7 +50,7 @@ export function GlobalSearch() {
           onFocus={() => {
             if (query.trim().length >= 2) setOpen(true);
           }}
-          className="pl-9 pr-9 bg-gray-50/90 border-gray-200/70 focus:bg-white focus:border-gray-300 h-9 text-xs sm:text-sm rounded-xl transition-all shadow-2xs"
+          className="pl-9 pr-9 bg-gray-50/90 dark:bg-neutral-900/90 border-gray-200/70 dark:border-neutral-800 focus:bg-white dark:focus:bg-neutral-950 focus:border-gray-300 dark:focus:border-neutral-700 h-9 text-xs sm:text-sm rounded-xl transition-all shadow-2xs"
         />
         {loading && (
           <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 animate-spin" />
@@ -63,9 +63,9 @@ export function GlobalSearch() {
             className="fixed inset-0 z-40"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-80 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-neutral-900 rounded-2xl shadow-xl border border-gray-100 dark:border-neutral-800 py-2 z-50 max-h-80 overflow-y-auto modal-scroll">
             <div className="px-2 py-1">
-              <p className="text-xs font-semibold text-gray-400 px-2 py-1 uppercase tracking-wider">
+              <p className="text-[10px] font-bold text-gray-400 dark:text-neutral-500 px-2 py-1 uppercase tracking-wider">
                 Clients
               </p>
               {clients.map((c) => (
@@ -76,14 +76,14 @@ export function GlobalSearch() {
                     setQuery('');
                     router.push(`/clients/${c._id}`);
                   }}
-                  className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-50 text-sm transition-colors"
+                  className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-neutral-800 text-sm transition-colors"
                 >
                   <User className="w-4 h-4 text-gray-400 shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-gray-900 truncate">
+                    <p className="font-semibold text-gray-900 dark:text-neutral-100 truncate">
                       {c.name || 'Unnamed Client'}
                     </p>
-                    <p className="text-xs text-gray-400 truncate">{c.clientId}</p>
+                    <p className="text-xs text-gray-400 dark:text-neutral-500 truncate">{c.clientId}</p>
                   </div>
                 </button>
               ))}

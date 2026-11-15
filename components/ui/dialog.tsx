@@ -16,7 +16,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] modal-overlay',
+      'fixed inset-0 z-[9998] bg-black/60 backdrop-blur-xs modal-overlay',
       className
     )}
     {...props}
@@ -35,11 +35,11 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         // Positioning — NO translate utilities here; translation lives in the keyframes
-        'fixed left-[50%] top-[50%] z-50',
+        'fixed left-[50%] top-[50%] z-[9999]',
         // Size — reduced width
         'w-[calc(100%-2rem)] max-w-sm max-h-[85dvh] overflow-y-auto overscroll-contain modal-scroll',
         // Visual
-        'bg-white rounded-2xl border border-gray-100 shadow-2xl',
+        'bg-white dark:bg-[#14171d] border border-gray-100 dark:border-neutral-800/80 text-gray-900 dark:text-neutral-100 shadow-2xl',
         // Layout
         'grid gap-4 p-5 sm:p-6',
         // Animation (handles translate internally)
@@ -55,7 +55,7 @@ const DialogContent = React.forwardRef<
         className={cn(
           'absolute right-3.5 top-3.5 z-10',
           'w-7 h-7 rounded-full flex items-center justify-center',
-          'text-gray-400 bg-gray-100 hover:bg-gray-200 hover:text-gray-700',
+          'text-gray-400 dark:text-neutral-400 bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 hover:text-gray-700 dark:hover:text-white',
           'transition-all duration-150',
           'focus:outline-none focus:ring-2 focus:ring-[#2C8567] focus:ring-offset-1',
           'disabled:pointer-events-none',
@@ -91,7 +91,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-lg font-semibold text-gray-900', className)}
+    className={cn('text-lg font-semibold text-gray-900 dark:text-white', className)}
     {...props}
   />
 ));
@@ -104,7 +104,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-sm text-gray-500', className)}
+    className={cn('text-sm text-gray-500 dark:text-neutral-400', className)}
     {...props}
   />
 ));

@@ -96,21 +96,21 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Top Banner / Studio Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14171d] p-6 rounded-2xl border border-gray-100/90 dark:border-neutral-800 shadow-[0_2px_16px_rgba(0,0,0,0.03)] dark:shadow-none">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 bg-gray-50 px-2.5 py-0.5 rounded-full border border-gray-200/60">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-neutral-400 bg-gray-50 dark:bg-neutral-800/80 px-2.5 py-0.5 rounded-full border border-gray-200/60 dark:border-neutral-700">
               <span className="w-1.5 h-1.5 rounded-full bg-[#dc2626] animate-pulse" />
               Creator Studio CRM
             </span>
-            <span className="text-xs text-gray-300">•</span>
-            <span className="text-xs text-gray-500 font-medium">Real-time pipeline</span>
+            <span className="text-xs text-gray-300 dark:text-neutral-600">•</span>
+            <span className="text-xs text-gray-500 dark:text-neutral-400 font-medium">Real-time pipeline</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] dark:text-white tracking-tight">
             Welcome back, {user?.name || 'Producer'}
             <span className="text-[#dc2626]">.</span>
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1 font-normal leading-relaxed">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-neutral-400 mt-1 font-normal leading-relaxed">
             Monitor creator bookings, shoot schedules, deliverable milestones, and payment collections.
           </p>
         </div>
@@ -178,17 +178,17 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Link
           href="/clients"
-          className="p-4 rounded-2xl bg-white border border-gray-100/90 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 transition-all duration-300 flex items-center justify-between group"
+          className="p-4 rounded-2xl bg-white dark:bg-[#14171d] border border-gray-100/90 dark:border-neutral-800 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 dark:hover:border-neutral-700 transition-all duration-300 flex items-center justify-between group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gray-100 text-[#141414] flex items-center justify-center font-bold group-hover:bg-[#141414] group-hover:text-white transition-colors duration-300">
+            <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-neutral-800 text-[#141414] dark:text-white flex items-center justify-center font-bold group-hover:bg-[#141414] dark:group-hover:bg-neutral-700 group-hover:text-white transition-colors duration-300">
               <Layers className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#141414] group-hover:text-black transition-colors">
+              <p className="text-sm font-bold text-[#141414] dark:text-white group-hover:text-black dark:group-hover:text-neutral-100 transition-colors">
                 Clients & Pipeline
               </p>
-              <p className="text-xs text-gray-400 font-normal">Track client stages & bookings</p>
+              <p className="text-xs text-gray-400 dark:text-neutral-400 font-normal">Track client stages & bookings</p>
             </div>
           </div>
           <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#dc2626] group-hover:translate-x-1 transition-all" />
@@ -196,17 +196,17 @@ export default function DashboardPage() {
 
         <Link
           href="/calendar"
-          className="p-4 rounded-2xl bg-white border border-gray-100/90 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 transition-all duration-300 flex items-center justify-between group"
+          className="p-4 rounded-2xl bg-white dark:bg-[#14171d] border border-gray-100/90 dark:border-neutral-800 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 dark:hover:border-neutral-700 transition-all duration-300 flex items-center justify-between group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
               <CalendarIcon className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#141414] group-hover:text-blue-600 transition-colors">
+              <p className="text-sm font-bold text-[#141414] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 Shoot Calendar
               </p>
-              <p className="text-xs text-gray-400 font-normal">Schedule & conflict detector</p>
+              <p className="text-xs text-gray-400 dark:text-neutral-400 font-normal">Schedule & conflict detector</p>
             </div>
           </div>
           <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
@@ -214,17 +214,17 @@ export default function DashboardPage() {
 
         <Link
           href="/notepad"
-          className="p-4 rounded-2xl bg-white border border-gray-100/90 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 transition-all duration-300 flex items-center justify-between group"
+          className="p-4 rounded-2xl bg-white dark:bg-[#14171d] border border-gray-100/90 dark:border-neutral-800 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 dark:hover:border-neutral-700 transition-all duration-300 flex items-center justify-between group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold group-hover:bg-amber-600 group-hover:text-white transition-colors duration-300">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold group-hover:bg-amber-600 group-hover:text-white transition-colors duration-300">
               <StickyNote className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#141414] group-hover:text-amber-600 transition-colors">
+              <p className="text-sm font-bold text-[#141414] dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                 Call Notepad
               </p>
-              <p className="text-xs text-gray-400 font-normal">Quick notes during inquiries</p>
+              <p className="text-xs text-gray-400 dark:text-neutral-400 font-normal">Quick notes during inquiries</p>
             </div>
           </div>
           <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
@@ -232,17 +232,17 @@ export default function DashboardPage() {
 
         <Link
           href="/packages"
-          className="p-4 rounded-2xl bg-white border border-gray-100/90 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 transition-all duration-300 flex items-center justify-between group"
+          className="p-4 rounded-2xl bg-white dark:bg-[#14171d] border border-gray-100/90 dark:border-neutral-800 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:border-gray-200 dark:hover:border-neutral-700 transition-all duration-300 flex items-center justify-between group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-50 text-[#dc2626] flex items-center justify-center font-bold group-hover:bg-[#dc2626] group-hover:text-white transition-colors duration-300">
+            <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-950/40 text-[#dc2626] dark:text-red-400 flex items-center justify-center font-bold group-hover:bg-[#dc2626] group-hover:text-white transition-colors duration-300">
               <Package className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#141414] group-hover:text-[#dc2626] transition-colors">
+              <p className="text-sm font-bold text-[#141414] dark:text-white group-hover:text-[#dc2626] transition-colors">
                 Proposals & PDF
               </p>
-              <p className="text-xs text-gray-400 font-normal">Client booklets & packages</p>
+              <p className="text-xs text-gray-400 dark:text-neutral-400 font-normal">Client booklets & packages</p>
             </div>
           </div>
           <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#dc2626] group-hover:translate-x-1 transition-all" />
@@ -257,15 +257,15 @@ export default function DashboardPage() {
         <RecentClients clients={recentClients} />
 
         {/* Recent Activity card */}
-        <Card className="shadow-xs border-gray-100 flex flex-col justify-between">
+        <Card className="shadow-xs border-gray-100 dark:border-neutral-800 dark:bg-[#14171d] flex flex-col justify-between">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div className="flex items-center gap-2">
               <ActivityIcon className="w-4 h-4 text-gray-500" />
-              <CardTitle className="text-base font-semibold text-gray-900">
+              <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
                 Recent Activity
               </CardTitle>
             </div>
-            <Button asChild variant="ghost" size="sm" className="text-xs text-gray-500 hover:text-black hover:bg-gray-100 rounded-xl">
+            <Button asChild variant="ghost" size="sm" className="text-xs text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-xl">
               <Link href="/activity" className="flex items-center gap-1 font-semibold">
                 View All <ArrowRight className="w-3.5 h-3.5 text-[#dc2626]" />
               </Link>
@@ -277,14 +277,14 @@ export default function DashboardPage() {
                 No recent activity logged.
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 dark:divide-neutral-800">
                 {activities.map((act) => (
                   <div
                     key={act._id}
                     className="py-3 flex items-start justify-between gap-3 text-sm"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-gray-900 truncate">
+                      <p className="font-medium text-gray-900 dark:text-white truncate">
                         {act.description}
                       </p>
                       <span className="text-xs text-gray-400 capitalize">

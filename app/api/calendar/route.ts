@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Client from '@/models/Client';
+import Status from '@/models/Status';
 import { requireAuth } from '@/lib/apiMiddleware';
 
 export interface CalendarShootEvent {

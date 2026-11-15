@@ -151,16 +151,16 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
     <div className={`space-y-4 ${className || ''}`}>
       {/* Top Banner: Stats & Conflict Alert */}
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        <div className="bg-white p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-[#14171d] p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs flex items-center justify-between">
           <div className="min-w-0">
-            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">
+            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wider truncate">
               Shoots in {currentDate.toLocaleDateString('en-IN', { month: 'short' })}
             </p>
-            <p className="text-lg sm:text-2xl font-bold text-gray-900 mt-0.5 sm:mt-1 font-mono">
+            <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white mt-0.5 sm:mt-1 font-mono">
               {currentMonthShootsCount}
             </p>
           </div>
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gray-100 text-[#141414] flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gray-100 dark:bg-neutral-800 text-[#141414] dark:text-white flex items-center justify-center shrink-0">
             <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#dc2626]" />
           </div>
         </div>
@@ -170,23 +170,23 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
           className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border shadow-xs flex items-center justify-between cursor-pointer transition-all ${
             currentMonthConflictsCount > 0
               ? filterConflictsOnly
-                ? 'bg-amber-100 border-amber-300 ring-2 ring-amber-400'
-                : 'bg-amber-50/70 border-amber-200 hover:bg-amber-100/70'
-              : 'bg-white border-gray-100'
+                ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-300 dark:border-amber-700 ring-2 ring-amber-400'
+                : 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/50 hover:bg-amber-100/70 dark:hover:bg-amber-950/50'
+              : 'bg-white dark:bg-[#14171d] border-gray-100 dark:border-neutral-800'
           }`}
         >
           <div className="min-w-0">
             <div className="flex items-center gap-1">
-              <p className="text-[10px] sm:text-xs font-semibold text-amber-900 uppercase tracking-wider truncate">
+              <p className="text-[10px] sm:text-xs font-semibold text-amber-900 dark:text-amber-400 uppercase tracking-wider truncate">
                 Conflicts
               </p>
               {currentMonthConflictsCount > 0 && (
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
               )}
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-amber-950 mt-0.5 sm:mt-1 font-mono">
+            <p className="text-lg sm:text-2xl font-bold text-amber-950 dark:text-amber-200 mt-0.5 sm:mt-1 font-mono">
               {currentMonthConflictsCount}{' '}
-              <span className="text-[10px] sm:text-xs font-normal text-amber-700 hidden sm:inline">
+              <span className="text-[10px] sm:text-xs font-normal text-amber-700 dark:text-amber-400 hidden sm:inline">
                 {currentMonthConflictsCount === 1 ? 'day' : 'days'}
               </span>
             </p>
@@ -194,44 +194,44 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
           <div
             className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 ${
               currentMonthConflictsCount > 0
-                ? 'bg-amber-200/80 text-amber-900'
-                : 'bg-gray-100 text-gray-400'
+                ? 'bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200'
+                : 'bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-neutral-500'
             }`}
           >
             <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
 
-        <div className="bg-white p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-[#14171d] p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs flex items-center justify-between">
           <div className="min-w-0">
-            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">
+            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wider truncate">
               Active Bookings
             </p>
-            <p className="text-lg sm:text-2xl font-bold text-gray-900 mt-0.5 sm:mt-1 font-mono">
+            <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white mt-0.5 sm:mt-1 font-mono">
               {events.length}
             </p>
           </div>
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
             <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
       </div>
 
       {/* Main Calendar Card */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#14171d] rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-sm overflow-hidden">
         {/* Navigation & Controls Toolbar */}
-        <div className="p-3.5 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-3.5 sm:p-5 border-b border-gray-100 dark:border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {/* Month Navigation */}
           <div className="flex items-center justify-between sm:justify-start gap-2">
-            <h2 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight min-w-[130px] sm:min-w-[170px]">
+            <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight min-w-[130px] sm:min-w-[170px]">
               {monthLabel}
             </h2>
-            <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-lg border border-gray-200/60">
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-neutral-800 p-0.5 rounded-lg border border-gray-200/60 dark:border-neutral-700">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={prevMonth}
-                className="h-7 w-7 text-gray-600 hover:text-gray-900"
+                className="h-7 w-7 text-gray-600 dark:text-neutral-300 hover:text-gray-900 dark:hover:text-white"
                 title="Previous month"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -240,7 +240,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                 variant="ghost"
                 size="sm"
                 onClick={jumpToToday}
-                className="h-7 px-2 text-xs font-medium text-gray-700 hover:text-gray-900"
+                className="h-7 px-2 text-xs font-medium text-gray-700 dark:text-neutral-300 hover:text-gray-900 dark:hover:text-white"
               >
                 Today
               </Button>
@@ -248,7 +248,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                 variant="ghost"
                 size="icon"
                 onClick={nextMonth}
-                className="h-7 w-7 text-gray-600 hover:text-gray-900"
+                className="h-7 w-7 text-gray-600 dark:text-neutral-300 hover:text-gray-900 dark:hover:text-white"
                 title="Next month"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -265,7 +265,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
               className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                 filterConflictsOnly
                   ? 'bg-amber-500 text-white border-amber-600 shadow-2xs'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                  : 'bg-white dark:bg-neutral-800 text-gray-600 dark:text-neutral-300 border-gray-200 dark:border-neutral-700 hover:border-gray-300'
               }`}
             >
               <AlertTriangle className="w-3.5 h-3.5" />
@@ -273,14 +273,14 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
             </button>
 
             {/* View Switcher: Grid vs Timeline */}
-            <div className="inline-flex p-0.5 rounded-lg bg-gray-100 border border-gray-200/60 text-xs">
+            <div className="inline-flex p-0.5 rounded-lg bg-gray-100 dark:bg-neutral-800 border border-gray-200/60 dark:border-neutral-700 text-xs">
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-md transition-all ${
                   viewMode === 'grid'
-                    ? 'bg-white text-gray-900 shadow-2xs font-semibold'
-                    : 'text-gray-500 hover:text-gray-900'
+                    ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-white shadow-2xs font-semibold'
+                    : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
                 title="Calendar Grid"
               >
@@ -291,8 +291,8 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                 onClick={() => setViewMode('timeline')}
                 className={`p-1.5 rounded-md transition-all ${
                   viewMode === 'timeline'
-                    ? 'bg-white text-gray-900 shadow-2xs font-semibold'
-                    : 'text-gray-500 hover:text-gray-900'
+                    ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-white shadow-2xs font-semibold'
+                    : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
                 title="Timeline List"
               >
@@ -307,7 +307,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                 setAddModalOpen(true);
               }}
               size="sm"
-              className="h-8 bg-[#141414] hover:bg-black text-white text-xs font-semibold gap-1.5 rounded-xl shadow-xs"
+              className="h-8 bg-[#141414] hover:bg-black dark:bg-neutral-800 dark:hover:bg-neutral-700 text-white text-xs font-semibold gap-1.5 rounded-xl shadow-xs"
             >
               <Plus className="w-3.5 h-3.5 text-[#dc2626]" />
               <span>Add Client</span>
@@ -324,7 +324,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                 <div
                   key={dayName}
                   className={`py-1.5 sm:py-2 text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${
-                    idx === 0 || idx === 6 ? 'text-amber-700/80' : 'text-gray-500'
+                    idx === 0 || idx === 6 ? 'text-amber-700/80 dark:text-amber-400' : 'text-gray-500 dark:text-neutral-400'
                   }`}
                 >
                   <span className="sm:hidden">{dayName[0]}</span>
@@ -339,7 +339,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
               {Array.from({ length: firstDayOfMonth }).map((_, i) => (
                 <div
                   key={`empty-${i}`}
-                  className="min-h-[52px] sm:min-h-[115px] p-1 sm:p-1.5 rounded-lg sm:rounded-xl bg-gray-50/40 border border-transparent opacity-40 select-none"
+                  className="min-h-[52px] sm:min-h-[115px] p-1 sm:p-1.5 rounded-lg sm:rounded-xl bg-gray-50/40 dark:bg-neutral-900/30 border border-transparent opacity-40 select-none"
                 />
               ))}
 
@@ -355,9 +355,9 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                   return (
                     <div
                       key={dateStr}
-                      className="min-h-[52px] sm:min-h-[115px] p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-gray-100 bg-gray-50/20 opacity-30 flex items-start"
+                      className="min-h-[52px] sm:min-h-[115px] p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-gray-100 dark:border-neutral-800/40 bg-gray-50/20 dark:bg-neutral-900/20 opacity-30 flex items-start"
                     >
-                      <span className="text-[11px] sm:text-xs text-gray-400">{dayNum}</span>
+                      <span className="text-[11px] sm:text-xs text-gray-400 dark:text-neutral-500">{dayNum}</span>
                     </div>
                   );
                 }
@@ -368,12 +368,12 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                     onClick={() => handleOpenDay(dateStr)}
                     className={`group relative min-h-[52px] sm:min-h-[115px] p-1 sm:p-2 rounded-lg sm:rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
                       hasConflict
-                        ? 'bg-amber-50/60 border-amber-300 hover:border-amber-400 hover:shadow-md'
+                        ? 'bg-amber-50/60 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 hover:border-amber-400 hover:shadow-md'
                         : isToday
-                        ? 'bg-emerald-50/30 border-emerald-300 ring-1 ring-emerald-300/50'
+                        ? 'bg-emerald-50/30 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-600 ring-1 ring-emerald-300/50'
                         : dayShoots.length > 0
-                        ? 'bg-white border-gray-200/90 hover:border-gray-300 hover:shadow-xs'
-                        : 'bg-white/70 border-gray-100 hover:bg-gray-50/80 hover:border-gray-200'
+                        ? 'bg-white dark:bg-[#14171d] border-gray-200/90 dark:border-neutral-800 hover:border-gray-300 dark:hover:border-neutral-700 hover:shadow-xs'
+                        : 'bg-white/70 dark:bg-[#12141a]/60 border-gray-100 dark:border-neutral-800/80 hover:bg-gray-50/80 dark:hover:bg-neutral-800/50 hover:border-gray-200'
                     }`}
                   >
                     {/* Top Row: Date Number & Badges */}
@@ -381,8 +381,8 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                       <span
                         className={`text-[11px] sm:text-sm font-semibold inline-flex items-center justify-center ${
                           isToday
-                            ? 'w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#141414] text-white font-bold text-[10px] sm:text-xs'
-                            : 'text-gray-700'
+                            ? 'w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#141414] dark:bg-white text-white dark:text-black font-bold text-[10px] sm:text-xs'
+                            : 'text-gray-700 dark:text-neutral-300'
                         }`}
                       >
                         {dayNum}
@@ -594,10 +594,10 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
 
       {/* Day Details & Conflict Inspector Dialog */}
       <Dialog open={!!selectedDayDate} onOpenChange={(open) => !open && setSelectedDayDate(null)}>
-        <DialogContent className="!w-[calc(100%-1.5rem)] sm:!w-full !max-w-lg !max-h-[85dvh] !p-0 !flex !flex-col !overflow-hidden rounded-2xl shadow-2xl border border-gray-100 bg-white">
-          <DialogHeader className="sticky top-0 z-10 bg-white px-4 sm:px-6 py-3.5 border-b border-gray-100 flex flex-row items-center justify-between shrink-0">
+        <DialogContent className="!w-[calc(100%-1.5rem)] sm:!w-full !max-w-lg !max-h-[85dvh] !p-0 !flex !flex-col !overflow-hidden rounded-2xl shadow-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-[#14171d]">
+          <DialogHeader className="sticky top-0 z-10 bg-white dark:bg-[#14171d] px-4 sm:px-6 py-3.5 border-b border-gray-100 dark:border-neutral-800 flex flex-row items-center justify-between shrink-0">
             <div className="min-w-0 pr-2">
-              <DialogTitle className="text-base sm:text-lg font-bold text-gray-900 truncate">
+              <DialogTitle className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
                 {selectedDayDate &&
                   new Date(selectedDayDate).toLocaleDateString('en-IN', {
                     weekday: 'short',
@@ -606,7 +606,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                     year: 'numeric',
                   })}
               </DialogTitle>
-              <DialogDescription className="text-xs text-gray-500 truncate">
+              <DialogDescription className="text-xs text-gray-500 dark:text-neutral-400 truncate">
                 {selectedDayShoots.length === 0
                   ? 'No shoots scheduled on this day.'
                   : `${selectedDayShoots.length} shoot${
@@ -617,7 +617,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
             <button
               type="button"
               onClick={() => setSelectedDayDate(null)}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors shrink-0"
               title="Close"
             >
               <X className="w-4 h-4" />
@@ -627,13 +627,13 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
           <div className="flex-1 min-h-0 overflow-y-auto modal-scroll p-4 sm:p-6 space-y-3">
             {/* Conflict Alert Banner if >= 2 shoots */}
             {selectedDayShoots.length >= 2 && (
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
-                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-bold text-amber-900">
+                  <p className="font-bold text-amber-900 dark:text-amber-200">
                     Availability Conflict ({selectedDayShoots.length} Overlapping Shoots)
                   </p>
-                  <p className="text-[11px] text-amber-700 mt-0.5">
+                  <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-0.5">
                     You have multiple clients booked on this exact date. Ensure separate photo/video crew members and gear sets are assigned.
                   </p>
                 </div>
@@ -642,7 +642,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
 
             {/* Shoots Cards */}
             {selectedDayShoots.length === 0 ? (
-              <div className="py-8 text-center text-xs text-gray-400">
+              <div className="py-8 text-center text-xs text-gray-400 dark:text-neutral-500">
                 <p>This date is completely free!</p>
                 <Button
                   onClick={() => {
@@ -651,7 +651,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                     if (d) handleBookOnDate(d);
                   }}
                   size="sm"
-                  className="mt-3 bg-[#141414] hover:bg-black text-white text-xs rounded-xl"
+                  className="mt-3 bg-[#141414] hover:bg-black dark:bg-neutral-800 dark:hover:bg-neutral-700 text-white text-xs rounded-xl"
                 >
                   <Plus className="w-3.5 h-3.5 mr-1" />
                   Book Shoot on this Date
@@ -663,7 +663,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                 return (
                   <div
                     key={shoot._id}
-                    className="p-3 sm:p-3.5 rounded-xl border border-gray-100 bg-white hover:border-gray-200 transition-all shadow-xs space-y-2"
+                    className="p-3 sm:p-3.5 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-[#161922] hover:border-gray-200 dark:hover:border-neutral-700 transition-all shadow-xs space-y-2"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -671,7 +671,7 @@ export function ShootCalendar({ onShootClick, onDateSelect, className }: ShootCa
                           className="w-2.5 h-2.5 rounded-full"
                           style={{ backgroundColor: statusColor }}
                         />
-                        <h4 className="font-bold text-gray-900 text-sm">{shoot.name}</h4>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-sm">{shoot.name}</h4>
                       </div>
                       {shoot.status && (
                         <span

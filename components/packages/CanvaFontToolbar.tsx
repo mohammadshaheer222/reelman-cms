@@ -104,14 +104,14 @@ export function CanvaFontToolbar({
   };
 
   return (
-    <div className="no-print w-full max-w-[560px] bg-white/95 backdrop-blur-md border border-gray-200 shadow-xl rounded-xl p-1.5 transition-all animate-in fade-in slide-in-from-top-1 duration-150 text-gray-800">
+    <div className="no-print w-full max-w-[560px] bg-white/95 dark:bg-[#14171d]/95 backdrop-blur-md border border-gray-200 dark:border-neutral-800 shadow-xl rounded-xl p-1.5 transition-all animate-in fade-in slide-in-from-top-1 duration-150 text-gray-800 dark:text-neutral-200">
       <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 py-0.5">
         {/* 1. Font Family Dropdown */}
         <div className="relative shrink-0">
           <button
             type="button"
             onClick={() => setShowFontMenu(!showFontMenu)}
-            className="h-7 sm:h-8 px-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-medium flex items-center gap-1 text-gray-800 min-w-[105px] sm:min-w-[125px] justify-between transition-colors"
+            className="h-7 sm:h-8 px-2 bg-gray-50 dark:bg-neutral-800 hover:bg-gray-100 dark:hover:bg-neutral-700 border border-gray-200 dark:border-neutral-700 rounded-lg text-xs font-medium flex items-center gap-1 text-gray-800 dark:text-neutral-200 min-w-[105px] sm:min-w-[125px] justify-between transition-colors"
             style={{ fontFamily: currentStyle.fontFamily || 'inherit' }}
           >
             <span className="truncate">{currentStyle.fontFamily || 'Font'}</span>
@@ -119,7 +119,7 @@ export function CanvaFontToolbar({
           </button>
 
           {showFontMenu && (
-            <div className="absolute top-9 left-0 z-50 w-60 max-h-64 overflow-y-auto bg-white rounded-xl shadow-2xl border border-gray-200 p-1 space-y-0.5">
+            <div className="absolute top-9 left-0 z-50 w-60 max-h-64 overflow-y-auto bg-white dark:bg-[#14171d] rounded-xl shadow-2xl border border-gray-200 dark:border-neutral-800 p-1 space-y-0.5">
               {ALL_FONTS.map((font) => (
                 <button
                   key={font.family}

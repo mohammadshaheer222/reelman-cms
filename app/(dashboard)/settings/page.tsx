@@ -12,8 +12,12 @@ import {
   Database,
   Download,
   Calendar,
+  Sun,
+  Moon,
+  Laptop,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/components/theme/ThemeProvider';
 import { Status, Requirement } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,6 +61,7 @@ const PRESET_COLORS = [
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { theme: activeTheme, setTheme } = useTheme();
   const [statuses, setStatuses] = useState<Status[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -271,17 +276,17 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-gray-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14171d] p-5 sm:p-6 rounded-2xl border border-gray-100/90 dark:border-neutral-800 shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
         <div>
           <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-neutral-500">
               System Configuration
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] dark:text-white tracking-tight">
             Pipeline Settings<span className="text-[#dc2626]">.</span>
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 font-normal">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-neutral-400 font-normal">
             Configure client workflow stages, colors, and automated WhatsApp prefill templates.
           </p>
         </div>
@@ -293,7 +298,7 @@ export default function SettingsPage() {
               size="sm"
               onClick={() => handleSeed(true)}
               disabled={seeding}
-              className="text-gray-700 bg-white border-gray-200 hover:bg-gray-50 rounded-xl text-xs font-semibold shadow-2xs"
+              className="text-gray-700 dark:text-neutral-300 bg-white dark:bg-neutral-800 border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 rounded-xl text-xs font-semibold shadow-2xs"
               title="Populates default 10 statuses and WhatsApp prefill messages"
             >
               <Sparkles className="w-4 h-4 mr-1.5 text-amber-500" />
@@ -302,7 +307,7 @@ export default function SettingsPage() {
             <Button
               size="sm"
               onClick={handleOpenAdd}
-              className="flex items-center gap-2 bg-[#141414] hover:bg-black text-white rounded-xl shadow-xs px-4 py-2 font-semibold transition-all hover:shadow-sm"
+              className="flex items-center gap-2 bg-[#141414] hover:bg-black dark:bg-neutral-800 dark:hover:bg-neutral-700 text-white rounded-xl shadow-xs px-4 py-2 font-semibold transition-all hover:shadow-sm"
             >
               <Plus className="w-4 h-4 text-[#dc2626]" />
               New Status
@@ -312,13 +317,13 @@ export default function SettingsPage() {
       </div>
 
       {/* Statuses List Card */}
-      <div className="bg-white rounded-2xl border border-gray-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+      <div className="bg-white dark:bg-[#14171d] rounded-2xl border border-gray-100/90 dark:border-neutral-800 shadow-[0_2px_16px_rgba(0,0,0,0.03)] overflow-hidden">
+        <div className="p-5 border-b border-gray-100 dark:border-neutral-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#141414]">
+            <div className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-neutral-800 flex items-center justify-center text-[#141414] dark:text-white">
               <Layers className="w-4 h-4 text-[#dc2626]" />
             </div>
-            <h2 className="text-base font-bold text-[#141414]">
+            <h2 className="text-base font-bold text-[#141414] dark:text-white">
               Pipeline Statuses & WhatsApp Prefills ({statuses.length})
             </h2>
           </div>
@@ -419,14 +424,14 @@ export default function SettingsPage() {
       </div>
 
       {/* Requirements & Services Management */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
+      <div className="bg-white dark:bg-[#14171d] rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-sm p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-neutral-800">
           <div>
-            <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#dc2626]" />
               <span>Client Requirements & Services ({requirements.length})</span>
             </h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-gray-500 dark:text-neutral-400 mt-0.5">
               Options shown in the Add Client requirements dropdown and client profile.
             </p>
           </div>
@@ -443,7 +448,7 @@ export default function SettingsPage() {
               type="submit"
               size="sm"
               disabled={reqSubmitting || !newReqInput.trim()}
-              className="h-8 text-xs bg-[#141414] hover:bg-black text-white gap-1 rounded-xl shadow-xs"
+              className="h-8 text-xs bg-[#141414] hover:bg-black dark:bg-neutral-800 dark:hover:bg-neutral-700 text-white gap-1 rounded-xl shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add</span>
@@ -456,7 +461,7 @@ export default function SettingsPage() {
           {requirements.map((req) => (
             <div
               key={req._id}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 border border-gray-200/80 text-xs font-medium text-gray-800 shadow-2xs group"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-neutral-800/80 border border-gray-200/80 dark:border-neutral-700 text-xs font-medium text-gray-800 dark:text-neutral-200 shadow-2xs group"
             >
               <span>{req.name}</span>
               {!req.isDefault && (
@@ -475,23 +480,101 @@ export default function SettingsPage() {
       </div>
 
       {/* System info */}
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+      <div className="bg-white dark:bg-[#14171d] p-6 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-sm space-y-3">
         <div className="flex items-center gap-2">
           <Info className="w-4 h-4 text-[#dc2626]" />
-          <h3 className="text-sm font-bold text-[#141414]">System Environment & WhatsApp Settings</h3>
+          <h3 className="text-sm font-bold text-[#141414] dark:text-white">System Environment & WhatsApp Settings</h3>
         </div>
-        <p className="text-xs text-gray-500 leading-relaxed">
+        <p className="text-xs text-gray-500 dark:text-neutral-400 leading-relaxed">
           When team members click the WhatsApp button on a client card or table, the message is automatically tailored to the client&apos;s current status using your custom template with dynamic placeholders for client name and shoot date.
         </p>
       </div>
 
+      {/* Appearance & Theme Setting */}
+      <div className="bg-white dark:bg-[#14171d] p-6 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-sm space-y-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <Sun className="w-4 h-4 text-amber-500" />
+            <h3 className="text-sm font-bold text-[#141414] dark:text-white">Appearance & Color Mode</h3>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1 leading-relaxed">
+            Choose your preferred interface theme. You can switch between Light, Dark, or sync with your system preference.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button
+            type="button"
+            onClick={() => setTheme('light')}
+            className={`p-4 rounded-2xl border text-left flex items-start gap-3 transition-all ${
+              activeTheme === 'light'
+                ? 'border-[#dc2626] ring-2 ring-red-400/40 bg-red-50/20 dark:bg-red-950/20 shadow-xs'
+                : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600 hover:bg-gray-50/60 dark:hover:bg-neutral-800/60'
+            }`}
+          >
+            <div className="p-2 rounded-xl bg-amber-50 text-amber-600 shrink-0">
+              <Sun className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-gray-900 dark:text-white">Light Mode</span>
+                {activeTheme === 'light' && <Check className="w-3.5 h-3.5 text-[#dc2626]" />}
+              </div>
+              <p className="text-[11px] text-gray-400 dark:text-neutral-400 mt-0.5">Clean high-contrast daytime interface</p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTheme('dark')}
+            className={`p-4 rounded-2xl border text-left flex items-start gap-3 transition-all ${
+              activeTheme === 'dark'
+                ? 'border-[#dc2626] ring-2 ring-red-400/40 bg-red-50/20 dark:bg-red-950/20 shadow-xs'
+                : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600 hover:bg-gray-50/60 dark:hover:bg-neutral-800/60'
+            }`}
+          >
+            <div className="p-2 rounded-xl bg-neutral-800 text-amber-400 shrink-0">
+              <Moon className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-gray-900 dark:text-white">Dark Mode</span>
+                {activeTheme === 'dark' && <Check className="w-3.5 h-3.5 text-[#dc2626]" />}
+              </div>
+              <p className="text-[11px] text-gray-400 dark:text-neutral-400 mt-0.5">Sleek carbon studio palette for low light</p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTheme('system')}
+            className={`p-4 rounded-2xl border text-left flex items-start gap-3 transition-all ${
+              activeTheme === 'system'
+                ? 'border-[#dc2626] ring-2 ring-red-400/40 bg-red-50/20 dark:bg-red-950/20 shadow-xs'
+                : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600 hover:bg-gray-50/60 dark:hover:bg-neutral-800/60'
+            }`}
+          >
+            <div className="p-2 rounded-xl bg-blue-50 text-blue-600 shrink-0">
+              <Laptop className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-gray-900 dark:text-white">System Sync</span>
+                {activeTheme === 'system' && <Check className="w-3.5 h-3.5 text-[#dc2626]" />}
+              </div>
+              <p className="text-[11px] text-gray-400 dark:text-neutral-400 mt-0.5">Automatically follows your device OS settings</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
       {/* Database Backup & Export */}
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+      <div className="bg-white dark:bg-[#14171d] p-6 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
               <Database className="w-4 h-4 text-emerald-600" />
-              <h3 className="text-sm font-bold text-[#141414]">Database Backup & Disaster Recovery</h3>
+              <h3 className="text-sm font-bold text-[#141414] dark:text-white">Database Backup & Disaster Recovery</h3>
             </div>
             <p className="text-xs text-gray-500 mt-1 leading-relaxed">
               Export an instant, complete snapshot of all studio data (clients, packages, statuses, activities, notes, and requirements) in JSON format.

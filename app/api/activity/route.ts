@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Activity from '@/models/Activity';
+import User from '@/models/User';
+import Client from '@/models/Client';
 import { requireAuth } from '@/lib/apiMiddleware';
 
 export async function GET(request: NextRequest) {

@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import Client from '@/models/Client';
 import Status from '@/models/Status';
+import User from '@/models/User';
 import Activity from '@/models/Activity';
 import { requireAuth } from '@/lib/apiMiddleware';
 import { generateId } from '@/lib/utils';
@@ -14,6 +15,7 @@ const createClientSchema = z.object({
   phone: z.string().optional(),
   date: z.string().optional(),
   dates: z.array(z.string()).optional(),
+  district: z.string().optional(),
   location: z.string().optional(),
   requirements: z.array(z.string()).optional(),
   packageDetails: z.string().optional(),
@@ -52,13 +54,15 @@ export async function GET(request: NextRequest) {
       }
     }
     if (search) {
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
-        { clientId: { $regex: search, $options: 'i' } },
-        { location: { $regex: search, $options: 'i' } },
-        { requirements: { $in: [new RegExp(search, 'i')] } },
-        { 'notes.content': { $regex: search, $options: 'i' } },
+        { name: { $regex: escapedSearch, $options: 'i' } },
+        { phone: { $regex: escapedSearch, $options: 'i' } },
+        { clientId: { $regex: escapedSearch, $options: 'i' } },
+        { district: { $regex: escapedSearch, $options: 'i' } },
+        { location: { $regex: escapedSearch, $options: 'i' } },
+        { requirements: { $in: [new RegExp(escapedSearch, 'i')] } },
+        { 'notes.content': { $regex: escapedSearch, $options: 'i' } },
       ];
     }
 
@@ -85,7 +89,9 @@ export async function GET(request: NextRequest) {
 
     // Ensure every client has a valid status object (fall back to default if dangling reference)
     const sanitizedClients = clients.map((c) => {
-      if (!c.status || typeof c.status !== 'object') {
+      const statusObj =
+        c.status && typeof c.status === 'object' && 'name' in c.status ? c.status : null;
+      if (!statusObj) {
         return {
           ...c,
           status: {
@@ -106,9 +112,13 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil(total / limit),
       limit,
     });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error('Fetch clients error:', err);
-    return NextResponse.json({ error: 'Failed to fetch clients' }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Failed to fetch clients';
+    return NextResponse.json(
+      { error: 'Failed to fetch clients', details: message },
+      { status: 500 }
+    );
   }
 }
 
@@ -127,6 +137,7 @@ export async function POST(request: NextRequest) {
       phone,
       date,
       dates,
+      district,
       location,
       requirements,
       packageDetails,
@@ -179,6 +190,7 @@ export async function POST(request: NextRequest) {
       phone: phone?.trim() || undefined,
       date: effectiveDates[0] || date?.trim() || undefined,
       dates: effectiveDates,
+      district: district?.trim() || undefined,
       location: location?.trim() || undefined,
       requirements: Array.isArray(requirements) ? requirements : [],
       packageDetails: packageDetails?.trim() || undefined,

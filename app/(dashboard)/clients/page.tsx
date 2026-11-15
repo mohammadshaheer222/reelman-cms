@@ -23,14 +23,14 @@ export default function ClientsPage() {
     try {
       const params = new URLSearchParams(window.location.search);
       const urlView = params.get('view') as ViewMode | null;
-      if (urlView && ['kanban', 'calendar', 'grid', 'table'].includes(urlView)) {
+      if (urlView && ['kanban', 'calendar', 'grid', 'table', 'map'].includes(urlView)) {
         setViewMode(urlView);
         localStorage.setItem('reelman_clients_view_mode', urlView);
         return;
       }
 
       const saved = localStorage.getItem('reelman_clients_view_mode') as ViewMode | null;
-      if (saved && ['kanban', 'calendar', 'grid', 'table'].includes(saved)) {
+      if (saved && ['kanban', 'calendar', 'grid', 'table', 'map'].includes(saved)) {
         setViewMode(saved);
         return;
       }
@@ -64,14 +64,14 @@ export default function ClientsPage() {
 
   const { statuses, loading: statusesLoading } = useStatuses();
 
-  // Load 150 for Kanban, 30 for grid/list so all clients are visible without excessive paging
-  const limit = viewMode === 'kanban' ? 150 : 30;
+  // Load 150 for Kanban and Map, 30 for grid/list so all clients are visible without excessive paging
+  const limit = viewMode === 'kanban' || viewMode === 'map' ? 150 : 30;
 
   const { clients, total, totalPages, loading: clientsLoading, refetch } = useClients({
     search,
     status: status === 'all' ? undefined : status,
     sort,
-    page: viewMode === 'kanban' ? 1 : page,
+    page: viewMode === 'kanban' || viewMode === 'map' ? 1 : page,
     limit,
     archived: showArchived,
   });
@@ -100,17 +100,17 @@ export default function ClientsPage() {
   return (
     <div className="space-y-5">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-gray-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14171d] p-5 sm:p-6 rounded-2xl border border-gray-100/90 dark:border-neutral-800 shadow-[0_2px_16px_rgba(0,0,0,0.03)] dark:shadow-none">
         <div>
           <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-neutral-500">
               Pipeline Management
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#141414] dark:text-white tracking-tight">
             Clients & Bookings<span className="text-[#dc2626]">.</span>
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-0.5 font-normal">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-neutral-400 mt-0.5 font-normal">
             Manage creator shoots, lead statuses, confirmed proposals, and delivery milestones.
           </p>
         </div>

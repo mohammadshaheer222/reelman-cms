@@ -12,6 +12,8 @@ import {
   ArrowRight,
   IndianRupee,
   RotateCcw,
+  MapPin,
+  Trash2,
 } from 'lucide-react';
 import { Client, Status } from '@/types';
 import { ClientCard } from './ClientCard';
@@ -29,11 +31,13 @@ import {
 import { formatDate, timeAgo } from '@/lib/utils';
 import { openWhatsApp, formatStatusWhatsAppMessage } from '@/lib/whatsapp';
 import { ClientQuickEditModal, EditField } from './ClientQuickEditModal';
+import { DeleteClientModal } from './DeleteClientModal';
 import { KanbanBoard } from './KanbanBoard';
 import { ShootCalendar } from '@/components/calendar/ShootCalendar';
+import { ClientMapTracker } from './ClientMapTracker';
 import { toast } from 'sonner';
 
-export type ViewMode = 'kanban' | 'calendar' | 'grid' | 'table';
+export type ViewMode = 'kanban' | 'calendar' | 'grid' | 'table' | 'map';
 
 interface ClientListProps {
   clients: Client[];
@@ -73,13 +77,21 @@ export function ClientList({
   };
 
   const [overrides, setOverrides] = useState<Record<string, Client>>({});
+  const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [editTarget, setEditTarget] = useState<{ client: Client; field: EditField } | null>(null);
+  const [deleteTargetClient, setDeleteTargetClient] = useState<Client | null>(null);
 
-  const clients = initialClients.map((c) => overrides[c._id] ?? c);
+  const clients = initialClients
+    .filter((c) => !deletedIds.includes(c._id))
+    .map((c) => overrides[c._id] ?? c);
 
   const handleUpdated = (updated: Client) => {
     setOverrides((prev) => ({ ...prev, [updated._id]: updated }));
     onClientUpdated?.(updated);
+  };
+
+  const handleDeleted = (id: string) => {
+    setDeletedIds((prev) => [...prev, id]);
   };
 
   const handleMoveToNew = async (e: React.MouseEvent, client: Client) => {
@@ -107,14 +119,20 @@ export function ClientList({
     }
   };
 
+  const handleDeleteClient = (e: React.MouseEvent, client: Client) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDeleteTargetClient(client);
+  };
+
   const openEdit = (e: React.MouseEvent, client: Client, field: EditField) => {
     e.preventDefault();
     e.stopPropagation();
     setEditTarget({ client: overrides[client._id] ?? client, field });
   };
 
-  // If no clients and NOT in kanban mode, show empty state
-  if (clients.length === 0 && viewMode !== 'kanban') {
+  // If no clients and NOT in kanban, calendar, or map mode, show empty state
+  if (clients.length === 0 && viewMode !== 'kanban' && viewMode !== 'map' && viewMode !== 'calendar') {
     return (
       <EmptyState
         icon={Users}
@@ -136,14 +154,14 @@ export function ClientList({
           </p>
 
           {/* View mode switcher */}
-          <div className="flex items-center bg-gray-100/90 p-1 rounded-2xl border border-gray-200/60 self-start sm:self-auto overflow-x-auto max-w-full modal-scroll">
+          <div className="flex items-center bg-gray-100/90 dark:bg-neutral-900/90 p-1 rounded-2xl border border-gray-200/60 dark:border-neutral-800 self-start sm:self-auto overflow-x-auto max-w-full modal-scroll">
             <button
               type="button"
               onClick={() => setViewMode('kanban')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'kanban'
-                  ? 'bg-white text-[#141414] shadow-xs'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'bg-white dark:bg-[#1a1e27] text-[#141414] dark:text-white shadow-xs'
+                  : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
               }`}
               title="Board View"
             >
@@ -156,12 +174,12 @@ export function ClientList({
               onClick={() => setViewMode('calendar')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'calendar'
-                  ? 'bg-white text-[#141414] shadow-xs'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'bg-white dark:bg-[#1a1e27] text-[#141414] dark:text-white shadow-xs'
+                  : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
               }`}
               title="Shoot Calendar & Conflict Detector"
             >
-              <Calendar className="w-3.5 h-3.5 text-blue-600" />
+              <Calendar className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               <span>Calendar</span>
             </button>
 
@@ -170,8 +188,8 @@ export function ClientList({
               onClick={() => setViewMode('grid')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'grid'
-                  ? 'bg-white text-[#141414] shadow-xs'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'bg-white dark:bg-[#1a1e27] text-[#141414] dark:text-white shadow-xs'
+                  : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
               }`}
               title="Cards View"
             >
@@ -184,19 +202,40 @@ export function ClientList({
               onClick={() => setViewMode('table')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 viewMode === 'table'
-                  ? 'bg-white text-[#141414] shadow-xs'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'bg-white dark:bg-[#1a1e27] text-[#141414] dark:text-white shadow-xs'
+                  : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
               }`}
               title="List View"
             >
               <List className="w-3.5 h-3.5" />
               <span>List</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => setViewMode('map')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                viewMode === 'map'
+                  ? 'bg-white dark:bg-[#1a1e27] text-[#141414] dark:text-white shadow-xs'
+                  : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
+              title="Client Geo Tracking Map (Default: Kerala Map)"
+            >
+              <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Map</span>
+            </button>
           </div>
         </div>
 
         {/* View Content */}
-        {viewMode === 'calendar' ? (
+        {viewMode === 'map' ? (
+          <ClientMapTracker
+            clients={clients}
+            statuses={statuses}
+            onClientUpdated={handleUpdated}
+            onAddClient={onAddClient}
+          />
+        ) : viewMode === 'calendar' ? (
           <ShootCalendar />
         ) : viewMode === 'kanban' ? (
           /* Kanban Drag & Drop Pipeline View */
@@ -216,15 +255,16 @@ export function ClientList({
                 client={overrides[client._id] ?? client}
                 statuses={statuses}
                 onUpdated={handleUpdated}
+                onDeleted={handleDeleted}
               />
             ))}
           </div>
         ) : (
           /* Table View */
-          <div className="bg-white rounded-2xl border border-gray-100/90 overflow-x-auto shadow-[0_2px_16px_rgba(0,0,0,0.03)]">
+          <div className="bg-white dark:bg-[#14171d] rounded-2xl border border-gray-100/90 dark:border-neutral-800 overflow-x-auto shadow-[0_2px_16px_rgba(0,0,0,0.03)] dark:shadow-none">
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-50/70 border-b border-gray-100">
+                <TableRow className="bg-gray-50/70 dark:bg-neutral-900/60 border-b border-gray-100 dark:border-neutral-800">
                   <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Client</TableHead>
                   <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Phone</TableHead>
                   <TableHead className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
@@ -324,9 +364,9 @@ export function ClientList({
                                   +{c.dates.length - 1} more days
                                 </span>
                               )}
-                              {c.location && (
-                                <span className="block text-[10px] text-gray-400 mt-0.5 truncate max-w-[140px]">
-                                  📍 {c.location}
+                              {(c.district || c.location) && (
+                                <span className="block text-[10px] text-gray-500 mt-0.5 truncate max-w-[150px]">
+                                  📍 {c.district ? `${c.district}${c.location ? ` • ${c.location}` : ''}` : c.location}
                                 </span>
                               )}
                             </div>
@@ -422,6 +462,14 @@ export function ClientList({
                               <span>To New</span>
                             </button>
                           )}
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteClient(e, c)}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                            title="Delete client"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                           <Link
                             href={`/clients/${c._id}`}
                             className="inline-flex items-center justify-center w-8 h-8 rounded-xl text-gray-400 hover:text-[#dc2626] hover:bg-gray-100 transition-colors"
@@ -439,8 +487,8 @@ export function ClientList({
           </div>
         )}
 
-        {/* Pagination (only in grid and table view, kanban and calendar show full dataset) */}
-        {viewMode !== 'kanban' && viewMode !== 'calendar' && totalPages > 1 && (
+        {/* Pagination (only in grid and table view, kanban, calendar and map show full dataset) */}
+        {viewMode !== 'kanban' && viewMode !== 'calendar' && viewMode !== 'map' && totalPages > 1 && (
           <div className="flex items-center justify-between pt-4">
             <Button
               variant="outline"
@@ -476,6 +524,17 @@ export function ClientList({
           onSuccess={handleUpdated}
         />
       )}
+
+      {/* Delete Client Confirmation Modal */}
+      <DeleteClientModal
+        client={deleteTargetClient}
+        open={deleteTargetClient !== null}
+        onOpenChange={(open) => !open && setDeleteTargetClient(null)}
+        onDeleted={(deletedId) => {
+          handleDeleted(deletedId);
+          window.dispatchEvent(new CustomEvent('client-updated'));
+        }}
+      />
     </>
   );
 }

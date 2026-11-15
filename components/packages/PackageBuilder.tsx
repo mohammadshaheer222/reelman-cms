@@ -271,26 +271,26 @@ export function PackageBuilder({
   return (
     <div className="space-y-4">
       {/* Top Action Bar */}
-      <div className="no-print bg-white p-3 sm:p-4 rounded-2xl border border-gray-100 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="no-print bg-white dark:bg-[#14171d] p-3 sm:p-4 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">
+            <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-tight">
               Package & Proposal Studio
             </h1>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-neutral-400">
               Click any text to edit directly • Luxury 8-page PDF
             </p>
           </div>
 
           {/* Mobile switcher (Canvas vs Settings) */}
-          <div className="flex lg:hidden bg-gray-100 p-0.5 rounded-lg text-xs">
+          <div className="flex lg:hidden bg-gray-100 dark:bg-neutral-800 p-0.5 rounded-lg text-xs">
             <button
               type="button"
               onClick={() => setMobileTab('canvas')}
               className={`px-3 py-1 rounded-md font-medium transition-colors ${
                 mobileTab === 'canvas'
-                  ? 'bg-white text-gray-900 shadow-xs'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-white shadow-xs'
+                  : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               Canvas
@@ -300,8 +300,8 @@ export function PackageBuilder({
               onClick={() => setMobileTab('settings')}
               className={`px-3 py-1 rounded-md font-medium transition-colors ${
                 mobileTab === 'settings'
-                  ? 'bg-white text-gray-900 shadow-xs'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-white shadow-xs'
+                  : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               Settings
@@ -324,7 +324,7 @@ export function PackageBuilder({
             variant="outline"
             size="sm"
             onClick={handlePrintPDF}
-            className="text-xs h-8 px-2.5 bg-gray-50 hover:bg-gray-100 text-gray-800"
+            className="text-xs h-8 px-2.5 bg-gray-50 dark:bg-neutral-800 hover:bg-gray-100 dark:hover:bg-neutral-700 text-gray-800 dark:text-neutral-200"
           >
             <Printer className="w-3.5 h-3.5 mr-1.5" />
             Download PDF
@@ -346,12 +346,12 @@ export function PackageBuilder({
       <div className="no-print grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Left: Clean & Simple Settings (Hidden on mobile when on canvas tab) */}
         <div
-          className={`no-print lg:col-span-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-xs space-y-4 max-h-[calc(100vh-140px)] overflow-y-auto ${
+          className={`no-print lg:col-span-4 bg-white dark:bg-[#14171d] p-4 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs space-y-4 max-h-[calc(100vh-140px)] overflow-y-auto ${
             mobileTab === 'settings' ? 'block' : 'hidden lg:block'
           }`}
         >
           <Tabs defaultValue="cover" className="space-y-4">
-            <TabsList className="grid grid-cols-3 w-full h-8 bg-gray-100 p-0.5 rounded-lg text-xs">
+            <TabsList className="grid grid-cols-3 w-full h-8 bg-gray-100 dark:bg-neutral-800 p-0.5 rounded-lg text-xs">
               <TabsTrigger value="cover">Cover & $</TabsTrigger>
               <TabsTrigger value="fonts">Fonts</TabsTrigger>
               <TabsTrigger value="client">Client</TabsTrigger>
@@ -669,17 +669,17 @@ export function PackageBuilder({
         >
           {/* Page Navigator bar */}
           {!viewAll && (
-            <div className="no-print flex items-center justify-between w-full max-w-[520px] bg-white px-3 py-1.5 rounded-xl border border-gray-100 shadow-xs text-xs">
+            <div className="no-print flex items-center justify-between w-full max-w-[520px] bg-white dark:bg-[#14171d] px-3 py-1.5 rounded-xl border border-gray-100 dark:border-neutral-800 shadow-xs text-xs">
               <button
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
                 disabled={currentPage === 0}
-                className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 flex items-center gap-1 font-medium text-gray-700"
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800 disabled:opacity-30 flex items-center gap-1 font-medium text-gray-700 dark:text-neutral-300"
               >
                 <ChevronLeft className="w-4 h-4" /> Previous
               </button>
 
-              <span className="font-semibold text-gray-700">
+              <span className="font-semibold text-gray-700 dark:text-neutral-300">
                 Page {Math.min(currentPage, (pkg.pagesList?.length || 8) - 1) + 1} of{' '}
                 {pkg.pagesList?.length || 8}
               </span>

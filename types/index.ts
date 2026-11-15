@@ -55,6 +55,7 @@ export interface Client {
   phone?: string;
   date?: string;
   dates?: string[];
+  district?: string;
   location?: string;
   requirements?: string[];
   packageDetails?: string;

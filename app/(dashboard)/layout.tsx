@@ -23,6 +23,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     }
     const knownSections = [
       '/clients',
+      '/map',
       '/calendar',
       '/notepad',
       '/packages',
@@ -48,14 +49,14 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   if (loading && !user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#fafbfc]">
+      <div className="flex h-screen items-center justify-center bg-[#fafbfc] dark:bg-[#0c0d0e]">
         <div className="flex flex-col items-center gap-3">
           <img
             src="/logo.png"
             alt="Reelman Flow Logo"
-            className="w-12 h-12 rounded-2xl object-cover shadow-md border border-gray-100 animate-pulse"
+            className="w-12 h-12 rounded-2xl object-cover shadow-md border border-gray-100 dark:border-neutral-800 animate-pulse"
           />
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Loading Reelman Flow...</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-neutral-500">Loading Reelman Flow...</p>
         </div>
       </div>
     );
@@ -68,21 +69,21 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   if (user && isCurrentPathBlocked && hasRestrictedNav) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#fafbfc]">
+      <div className="flex h-screen items-center justify-center bg-[#fafbfc] dark:bg-[#0c0d0e]">
         <div className="flex flex-col items-center gap-3">
           <img
             src="/logo.png"
             alt="Reelman Flow Logo"
-            className="w-12 h-12 rounded-2xl object-cover shadow-md border border-gray-100 animate-pulse"
+            className="w-12 h-12 rounded-2xl object-cover shadow-md border border-gray-100 dark:border-neutral-800 animate-pulse"
           />
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Redirecting to permitted section...</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-neutral-500">Redirecting to permitted section...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#fafbfc]">
+    <div className="flex h-screen overflow-hidden bg-[#fafbfc] dark:bg-[#0c0d0e] text-[#141414] dark:text-[#f3f4f6]">
       {/* Sidebar (Desktop and Mobile Drawer) */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 

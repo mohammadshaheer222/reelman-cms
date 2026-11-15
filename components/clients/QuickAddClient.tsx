@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Status, Requirement, CalendarShootEvent } from '@/types';
+import { ALL_DISTRICT_OPTIONS } from '@/lib/geoTracking';
 import {
   AlertCircle,
   AlertTriangle,
@@ -82,6 +83,7 @@ export function QuickAddClient({
 }: QuickAddClientProps) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [district, setDistrict] = useState('');
   const [location, setLocation] = useState('');
   const [dates, setDates] = useState<string[]>(['']);
 
@@ -324,6 +326,7 @@ export function QuickAddClient({
         body: JSON.stringify({
           name: name.trim() || undefined,
           phone: phone.trim() || undefined,
+          district: district.trim() || undefined,
           location: location.trim() || undefined,
           date: validDates[0] || undefined,
           dates: validDates,
@@ -347,6 +350,7 @@ export function QuickAddClient({
       // Reset form
       setName('');
       setPhone('');
+      setDistrict('');
       setLocation('');
       setDates(['']);
       setSelectedRequirements([]);
@@ -518,18 +522,48 @@ export function QuickAddClient({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="clientLocation" className="text-xs font-semibold text-gray-700 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-gray-400" />
-                  <span>Shoot Location / Venue</span>
+                <Label htmlFor="clientDistrict" className="text-xs font-semibold text-gray-700 flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-[#dc2626]" />
+                  <span>District / Region</span>
                 </Label>
-                <Input
-                  id="clientLocation"
-                  placeholder="e.g. Bangalore, Taj West End"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="h-9.5 text-sm"
-                />
+                <select
+                  id="clientDistrict"
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="w-full h-9.5 text-xs bg-white rounded-xl border border-gray-200 px-3 text-gray-800 focus:outline-hidden focus:border-[#dc2626] transition-colors"
+                >
+                  <option value="">Select District (Kerala & India)...</option>
+                  <optgroup label="🌴 Kerala Districts">
+                    {ALL_DISTRICT_OPTIONS.filter((d) => d.region === 'Kerala').map((d) => (
+                      <option key={d.value} value={d.value}>
+                        {d.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="🇮🇳 Other States & Destinations">
+                    {ALL_DISTRICT_OPTIONS.filter((d) => d.region !== 'Kerala').map((d) => (
+                      <option key={d.value} value={d.value}>
+                        {d.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                </select>
               </div>
+            </div>
+
+            {/* Manual Location / Specific Venue */}
+            <div className="space-y-1.5">
+              <Label htmlFor="clientLocation" className="text-xs font-semibold text-gray-700 flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-gray-400" />
+                <span>Manual Location / Specific Venue</span>
+              </Label>
+              <Input
+                id="clientLocation"
+                placeholder="e.g. Grand Hyatt Bolgatty, Lulu Convention Centre, Kovalam Beach"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="h-9.5 text-sm"
+              />
             </div>
 
             {/* Row 3: Event Date & Agreed Price */}

@@ -18,16 +18,16 @@ export function StatsCard({
   color = 'text-[#141414] bg-gray-100',
 }: StatsCardProps) {
   return (
-    <Card className="p-5 sm:p-6 flex items-start justify-between bg-white rounded-2xl border border-gray-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-gray-200 transition-all duration-300 group">
+    <Card className="p-5 sm:p-6 flex items-start justify-between bg-white dark:bg-[#14171d] rounded-2xl border border-gray-100/90 dark:border-neutral-800 shadow-[0_2px_16px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-gray-200 dark:hover:border-neutral-700 transition-all duration-300 group">
       <div className="flex-1 min-w-0 pr-2">
-        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.18em]">
+        <p className="text-[11px] font-bold text-gray-400 dark:text-neutral-400 uppercase tracking-[0.18em]">
           {title}
         </p>
-        <p className="text-2xl sm:text-3xl font-extrabold text-[#141414] mt-2 tracking-tight group-hover:text-black transition-colors">
+        <p className="text-2xl sm:text-3xl font-extrabold text-[#141414] dark:text-white mt-2 tracking-tight group-hover:text-black dark:group-hover:text-white transition-colors">
           {value}
         </p>
         {description && (
-          <p className="text-xs text-gray-400 mt-1.5 font-normal truncate leading-normal">
+          <p className="text-xs text-gray-400 dark:text-neutral-500 mt-1.5 font-normal truncate leading-normal">
             {description}
           </p>
         )}

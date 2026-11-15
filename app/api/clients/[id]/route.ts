@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import Client from '@/models/Client';
 import Status from '@/models/Status';
+import User from '@/models/User';
 import Activity from '@/models/Activity';
 import { requireAuth } from '@/lib/apiMiddleware';
 
@@ -43,6 +44,7 @@ export async function PATCH(
       phone,
       date,
       dates,
+      district,
       location,
       requirements,
       packageDetails,
@@ -62,6 +64,7 @@ export async function PATCH(
     if (phone !== undefined) client.phone = phone;
     if (date !== undefined) client.date = date;
     if (dates !== undefined) client.dates = dates;
+    if (district !== undefined) client.district = district;
     if (location !== undefined) client.location = location;
     if (requirements !== undefined) client.requirements = requirements;
     if (packageDetails !== undefined) client.packageDetails = packageDetails;
@@ -127,6 +130,21 @@ export async function DELETE(
   const { id } = await params;
   try {
     await connectDB();
+    const { searchParams } = new URL(request.url);
+    const permanent = searchParams.get('permanent') === 'true';
+
+    if (permanent) {
+      const client = await Client.findByIdAndDelete(id);
+      if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 });
+      await Activity.create({
+        clientId: client._id,
+        userId: user!.userId,
+        action: 'client_deleted',
+        description: `Client "${client.name || 'Client'}" permanently deleted`,
+      });
+      return NextResponse.json({ message: 'Client permanently deleted successfully' });
+    }
+
     const client = await Client.findByIdAndUpdate(id, { isArchived: true }, { new: true });
     if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 });
     await Activity.create({
@@ -137,7 +155,7 @@ export async function DELETE(
     });
     return NextResponse.json({ message: 'Client archived successfully' });
   } catch {
-    return NextResponse.json({ error: 'Failed to archive client' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to delete client' }, { status: 500 });
   }
 }
 

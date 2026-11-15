@@ -160,18 +160,18 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
   return (
     <div className="space-y-4">
       {/* Top Banner: Shoot Days Counter & Overall Progress Meter */}
-      <div className="bg-gradient-to-br from-white to-gray-50/80 p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-xs space-y-3">
+      <div className="bg-gradient-to-br from-white to-gray-50/80 dark:from-[#14171d] dark:to-[#101216] p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-xs space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
               <span className="p-1.5 rounded-lg bg-[#2C8567]/10 text-[#2C8567]">
                 <Clock className="w-4 h-4" />
               </span>
-              <h3 className="text-base font-bold text-gray-900">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">
                 Post-Production Pipeline
               </h3>
             </div>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-gray-500 dark:text-neutral-400 mt-0.5">
               Deliverable milestones and turnaround tracking for raw files, teasers, films, and albums.
             </p>
           </div>
@@ -180,29 +180,29 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
           <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap w-full sm:w-auto justify-between sm:justify-end">
             {shootDate ? (
               isShootPast ? (
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-50 text-purple-900 border border-purple-200/80 text-xs font-semibold shadow-2xs">
-                  <Calendar className="w-3.5 h-3.5 text-purple-600" />
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-900 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800 text-xs font-semibold shadow-2xs">
+                  <Calendar className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                   <span>
                     <strong className="font-mono text-sm">{daysElapsed}</strong>{' '}
                     {daysElapsed === 1 ? 'day' : 'days'} elapsed
                   </span>
                 </div>
               ) : isShootToday ? (
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs font-bold animate-pulse">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold animate-pulse">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Shoot is Today! 📸</span>
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 text-blue-900 border border-blue-200 text-xs font-semibold">
-                  <Calendar className="w-3.5 h-3.5 text-blue-600" />
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-semibold">
+                  <Calendar className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   <span>In {daysUntilShoot} days</span>
                 </div>
               )
             ) : (
-              <span className="text-xs text-gray-400 italic">No shoot date set</span>
+              <span className="text-xs text-gray-400 dark:text-neutral-500 italic">No shoot date set</span>
             )}
 
-            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-gray-100 text-gray-700 text-xs font-semibold">
+            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 text-xs font-semibold">
               <span>{completedCount}/{totalCount} Done</span>
               <span className="font-mono">({progressPercent}%)</span>
             </div>
@@ -211,13 +211,13 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
 
         {/* Visual Progress Bar */}
         <div className="space-y-1">
-          <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+          <div className="w-full bg-gray-200 dark:bg-neutral-800 rounded-full h-2.5 overflow-hidden">
             <div
               className="bg-[#2C8567] h-2.5 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <div className="hidden sm:flex justify-between text-[11px] text-gray-500 font-medium">
+          <div className="hidden sm:flex justify-between text-[11px] text-gray-500 dark:text-neutral-400 font-medium">
             <span>Raw Capture</span>
             <span>72h Teaser</span>
             <span>Gallery</span>
@@ -256,12 +256,12 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
               key={milestone.id}
               className={`p-3.5 sm:p-4 rounded-xl border transition-all ${
                 isCompleted
-                  ? 'bg-emerald-50/30 border-emerald-200/80'
+                  ? 'bg-emerald-50/30 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/60'
                   : isInProgress
-                  ? 'bg-blue-50/30 border-blue-200/80 shadow-2xs'
+                  ? 'bg-blue-50/30 dark:bg-blue-950/20 border-blue-200/80 dark:border-blue-800/60 shadow-2xs'
                   : isOverdue
-                  ? 'bg-red-50/25 border-red-200/80'
-                  : 'bg-white border-gray-100 hover:border-gray-200'
+                  ? 'bg-red-50/25 dark:bg-red-950/20 border-red-200/80 dark:border-red-800/60'
+                  : 'bg-white dark:bg-[#14171d] border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:hover:border-neutral-700'
               }`}
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -270,10 +270,10 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                   <div
                     className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
                       isCompleted
-                        ? 'bg-emerald-100/70 border-emerald-200 text-emerald-800'
+                        ? 'bg-emerald-100/70 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
                         : isInProgress
-                        ? 'bg-blue-100/70 border-blue-200 text-blue-800'
-                        : 'bg-gray-100 border-gray-200/80 text-gray-600'
+                        ? 'bg-blue-100/70 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300'
+                        : 'bg-gray-100 dark:bg-neutral-800 border-gray-200/80 dark:border-neutral-700 text-gray-600 dark:text-neutral-400'
                     }`}
                   >
                     {isCompleted ? <CheckCircle2 className="w-5 h-5 text-[#2C8567]" /> : icon}
@@ -283,7 +283,7 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                     <div className="flex items-center gap-2 flex-wrap">
                       <h4
                         className={`text-sm font-bold truncate ${
-                          isCompleted ? 'text-emerald-950 line-through opacity-85' : 'text-gray-900'
+                          isCompleted ? 'text-emerald-950 dark:text-emerald-300 line-through opacity-85' : 'text-gray-900 dark:text-white'
                         }`}
                       >
                         {milestone.title}
@@ -294,12 +294,12 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                             isCompleted
-                              ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                              ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
                               : isOverdue
-                              ? 'bg-red-100 text-red-800 border-red-300 animate-pulse'
+                              ? 'bg-red-100 dark:bg-red-950/50 text-red-800 dark:text-red-300 border-red-300 dark:border-red-800 animate-pulse'
                               : isInProgress
-                              ? 'bg-blue-100 text-blue-800 border-blue-300'
-                              : 'bg-gray-100 text-gray-600 border-gray-200'
+                              ? 'bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800'
+                              : 'bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-neutral-300 border-gray-200 dark:border-neutral-700'
                           }`}
                         >
                           {isCompleted ? 'Delivered ✅' : targetLabel}
@@ -308,7 +308,7 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                     </div>
 
                     {milestone.description && (
-                      <p className="text-xs text-gray-500 mt-0.5 truncate">
+                      <p className="text-xs text-gray-500 dark:text-neutral-400 mt-0.5 truncate">
                         {milestone.description}
                       </p>
                     )}
@@ -331,17 +331,17 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                 </div>
 
                 {/* Actions & Status Controls */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto pt-2.5 sm:pt-0 border-t border-gray-100 sm:border-0 min-w-0">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto pt-2.5 sm:pt-0 border-t border-gray-100 dark:border-neutral-800 sm:border-0 min-w-0">
                   {/* Status Toggle Buttons (Full-width grid on mobile, inline on desktop) */}
                   {!readOnly && (
-                    <div className="grid grid-cols-3 sm:flex p-0.5 rounded-lg bg-gray-100 border border-gray-200/80 text-xs w-full sm:w-auto shrink-0">
+                    <div className="grid grid-cols-3 sm:flex p-0.5 rounded-lg bg-gray-100 dark:bg-neutral-800 border border-gray-200/80 dark:border-neutral-700 text-xs w-full sm:w-auto shrink-0">
                       <button
                         type="button"
                         onClick={() => handleStatusChange(milestone.id, 'pending')}
                         className={`py-1.5 px-2 rounded-md transition-all font-medium text-center truncate ${
                           milestone.status === 'pending'
-                            ? 'bg-white text-gray-900 shadow-2xs font-semibold'
-                            : 'text-gray-500 hover:text-gray-900'
+                            ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-white shadow-2xs font-semibold'
+                            : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
                         }`}
                       >
                         Pending
@@ -352,7 +352,7 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                         className={`py-1.5 px-2 rounded-md transition-all font-medium text-center truncate ${
                           milestone.status === 'in-progress'
                             ? 'bg-blue-600 text-white shadow-2xs font-semibold'
-                            : 'text-gray-500 hover:text-gray-900'
+                            : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
                         }`}
                       >
                         In Progress
@@ -363,7 +363,7 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                         className={`py-1.5 px-2 rounded-md transition-all font-medium text-center truncate ${
                           milestone.status === 'completed'
                             ? 'bg-[#2C8567] text-white shadow-2xs font-semibold'
-                            : 'text-gray-500 hover:text-gray-900'
+                            : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
                         }`}
                       >
                         Done ✅
@@ -383,7 +383,7 @@ export function DeliverableTracker({ client, onUpdate, readOnly = false }: Deliv
                           setEditingLinkId(milestone.id);
                           setLinkInput(milestone.link || '');
                         }}
-                        className="h-8 text-xs text-gray-600 hover:text-gray-900 gap-1 px-2.5 bg-gray-50 hover:bg-gray-100 sm:bg-transparent flex-1 sm:flex-initial justify-center cursor-pointer"
+                        className="h-8 text-xs text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white gap-1 px-2.5 bg-gray-50 dark:bg-neutral-800 hover:bg-gray-100 dark:hover:bg-neutral-700 sm:bg-transparent flex-1 sm:flex-initial justify-center cursor-pointer"
                         title="Attach Drive/Gallery link for couple"
                       >
                         <LinkIcon className="w-3 h-3 text-gray-500 shrink-0" />

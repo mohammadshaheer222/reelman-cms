@@ -36,7 +36,7 @@ const DropdownMenuSubContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.SubContent
     ref={ref}
-    className={cn('z-50 min-w-[8rem] overflow-hidden rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl dropdown-content', className)}
+    className={cn('z-50 min-w-[8rem] overflow-hidden rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-[#14171d] text-gray-900 dark:text-neutral-100 p-1.5 shadow-xl dropdown-content', className)}
     {...props}
   />
 ));
@@ -51,7 +51,7 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        'z-50 min-w-[8rem] overflow-hidden rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl',
+        'z-50 min-w-[8rem] overflow-hidden rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-[#14171d] text-gray-900 dark:text-neutral-100 p-1.5 shadow-xl',
         'dropdown-content',
         className
       )}
@@ -69,7 +69,7 @@ const DropdownMenuItem = React.forwardRef<
     ref={ref}
     className={cn(
       'relative flex cursor-pointer select-none items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none transition-colors',
-      'focus:bg-gray-50 text-gray-700 focus:text-gray-900',
+      'focus:bg-gray-50 dark:focus:bg-neutral-800 text-gray-700 dark:text-neutral-300 focus:text-gray-900 dark:focus:text-white',
       'data-[disabled]:pointer-events-none data-[disabled]:opacity-40',
       inset && 'pl-8',
       className
@@ -86,7 +86,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
   <DropdownMenuPrimitive.CheckboxItem
     ref={ref}
     className={cn(
-      'relative flex cursor-default select-none items-center rounded-lg py-2 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-gray-50 data-[disabled]:pointer-events-none data-[disabled]:opacity-40',
+      'relative flex cursor-default select-none items-center rounded-lg py-2 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-gray-50 dark:focus:bg-neutral-800 text-gray-700 dark:text-neutral-300 data-[disabled]:pointer-events-none data-[disabled]:opacity-40',
       className
     )}
     checked={checked}

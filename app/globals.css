@@ -1,6 +1,154 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Alex+Brush&family=Allura&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Great+Vibes&family=Lato:ital,wght@0,300;0,400;0,700;1,300&family=Marcellus&family=Montserrat:wght@200;300;400;500;600&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Prata&family=Raleway:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
+/* ─────────────────────────────────────────────
+   Comprehensive Dark Mode Baseline System
+   ───────────────────────────────────────────── */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: #0c0d0e !important;
+  color: #f3f4f6;
+}
+
+/* Surfaces: Map, Dashboard, Cards, and Containers */
+html.dark [class*="bg-white"]:not([class*="dark:bg-"]),
+html.dark [class*="bg-white/"]:not([class*="dark:bg-"]),
+.dark .bg-white {
+  background-color: #14171d !important;
+}
+
+/* Gradients in dark mode */
+html.dark [class*="from-white"] {
+  --tw-gradient-from: #14171d var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(20 23 29 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark [class*="via-white"] {
+  --tw-gradient-to: rgb(20 23 29 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #14171d var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+
+html.dark [class*="to-white"] {
+  --tw-gradient-to: #14171d var(--tw-gradient-to-position) !important;
+}
+
+html.dark [class*="bg-gray-50"]:not([class*="dark:bg-"]) {
+  background-color: #181c24 !important;
+}
+
+html.dark [class*="bg-gray-100"]:not([class*="dark:bg-"]) {
+  background-color: #1e232d !important;
+}
+
+html.dark [class*="bg-slate-50"]:not([class*="dark:bg-"]),
+html.dark [class*="bg-slate-100"]:not([class*="dark:bg-"]) {
+  background-color: #181c24 !important;
+}
+
+html.dark [class*="bg-[#fafbfc]"]:not([class*="dark:bg-"]),
+html.dark [class*="bg-[#f8f9fa]"]:not([class*="dark:bg-"]),
+html.dark [class*="bg-[#f8fafc]"]:not([class*="dark:bg-"]) {
+  background-color: #0c0d0e !important;
+}
+
+/* Text in dark mode */
+html.dark [class*="text-[#141414]"]:not([class*="dark:text-"]) {
+  color: #f8fafc !important;
+}
+
+html.dark [class*="text-gray-900"]:not([class*="dark:text-"]) {
+  color: #f8fafc !important;
+}
+
+html.dark [class*="text-gray-800"]:not([class*="dark:text-"]) {
+  color: #e2e8f0 !important;
+}
+
+html.dark [class*="text-gray-700"]:not([class*="dark:text-"]) {
+  color: #cbd5e1 !important;
+}
+
+html.dark [class*="text-gray-600"]:not([class*="dark:text-"]) {
+  color: #94a3b8 !important;
+}
+
+html.dark [class*="text-gray-500"]:not([class*="dark:text-"]) {
+  color: #7b8b9f !important;
+}
+
+html.dark [class*="text-gray-400"]:not([class*="dark:text-"]) {
+  color: #64748b !important;
+}
+
+/* Borders in dark mode */
+html.dark [class*="border-gray-100"]:not([class*="dark:border-"]),
+html.dark [class*="border-gray-200"]:not([class*="dark:border-"]) {
+  border-color: #262c37 !important;
+}
+
+/* Hover states */
+html.dark [class*="hover:bg-gray-50"]:hover:not([class*="dark:hover:bg-"]),
+html.dark [class*="hover:bg-gray-100"]:hover:not([class*="dark:hover:bg-"]) {
+  background-color: #232935 !important;
+}
+
+html.dark [class*="hover:text-[#141414]"]:hover:not([class*="dark:hover:text-"]),
+html.dark [class*="hover:text-gray-900"]:hover:not([class*="dark:hover:text-"]) {
+  color: #ffffff !important;
+}
+
+/* Form inputs & controls in dark */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea {
+  background-color: #101318 !important;
+  border-color: #262c37 !important;
+  color: #f8fafc !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #55657a !important;
+}
+
+/* Modals & Dialogs */
+.dark [role="dialog"],
+.dark .modal-content {
+  background-color: #14171d !important;
+  border-color: #262c37 !important;
+  color: #f8fafc !important;
+}
+
+/* Leaflet map dark popups */
+.dark .leaflet-popup-content-wrapper {
+  background: #14171d !important;
+  color: #f8fafc !important;
+  border: 1px solid #262c37 !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+}
+
+.dark .leaflet-popup-tip {
+  background: #14171d !important;
+}
+
+.dark * {
+  scrollbar-color: #334155 #0c0d0e;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
 /* ─────────────────────────────────────────────
    Modal / Dialog animation keyframes
    ───────────────────────────────────────────── */

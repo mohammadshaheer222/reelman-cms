@@ -1,5 +1,15 @@
 import mongoose from 'mongoose';
 
+// Ensure all Mongoose models are registered for populate references
+import '@/models/User';
+import '@/models/Status';
+import '@/models/Client';
+import '@/models/Activity';
+import '@/models/Package';
+import '@/models/Payment';
+import '@/models/Project';
+import '@/models/Requirement';
+
 const MONGODB_URI = process.env.MONGODB_URI!;
 
 if (!MONGODB_URI) {

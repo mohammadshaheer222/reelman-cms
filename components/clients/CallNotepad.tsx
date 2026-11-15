@@ -95,22 +95,22 @@ export function CallNotepad({
 
   return (
     <div
-      className={`w-full transition-all bg-white rounded-2xl border border-gray-200/90 shadow-sm overflow-hidden flex flex-col ${
+      className={`w-full transition-all bg-white dark:bg-[#14171d] rounded-2xl border border-gray-200/90 dark:border-neutral-800 shadow-sm overflow-hidden flex flex-col ${
         isInline ? 'min-h-[520px]' : 'max-w-3xl mx-auto min-h-[500px]'
       }`}
     >
       {/* Notepad Toolbar Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3.5 border-b border-gray-100 bg-gray-50/60 shrink-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3.5 border-b border-gray-100 dark:border-neutral-800 bg-gray-50/60 dark:bg-[#111317]/80 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#141414] text-white flex items-center justify-center shadow-2xs">
+          <div className="w-8 h-8 rounded-xl bg-[#141414] dark:bg-neutral-800 text-white flex items-center justify-center shadow-2xs">
             <StickyNote className="w-4 h-4 text-[#dc2626]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-gray-900 text-sm tracking-tight">
+              <h3 className="font-bold text-gray-900 dark:text-white text-sm tracking-tight">
                 Notepad
               </h3>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-850">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 {lastSaved}
               </span>
@@ -126,7 +126,7 @@ export function CallNotepad({
             size="sm"
             onClick={handleCopy}
             disabled={!content.trim()}
-            className="h-8 px-2.5 text-xs font-semibold gap-1.5 border-gray-200 text-gray-700 hover:bg-white hover:text-gray-900 shadow-2xs"
+            className="h-8 px-2.5 text-xs font-semibold gap-1.5 border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-neutral-300 hover:bg-white dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-white shadow-2xs"
             title="Copy all text to clipboard"
           >
             {copied ? (
@@ -148,7 +148,7 @@ export function CallNotepad({
             size="sm"
             onClick={handleDownload}
             disabled={!content.trim()}
-            className="h-8 px-2.5 text-xs font-semibold gap-1.5 border-gray-200 text-gray-700 hover:bg-white hover:text-gray-900 shadow-2xs"
+            className="h-8 px-2.5 text-xs font-semibold gap-1.5 border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-neutral-300 hover:bg-white dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-white shadow-2xs"
             title="Download notes as .txt"
           >
             <Download className="w-3.5 h-3.5 text-gray-500" />
@@ -161,7 +161,7 @@ export function CallNotepad({
             size="sm"
             onClick={handleClear}
             disabled={!content.trim()}
-            className="h-8 px-2.5 text-xs font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 border-gray-200 shadow-2xs"
+            className="h-8 px-2.5 text-xs font-medium text-gray-500 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 border-gray-200 dark:border-neutral-700 shadow-2xs"
             title="Clear notepad"
           >
             <RotateCcw className="w-3.5 h-3.5 mr-1" />
@@ -171,13 +171,13 @@ export function CallNotepad({
       </div>
 
       {/* Pure Notepad Text Area (No input fields!) */}
-      <div className="flex-1 relative p-4 sm:p-6 flex flex-col min-h-[420px] bg-white">
+      <div className="flex-1 relative p-4 sm:p-6 flex flex-col min-h-[420px] bg-white dark:bg-[#14171d]">
         <textarea
           ref={textareaRef}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Start typing rough notes, client discussion points, shoot requirements, phone call takeaways, pricing ideas..."
-          className="w-full flex-1 min-h-[380px] p-0 border-0 bg-transparent font-sans text-sm sm:text-base text-gray-800 leading-relaxed placeholder:text-gray-400 focus:outline-none resize-none modal-scroll"
+          className="w-full flex-1 min-h-[380px] p-0 border-0 bg-transparent font-sans text-sm sm:text-base text-gray-800 dark:text-neutral-100 leading-relaxed placeholder:text-gray-400 dark:placeholder:text-neutral-600 focus:outline-none resize-none modal-scroll"
           style={{ lineHeight: '1.75' }}
         />
       </div>
