@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import Client from '@/models/Client';
-import User from '@/models/User';
 import Activity from '@/models/Activity';
 import { requireAuth } from '@/lib/apiMiddleware';
+import { isValidObjectId, handleApiError } from '@/lib/apiError';
 
 export async function POST(
   request: NextRequest,
@@ -12,19 +12,34 @@ export async function POST(
 ) {
   const { error, user } = await requireAuth(request);
   if (error) return error;
+
   const { id } = await params;
+  if (!isValidObjectId(id)) {
+    return NextResponse.json({ error: 'Invalid client ID format' }, { status: 400 });
+  }
+
   try {
     await connectDB();
-    const { content } = await request.json();
-    if (!content?.trim()) {
+    const body = await request.json();
+    const content = typeof body.content === 'string' ? body.content.trim() : '';
+
+    if (!content) {
       return NextResponse.json({ error: 'Note content is required' }, { status: 400 });
     }
+
+    if (content.length > 5000) {
+      return NextResponse.json(
+        { error: 'Note exceeds maximum permitted length (5000 characters)' },
+        { status: 400 }
+      );
+    }
+
     const client = await Client.findById(id);
     if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 });
 
     client.notes.push({
       _id: new mongoose.Types.ObjectId(),
-      content: content.trim(),
+      content,
       createdBy: new mongoose.Types.ObjectId(user!.userId),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -40,9 +55,7 @@ export async function POST(
 
     const updated = await Client.findById(id).populate('notes.createdBy', 'name');
     return NextResponse.json({ data: updated?.notes }, { status: 201 });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: 'Failed to add note' }, { status: 500 });
+  } catch (err: unknown) {
+    return handleApiError(err, 'Failed to add note');
   }
 }
-

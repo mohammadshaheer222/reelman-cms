@@ -20,13 +20,19 @@ export function useDashboard() {
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setStats(statsData.data || statsData);
+      } else {
+        const errJson = await statsRes.json().catch(() => null);
+        console.warn('Dashboard stats error:', errJson?.error || statsRes.statusText);
       }
+
       if (clientsRes.ok) {
         const clientsData = await clientsRes.json();
         setRecentClients(clientsData.data || []);
       }
-    } catch {
-      setError('Failed to fetch dashboard data');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to fetch dashboard data';
+      setError(msg);
+      console.error('useDashboard error:', err);
     } finally {
       setLoading(false);
     }

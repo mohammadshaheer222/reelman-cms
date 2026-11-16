@@ -1,9 +1,17 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-const getJwtSecret = () =>
-  new TextEncoder().encode(
-    process.env.JWT_SECRET || 'fallback-secret-change-in-production'
-  );
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error(
+        'CRITICAL SECURITY WARNING: JWT_SECRET environment variable is not set! Using dev fallback.'
+      );
+    }
+    return new TextEncoder().encode('reelman-studio-fallback-secret-development-key');
+  }
+  return new TextEncoder().encode(secret);
+};
 
 export interface TokenPayload {
   userId: string;

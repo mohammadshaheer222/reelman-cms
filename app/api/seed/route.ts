@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Status from '@/models/Status';
+import { requireAdmin } from '@/lib/apiMiddleware';
+import { handleApiError } from '@/lib/apiError';
 
 const DEFAULT_STATUSES = [
   {
@@ -98,18 +100,24 @@ export async function GET(request: NextRequest) {
     }
 
     if (force) {
-      // Update existing default statuses with prefill templates if they are missing
+      // Security: Force re-seeding / template overwriting requires admin credentials
+      const { error } = await requireAdmin(request);
+      if (error) return error;
+
       for (const def of DEFAULT_STATUSES) {
         await Status.findOneAndUpdate(
           { name: def.name },
           { $set: { whatsappMessage: def.whatsappMessage } }
         );
       }
-      return NextResponse.json({ message: 'Statuses updated with default WhatsApp templates', updated: true });
+      return NextResponse.json({
+        message: 'Statuses updated with default WhatsApp templates',
+        updated: true,
+      });
     }
 
     return NextResponse.json({ message: 'Already seeded', seeded: false });
-  } catch {
-    return NextResponse.json({ error: 'Seed failed' }, { status: 500 });
+  } catch (err: unknown) {
+    return handleApiError(err, 'Seed execution failed');
   }
 }

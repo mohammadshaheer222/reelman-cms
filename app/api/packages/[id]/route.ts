@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Package from '@/models/Package';
 import { requireAuth } from '@/lib/apiMiddleware';
+import { isValidObjectId, handleApiError } from '@/lib/apiError';
 
 export async function GET(
   request: NextRequest,
@@ -9,14 +10,19 @@ export async function GET(
 ) {
   const { error } = await requireAuth(request);
   if (error) return error;
+
   const { id } = await params;
+  if (!isValidObjectId(id)) {
+    return NextResponse.json({ error: 'Invalid package ID format' }, { status: 400 });
+  }
+
   try {
     await connectDB();
     const pkg = await Package.findById(id).lean();
     if (!pkg) return NextResponse.json({ error: 'Package not found' }, { status: 404 });
     return NextResponse.json({ data: pkg });
-  } catch {
-    return NextResponse.json({ error: 'Failed to fetch package' }, { status: 500 });
+  } catch (err: unknown) {
+    return handleApiError(err, 'Failed to fetch package');
   }
 }
 
@@ -26,7 +32,12 @@ export async function PATCH(
 ) {
   const { error } = await requireAuth(request);
   if (error) return error;
+
   const { id } = await params;
+  if (!isValidObjectId(id)) {
+    return NextResponse.json({ error: 'Invalid package ID format' }, { status: 400 });
+  }
+
   try {
     await connectDB();
     const body = await request.json();
@@ -44,8 +55,7 @@ export async function PATCH(
     if (!pkg) return NextResponse.json({ error: 'Package not found' }, { status: 404 });
     return NextResponse.json({ data: pkg });
   } catch (err: unknown) {
-    console.error('Failed to update package:', err);
-    return NextResponse.json({ error: 'Failed to update package' }, { status: 500 });
+    return handleApiError(err, 'Failed to update package');
   }
 }
 
@@ -55,12 +65,18 @@ export async function DELETE(
 ) {
   const { error } = await requireAuth(request);
   if (error) return error;
+
   const { id } = await params;
+  if (!isValidObjectId(id)) {
+    return NextResponse.json({ error: 'Invalid package ID format' }, { status: 400 });
+  }
+
   try {
     await connectDB();
-    await Package.findByIdAndDelete(id);
+    const pkg = await Package.findByIdAndDelete(id);
+    if (!pkg) return NextResponse.json({ error: 'Package not found' }, { status: 404 });
     return NextResponse.json({ message: 'Package deleted' });
-  } catch {
-    return NextResponse.json({ error: 'Failed to delete package' }, { status: 500 });
+  } catch (err: unknown) {
+    return handleApiError(err, 'Failed to delete package');
   }
 }

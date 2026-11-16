@@ -3,9 +3,9 @@ import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import Client from '@/models/Client';
 import Status from '@/models/Status';
-import User from '@/models/User';
 import Activity from '@/models/Activity';
 import { requireAuth } from '@/lib/apiMiddleware';
+import { isValidObjectId, handleApiError } from '@/lib/apiError';
 
 export async function GET(
   request: NextRequest,
@@ -13,7 +13,12 @@ export async function GET(
 ) {
   const { error } = await requireAuth(request);
   if (error) return error;
+
   const { id } = await params;
+  if (!isValidObjectId(id)) {
+    return NextResponse.json({ error: 'Invalid client ID format' }, { status: 400 });
+  }
+
   try {
     await connectDB();
     const client = await Client.findById(id)
@@ -22,10 +27,11 @@ export async function GET(
       .populate('assignedTo', 'name email')
       .populate('notes.createdBy', 'name')
       .lean();
+
     if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 });
     return NextResponse.json({ data: client });
-  } catch {
-    return NextResponse.json({ error: 'Failed to fetch client' }, { status: 500 });
+  } catch (err: unknown) {
+    return handleApiError(err, 'Failed to fetch client');
   }
 }
 
@@ -35,7 +41,12 @@ export async function PATCH(
 ) {
   const { error, user } = await requireAuth(request);
   if (error) return error;
+
   const { id } = await params;
+  if (!isValidObjectId(id)) {
+    return NextResponse.json({ error: 'Invalid client ID format' }, { status: 400 });
+  }
+
   try {
     await connectDB();
     const body = await request.json();
@@ -57,11 +68,12 @@ export async function PATCH(
       deliverables,
       installments,
     } = body;
+
     const client = await Client.findById(id);
     if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 });
 
-    if (name !== undefined) client.name = name;
-    if (phone !== undefined) client.phone = phone;
+    if (name !== undefined) client.name = typeof name === 'string' ? name.trim() : name;
+    if (phone !== undefined) client.phone = typeof phone === 'string' ? phone.trim() : phone;
     if (date !== undefined) client.date = date;
     if (dates !== undefined) client.dates = dates;
     if (district !== undefined) client.district = district;
@@ -74,11 +86,20 @@ export async function PATCH(
     if (advancePaid !== undefined) client.advancePaid = Number(advancePaid) || 0;
     if (paymentStatus !== undefined) client.paymentStatus = paymentStatus;
     if (deliverables !== undefined) client.deliverables = deliverables;
+
     if (installments !== undefined) {
       client.installments = installments;
-      const totalPaid = installments.reduce((sum: number, inst: { status?: string; paidAmount?: number; amount?: number }) => {
-        return sum + (inst.status === 'paid' ? (Number(inst.paidAmount) || Number(inst.amount) || 0) : (Number(inst.paidAmount) || 0));
-      }, 0);
+      const totalPaid = installments.reduce(
+        (sum: number, inst: { status?: string; paidAmount?: number; amount?: number }) => {
+          return (
+            sum +
+            (inst.status === 'paid'
+              ? Number(inst.paidAmount) || Number(inst.amount) || 0
+              : Number(inst.paidAmount) || 0)
+          );
+        },
+        0
+      );
       if (totalPaid > 0 && advancePaid === undefined) {
         client.advancePaid = totalPaid;
       }
@@ -90,7 +111,7 @@ export async function PATCH(
       }
     }
 
-    if (statusId && statusId !== client.status.toString()) {
+    if (statusId && isValidObjectId(statusId) && statusId !== client.status.toString()) {
       const newStatus = await Status.findById(statusId);
       if (newStatus) {
         client.status = newStatus._id as mongoose.Types.ObjectId;
@@ -115,9 +136,10 @@ export async function PATCH(
       .populate('createdBy', 'name')
       .populate('assignedTo', 'name')
       .lean();
+
     return NextResponse.json({ data: updated });
-  } catch {
-    return NextResponse.json({ error: 'Failed to update client' }, { status: 500 });
+  } catch (err: unknown) {
+    return handleApiError(err, 'Failed to update client');
   }
 }
 
@@ -127,35 +149,52 @@ export async function DELETE(
 ) {
   const { error, user } = await requireAuth(request);
   if (error) return error;
+
   const { id } = await params;
+  if (!isValidObjectId(id)) {
+    return NextResponse.json({ error: 'Invalid client ID format' }, { status: 400 });
+  }
+
   try {
     await connectDB();
     const { searchParams } = new URL(request.url);
     const permanent = searchParams.get('permanent') === 'true';
 
+    // Security: Permanent deletion permanently deletes records and requires Admin privileges
     if (permanent) {
+      if (user?.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Forbidden: Only administrators can permanently delete clients' },
+          { status: 403 }
+        );
+      }
+
       const client = await Client.findByIdAndDelete(id);
       if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 });
+
       await Activity.create({
         clientId: client._id,
         userId: user!.userId,
         action: 'client_deleted',
         description: `Client "${client.name || 'Client'}" permanently deleted`,
       });
+
       return NextResponse.json({ message: 'Client permanently deleted successfully' });
     }
 
+    // Soft-archive for standard staff and producers
     const client = await Client.findByIdAndUpdate(id, { isArchived: true }, { new: true });
     if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 });
+
     await Activity.create({
       clientId: client._id,
       userId: user!.userId,
       action: 'client_archived',
       description: 'Client archived',
     });
+
     return NextResponse.json({ message: 'Client archived successfully' });
-  } catch {
-    return NextResponse.json({ error: 'Failed to delete client' }, { status: 500 });
+  } catch (err: unknown) {
+    return handleApiError(err, 'Failed to delete client');
   }
 }
-

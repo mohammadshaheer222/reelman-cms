@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import User from '@/models/User';
 import { signToken } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/rateLimit';
+import { handleApiError } from '@/lib/apiError';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -10,6 +12,18 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 8 login attempts per 10 minutes per IP to block brute-force
+  const rateLimit = checkRateLimit(request, {
+    windowMs: 10 * 60 * 1000,
+    max: 8,
+    message: 'Too many login attempts. Please wait 10 minutes before trying again.',
+    keyPrefix: 'login',
+  });
+
+  if (!rateLimit.allowed && rateLimit.response) {
+    return rateLimit.response;
+  }
+
   try {
     await connectDB();
     const body = await request.json();
@@ -17,11 +31,15 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 400 });
     }
-    const { email, password } = parsed.data;
+
+    const email = parsed.data.email.toLowerCase().trim();
+    const { password } = parsed.data;
+
     const user = await User.findOne({ email, isActive: true });
     if (!user || !(await user.comparePassword(password))) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
+
     const token = await signToken({
       userId: user._id.toString(),
       email: user.email,
@@ -29,6 +47,7 @@ export async function POST(request: NextRequest) {
       name: user.name,
       allowedNavItems: user.allowedNavItems,
     });
+
     const response = NextResponse.json({
       user: {
         _id: user._id,
@@ -38,17 +57,16 @@ export async function POST(request: NextRequest) {
         allowedNavItems: user.allowedNavItems,
       },
     });
+
     response.cookies.set('auth-token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
     });
+
     return response;
   } catch (err: unknown) {
-    console.error('Login error:', err);
-    const message = err instanceof Error ? err.message : 'Login failed';
-    return NextResponse.json({ error: 'Login failed', details: message }, { status: 500 });
+    return handleApiError(err, 'Login request could not be processed');
   }
 }
-

@@ -3,12 +3,29 @@ import { connectDB } from '@/lib/db';
 import Client from '@/models/Client';
 import Status from '@/models/Status';
 import { DEFAULT_DELIVERABLE_MILESTONES, createDefaultInstallments } from '@/types';
+import { isValidObjectId, handleApiError } from '@/lib/apiError';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Rate limit public portal views: max 60 requests per minute
+  const rateLimit = checkRateLimit(request, {
+    windowMs: 60 * 1000,
+    max: 60,
+    message: 'Too many requests to client portal',
+    keyPrefix: 'portal',
+  });
+  if (!rateLimit.allowed && rateLimit.response) {
+    return rateLimit.response;
+  }
+
   const { id } = await params;
+  if (!isValidObjectId(id)) {
+    return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+  }
+
   try {
     await connectDB();
     const client = await Client.findById(id)
@@ -50,7 +67,7 @@ export async function GET(
     };
 
     return NextResponse.json({ data: publicData });
-  } catch {
-    return NextResponse.json({ error: 'Failed to fetch booking details' }, { status: 500 });
+  } catch (err: unknown) {
+    return handleApiError(err, 'Failed to fetch booking details');
   }
 }

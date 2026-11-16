@@ -160,16 +160,33 @@ export interface Activity {
   createdAt: string;
 }
 
+export interface StatusStat {
+  _id: string;
+  name: string;
+  color: string;
+  order?: number;
+  count: number;
+  percentage: number;
+}
+
 export interface DashboardStats {
   totalClients: number;
   activeClients: number;
   pendingClients: number;
+  newClients?: number;
+  confirmedClients?: number;
+  confirmedPercentage?: number;
+  cancelledClients?: number;
+  cancelledPercentage?: number;
+  completedClients?: number;
+  completedPercentage?: number;
   completedProjects: number;
   cancelledProjects: number;
   upcomingEvents: number;
   totalRevenue: number;
   totalAdvance?: number;
   pendingPayments: number;
+  statusBreakdown?: StatusStat[];
 }
 
 export interface PaginatedResponse<T> {
