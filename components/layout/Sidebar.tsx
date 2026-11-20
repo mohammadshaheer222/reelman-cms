@@ -13,6 +13,7 @@ import {
   LogOut,
   X,
   MapPin,
+  Sparkles,
 } from 'lucide-react';
 import { cn, getInitials } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -26,6 +27,7 @@ export const navItems = [
   { label: 'Calendar', href: '/calendar', icon: Calendar, description: 'Shoot schedule and availability conflicts' },
   { label: 'Notepad', href: '/notepad', icon: StickyNote, description: 'Rough scratchpad for quick phone notes' },
   { label: 'Packages', href: '/packages', icon: Package, description: 'Package builder and PDF proposals' },
+  { label: 'Studio AI', href: '/studio-ai', icon: Sparkles, description: 'AI assistant, proposals & insights' },
   { label: 'History', href: '/activity', icon: History, description: 'Recent audit activity and team logs' },
   { label: 'Team', href: '/team', icon: UserCheck, description: 'Crew members and user accounts' },
   { label: 'Settings', href: '/settings', icon: Settings, description: 'Business settings and lead statuses' },

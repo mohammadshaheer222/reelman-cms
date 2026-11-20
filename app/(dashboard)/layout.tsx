@@ -6,6 +6,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import MobileNav from '@/components/layout/MobileNav';
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
+import { AiAssistant } from '@/components/ai/AiAssistant';
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,6 +28,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       '/calendar',
       '/notepad',
       '/packages',
+      '/studio-ai',
       '/activity',
       '/team',
       '/settings',
@@ -99,6 +101,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
         {/* Mobile bottom nav */}
         <MobileNav />
+
+        {/* Studio AI Floating Copilot & Drawer */}
+        <AiAssistant />
       </div>
     </div>
   );

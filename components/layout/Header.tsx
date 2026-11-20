@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, Plus } from 'lucide-react';
+import { Menu, Plus, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GlobalSearch } from '@/components/shared/GlobalSearch';
 import { useState } from 'react';
@@ -34,6 +34,18 @@ export default function Header({ onOpenMobileNav }: HeaderProps) {
           <div className="sm:hidden w-36">
             <GlobalSearch />
           </div>
+
+          {/* AI Copilot Quick Launcher */}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
+            className="flex items-center gap-1.5 border-emerald-300/80 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 rounded-xl px-3 font-medium transition-all shadow-2xs"
+            title="Open Studio AI Copilot"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span className="hidden sm:inline">Studio AI</span>
+          </Button>
 
           {/* Light / Dark Mode Toggle */}
           <ThemeToggle showDropdown />

@@ -15,6 +15,8 @@ import {
   Sun,
   Moon,
   Laptop,
+  KeyRound,
+  ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/theme/ThemeProvider';
@@ -82,6 +84,16 @@ export default function SettingsPage() {
   const [newReqInput, setNewReqInput] = useState('');
   const [reqSubmitting, setReqSubmitting] = useState(false);
   const [downloadingBackup, setDownloadingBackup] = useState(false);
+  const [geminiKey, setGeminiKey] = useState('');
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('reelman_gemini_api_key') || '';
+      setGeminiKey(saved);
+    } catch {
+      // Local storage unavailable
+    }
+  }, []);
 
   const handleDownloadBackup = async () => {
     setDownloadingBackup(true);
@@ -565,6 +577,73 @@ export default function SettingsPage() {
               <p className="text-[11px] text-gray-400 dark:text-neutral-400 mt-0.5">Automatically follows your device OS settings</p>
             </div>
           </button>
+        </div>
+      </div>
+
+      {/* Studio AI Assistant Configuration */}
+      <div className="bg-white dark:bg-[#14171d] p-6 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+              <h3 className="text-sm font-bold text-[#141414] dark:text-white">Studio AI Agent (Google Gemini)</h3>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1 leading-relaxed">
+              Power your in-app Studio Copilot with Google Gemini 2.0 Flash. The free tier gives you up to 15 requests/minute without a credit card.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
+              className="border-emerald-300 text-emerald-800 dark:text-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-xs font-semibold rounded-xl px-4 py-2"
+            >
+              Open AI Chat
+            </Button>
+            <a
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 bg-[#141414] hover:bg-black dark:bg-neutral-800 dark:hover:bg-neutral-700 text-white rounded-xl shadow-xs px-4 py-2 text-xs font-semibold shrink-0"
+            >
+              <span>Get Free Key</span>
+              <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+            </a>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 items-end pt-1">
+          <div className="flex-1 w-full space-y-1.5">
+            <Label htmlFor="geminiApiKey" className="text-xs font-semibold text-gray-700 dark:text-neutral-300">
+              Gemini API Key (stored safely in your browser)
+            </Label>
+            <Input
+              id="geminiApiKey"
+              type="password"
+              placeholder="Paste AI Studio API key (AIzaSy...)"
+              value={geminiKey}
+              onChange={(e) => setGeminiKey(e.target.value)}
+              className="h-9 text-xs font-mono"
+            />
+          </div>
+          <Button
+            type="button"
+            onClick={() => {
+              const trimmed = geminiKey.trim();
+              if (trimmed) {
+                localStorage.setItem('reelman_gemini_api_key', trimmed);
+                toast.success('Gemini API key saved successfully!');
+              } else {
+                localStorage.removeItem('reelman_gemini_api_key');
+                toast.info('Gemini API key cleared.');
+              }
+            }}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs px-4 h-9 font-semibold"
+          >
+            Save Key
+          </Button>
         </div>
       </div>
 
